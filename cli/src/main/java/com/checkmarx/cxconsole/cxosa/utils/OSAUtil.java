@@ -54,7 +54,7 @@ public class OSAUtil {
     private static final String[] ALL_EXTENSIONS = ArrayUtils.addAll(WHITE_SOURCE_SUPPORTED_EXTENSIONS, EXTRACTABLE_EXTENSIONS);
 
     public static String composeProjectOSASummaryLink(String url, long projectId) {
-        return String.format("%s/CxWebClient/portal#/projectState/%s/OSA", url, projectId);
+        return String.format("%s/CxWebClient/SPA/#/report/OSA/project/%s", url, projectId);
     }
 
     /**

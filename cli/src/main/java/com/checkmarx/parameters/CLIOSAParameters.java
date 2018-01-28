@@ -39,15 +39,15 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private String[] osaExtractableIncludeFiles = new String[]{};
     private boolean hasOsaExtractableIncludeFilesParam = false;
     private String osaScanDepth;
-    private String osaReportPDF;
-    private String osaReportHTML;
+//    private String osaReportPDF;
+//    private String osaReportHTML;
     private String osaJson;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
 
-    private static final Option PARAM_OSA_PDF_FILE = Option.builder("osareportpdf").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA PDF report . Optional.").build();
-    private static final Option PARAM_OSA_HTML_FILE = Option.builder("osareporthtml").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA HTML report. Optional.").build();
+//    private static final Option PARAM_OSA_PDF_FILE = Option.builder("osareportpdf").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA PDF report . Optional.").build();
+//    private static final Option PARAM_OSA_HTML_FILE = Option.builder("osareporthtml").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA HTML report. Optional.").build();
     private static final Option PARAM_OSA_JSON = Option.builder("osajson").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA scan results (libraries and vulnerabilities) in Json format. Optional.").build();
 
     private static final Option PARAM_OSA_EXCLUDE_FILES = Option.builder("osafilesexclude").hasArgs().argName("files list").desc("Comma separated list of file name patterns to exclude from OSA scan. Example: '-OsaFilesExclude *.class' excludes all files with '.class' extension. Optional.")
@@ -80,8 +80,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         osaIncludedFiles = parsedCommandLineArguments.getOptionValues(PARAM_OSA_INCLUDE_FILES.getOpt());
         hasOsaExtractableIncludeFilesParam = parsedCommandLineArguments.hasOption(PARAM_OSA_EXTRACTABLE_INCLUDE_FILES.getOpt());
         osaExtractableIncludeFiles = parsedCommandLineArguments.getOptionValues(PARAM_OSA_EXTRACTABLE_INCLUDE_FILES.getOpt());
-        osaReportHTML = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_HTML_FILE.getOpt());
-        osaReportPDF = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_PDF_FILE.getOpt());
+//        osaReportHTML = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_HTML_FILE.getOpt());
+//        osaReportPDF = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_PDF_FILE.getOpt());
         osaJson = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_JSON.getOpt());
         osaScanDepth = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_SCAN_DEPTH.getOpt());
         String osaLowThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_LOW_THRESHOLD.getOpt());
@@ -162,13 +162,13 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return osaIncludedFiles;
     }
 
-    public String getOsaReportPDF() {
-        return osaReportPDF;
-    }
+//    public String getOsaReportPDF() {
+//        return osaReportPDF;
+//    }
 
-    public String getOsaReportHTML() {
-        return osaReportHTML;
-    }
+//    public String getOsaReportHTML() {
+//        return osaReportHTML;
+//    }
 
     public String getOsaJson() {
         return osaJson;
@@ -205,8 +205,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
-        commandLineOptions.addOption(PARAM_OSA_PDF_FILE);
-        commandLineOptions.addOption(PARAM_OSA_HTML_FILE);
+//        commandLineOptions.addOption(PARAM_OSA_PDF_FILE);
+//        commandLineOptions.addOption(PARAM_OSA_HTML_FILE);
         commandLineOptions.addOption(PARAM_OSA_JSON);
         commandLineOptions.addOption(PARAM_OSA_EXCLUDE_FOLDERS);
         commandLineOptions.addOption(PARAM_OSA_EXCLUDE_FILES);

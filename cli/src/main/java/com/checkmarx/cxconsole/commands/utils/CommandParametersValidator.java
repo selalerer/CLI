@@ -61,7 +61,7 @@ public class CommandParametersValidator {
         if (parameters.getCliMandatoryParameters().getOriginalHost() == null || parameters.getCliMandatoryParameters().getHost() == null) {
             throw new CLICommandParameterValidatorException("Please provide server");
         }
-        if (parameters.getCliMandatoryParameters().getProjectName() == null ) {
+        if (parameters.getCliMandatoryParameters().getProjectName() == null) {
             throw new CLICommandParameterValidatorException("Please provide project name");
         }
     }
@@ -214,9 +214,9 @@ public class CommandParametersValidator {
     }
 
     public static void validateOSAAsyncScanParams(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
-        if (parameters.getCliOsaParameters().getOsaReportHTML() != null ||
-                parameters.getCliOsaParameters().getOsaReportPDF() != null ||
-                parameters.getCliOsaParameters().getOsaJson() != null) {
+        if (parameters.getCliOsaParameters().getOsaJson() != null ) {
+//                || parameters.getCliOsaParameters().getOsaReportPDF() != null ||
+//                parameters.getCliOsaParameters().getOsaReportHTML() != null) {
             throw new CLICommandParameterValidatorException("Asynchronous run does not allow report creation. Please remove the report parameters and run again");
         }
 
