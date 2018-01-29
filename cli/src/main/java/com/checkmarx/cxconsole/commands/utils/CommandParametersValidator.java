@@ -214,9 +214,7 @@ public class CommandParametersValidator {
     }
 
     public static void validateOSAAsyncScanParams(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
-        if (parameters.getCliOsaParameters().getOsaJson() != null ) {
-//                || parameters.getCliOsaParameters().getOsaReportPDF() != null ||
-//                parameters.getCliOsaParameters().getOsaReportHTML() != null) {
+        if (parameters.getCliOsaParameters().getOsaJson() != null) {
             throw new CLICommandParameterValidatorException("Asynchronous run does not allow report creation. Please remove the report parameters and run again");
         }
 

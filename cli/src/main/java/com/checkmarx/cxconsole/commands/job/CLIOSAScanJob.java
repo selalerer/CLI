@@ -123,26 +123,13 @@ public class CLIOSAScanJob extends CLIScanJob {
                 printOSAResultsToConsole(osaSummaryResults, osaProjectSummaryLink);
 
                 //OSA reports
-//                String htmlFile = cliosaParameters.getOsaReportHTML();
-//                String pdfFile = cliosaParameters.getOsaReportPDF();
                 String jsonFile = cliosaParameters.getOsaJson();
                 try {
-//                    if (htmlFile != null || pdfFile != null || jsonFile != null) {
                     if (jsonFile != null) {
                         log.info("Creating CxOSA Reports");
                         log.info("-----------------------");
                         String workDirectory = JobUtils.gerWorkDirectory(params);
 
-//                        //OSA HTML report
-//                        if (htmlFile != null) {
-//                            String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProjectName(), "HTML", htmlFile, OSA_REPORT_NAME + ".html", workDirectory);
-//                            cxRestOSAClient.createOsaHtmlReport(osaScan.getScanId(), resultFilePath);
-//                        }
-//                        //OSA PDF report
-//                        if (pdfFile != null) {
-//                            String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProjectName(), "PDF", pdfFile, OSA_REPORT_NAME + ".pdf", workDirectory);
-//                            cxRestOSAClient.createOsaPdfReport(osaScan.getScanId(), resultFilePath);
-//                        }
                         //OSA json reports
                         if (jsonFile != null) {
                             String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProjectName(), "JSON", jsonFile, "", workDirectory);

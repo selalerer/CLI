@@ -121,24 +121,6 @@ public class CxRestOSAClient {
         }
     }
 
-    public void createOsaHtmlReport(String scanId, String filePath) throws CxRestOSAClientException {
-        try {
-            String osaHtml = getOSAScanHTMLResults(scanId);
-            writeReport(osaHtml, filePath, "HTML report");
-        } catch (IOException | CxRestClientValidatorException e) {
-            throw new CxRestOSAClientException("Failed to create OSA HTML report: " + e.getMessage());
-        }
-    }
-
-    public void createOsaPdfReport(String scanId, String filePath) throws CxRestOSAClientException {
-        try {
-            byte[] osaPDF = getOSAScanPDFResults(scanId);
-            writeReport(osaPDF, filePath, "PDF report");
-        } catch (IOException | CxRestClientValidatorException e) {
-            throw new CxRestOSAClientException("Failed to create OSA PDF report: " + e.getMessage());
-        }
-    }
-
     public void createOsaJson(String scanId, String filePath, OSASummaryResults osaSummaryResults) throws CxRestOSAClientException {
         try {
             String specificFilePath = filePath.replace(JSON_FILE, "_" + OSA_SUMMARY_NAME + JSON_FILE);
@@ -160,44 +142,9 @@ public class CxRestOSAClient {
         HttpClientUtils.closeQuietly(apacheClient);
     }
 
-    private String getOSAScanHTMLResults(String scanId) throws IOException, CxRestClientValidatorException {
-        HttpGet getRequest = createHttpRequest(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)), MediaType.TEXT_HTML);
-        HttpResponse response = null;
-        try {
-            response = apacheClient.execute(getRequest);
-            validateResponse(response, 200, "Failed to get OSA scan html results");
-
-            return IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-        } finally {
-            getRequest.releaseConnection();
-            HttpClientUtils.closeQuietly(response);
-        }
-    }
-
-    private byte[] getOSAScanPDFResults(String scanId) throws IOException, CxRestClientValidatorException {
-        HttpGet getRequest = createHttpRequest(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)), "application/pdf");
-        HttpResponse response = null;
-
-        try {
-            response = apacheClient.execute(getRequest);
-            validateResponse(response, 200, "Failed to get OSA scan pdf results");
-
-            return IOUtils.toByteArray(response.getEntity().getContent());
-        } finally {
-            getRequest.releaseConnection();
-            HttpClientUtils.closeQuietly(response);
-        }
-    }
-
     private void writeReport(Object data, String filePath, String toLog) throws IOException {
         File file = new File(filePath);
         switch (FilenameUtils.getExtension(filePath)) {
-            case ("html"):
-                FileUtils.writeStringToFile(file, (String) data, Charset.defaultCharset());
-                break;
-            case ("pdf"):
-                FileUtils.writeByteArrayToFile(file, (byte[]) data);
-                break;
             case ("json"):
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, data);
                 break;

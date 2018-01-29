@@ -34,14 +34,6 @@ public class RestResourcesURIBuilder {
         }
     }
 
-    public static URL getFileExtensionsURL(URL serverUrl) {
-        try {
-            return new URL(serverUrl, APPLICATION_NAME + "/" + OSA_FILE_EXTENSIONS_RESOURCE);
-        } catch (MalformedURLException e) {
-            return serverUrl;
-        }
-    }
-
     public static URL buildRevokeURL(URL serverUrl) {
         try {
             return new URL(serverUrl, APPLICATION_NAME + "/" + IDENTITY_CONNECT_RESOURCE + "/" + REVOCATION_RESOURCE);
