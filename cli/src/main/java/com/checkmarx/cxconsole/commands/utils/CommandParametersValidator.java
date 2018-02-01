@@ -3,8 +3,11 @@ package com.checkmarx.cxconsole.commands.utils;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.parameters.CLIScanParametersSingleton;
+import org.apache.log4j.Logger;
 
 import java.io.File;
+
+import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 
 /**
  * Created by nirli on 31/10/2017.
@@ -14,6 +17,8 @@ public class CommandParametersValidator {
     private CommandParametersValidator() {
         throw new IllegalStateException("Utility class");
     }
+
+    private static Logger log = Logger.getLogger(LOG_NAME);
 
     private static final String MSG_ERR_SSO_WINDOWS_SUPPORT = "SSO login method is available only on Windows";
     private static final String MSG_ERR_MISSING_AUTHENTICATION_PARAMETERS = "Missing authentication parameters, please provide user name and password or token";
@@ -214,7 +219,9 @@ public class CommandParametersValidator {
     }
 
     public static void validateOSAAsyncScanParams(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
-        if (parameters.getCliOsaParameters().getOsaJson() != null) {
+        if (parameters.getCliOsaParameters().getOsaJson() != null
+                || parameters.getCliOsaParameters().getOsaReportPDF() != null
+                || parameters.getCliOsaParameters().getOsaReportHTML() != null) {
             throw new CLICommandParameterValidatorException("Asynchronous run does not allow report creation. Please remove the report parameters and run again");
         }
 
@@ -311,6 +318,16 @@ public class CommandParametersValidator {
     private static void validateLocationPort(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
         if (parameters.getCliSastParameters().getLocationPort() == null) {
             throw new CLICommandParameterValidatorException("Invalid location port");
+        }
+    }
+
+    public static void validateDisabledReportsParams(CLIScanParametersSingleton parameters) {
+        if (parameters.getCliOsaParameters().getOsaReportPDF() != null) {
+            log.info("OsaReportPDF parameter is not supported in this CLI version");
+        }
+
+        if (parameters.getCliOsaParameters().getOsaReportHTML() != null) {
+            log.info("OsaReportHTML parameter is not supported in this CLI version");
         }
     }
 }
