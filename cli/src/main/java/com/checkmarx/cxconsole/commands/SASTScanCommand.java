@@ -32,7 +32,7 @@ class SASTScanCommand extends CLICommand {
 
     @Override
     protected int executeCommand() throws CLICommandException {
-        CLIScanJob job = null;
+        CLIScanJob job;
         if (!isAsyncScan) {
             job = new CLISASTScanJob(params, false);
         } else {

@@ -203,6 +203,8 @@ public class CommandParametersValidator {
                         (parameters.getCliSharedParameters().getLocationType() != LocationType.FOLDER && parameters.getCliSharedParameters().getLocationType() != LocationType.SHARED))) {
             throw new CLICommandParameterValidatorException("For OSA Scan with EnableOsa parameter, provide  locationPath  or locationType ( values: folder/shared)");
         }
+
+        validateOsaDisabledReportsParams(parameters);
     }
 
     public static void validateSASTAsyncScanParams(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
@@ -321,7 +323,7 @@ public class CommandParametersValidator {
         }
     }
 
-    public static void validateDisabledReportsParams(CLIScanParametersSingleton parameters) {
+    public static void validateOsaDisabledReportsParams(CLIScanParametersSingleton parameters) {
         if (parameters.getCliOsaParameters().getOsaReportPDF() != null) {
             log.info("OsaReportPDF parameter is not supported in this CLI version");
         }
