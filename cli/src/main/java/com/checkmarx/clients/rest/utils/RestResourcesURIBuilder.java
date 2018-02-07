@@ -16,10 +16,10 @@ public class RestResourcesURIBuilder {
     private static final String ITEM_PER_PAGE_QUERY_PARAM = "&itemsPerPage=";
     private static final String OSA_SCAN_STATUS_RESOURCE = "scans/{scanId}";
     private static final String OSA_SCAN_SUMMARY_RESOURCE = "osa/reports";
-    private static final String OSA_FILE_EXTENSIONS_RESOURCE = "osa/fileextensions";
     private static final String OSA_SCAN_LIBRARIES_PATH = "/osa/libraries";
     private static final String OSA_SCAN_VULNERABILITIES_PATH = "/osa/vulnerabilities";
-    private static final String OSA_CREATE_SHA1_SCAN_PATH = "osa/scans";
+    private static final String OSA_CREATE_SCAN_WITH_FS = "osa/inventory";
+
     private static final long MAX_ITEMS = 1000000;
 
     private RestResourcesURIBuilder() {
@@ -58,9 +58,9 @@ public class RestResourcesURIBuilder {
         }
     }
 
-    public static URL buildCreateOSASha1ScanURL(URL serverUrl) {
+    public static URL buildCreateOSAFSScanURL(URL serverUrl) {
         try {
-            return new URL(serverUrl, APPLICATION_NAME + "/" + OSA_CREATE_SHA1_SCAN_PATH);
+            return new URL(serverUrl, APPLICATION_NAME + "/" + OSA_CREATE_SCAN_WITH_FS);
         } catch (MalformedURLException e) {
             return serverUrl;
         }

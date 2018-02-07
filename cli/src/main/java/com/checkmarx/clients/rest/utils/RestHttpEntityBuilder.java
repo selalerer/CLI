@@ -3,6 +3,7 @@ package com.checkmarx.clients.rest.utils;
 import com.checkmarx.clients.rest.exceptions.CxRestClientException;
 import com.checkmarx.clients.rest.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.clients.rest.osa.constant.OsaShaOneDTO;
+import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
@@ -90,12 +91,12 @@ public class RestHttpEntityBuilder {
         }
     }
 
-    public static StringEntity createOsaShaOneEntity(OsaShaOneDTO osaShaOneDTO) throws CxRestClientException {
+    public static StringEntity createOsaFSAEntity(CreateOSAScanRequest osaScanRequest) throws CxRestClientException {
         ObjectMapper mapper = new ObjectMapper();
-        String osaShaOneDTOStr;
+        String osaScanRequestStr;
         try {
-            osaShaOneDTOStr = mapper.writeValueAsString(osaShaOneDTO);
-            return new StringEntity(osaShaOneDTOStr, ContentType.APPLICATION_JSON);
+            osaScanRequestStr = mapper.writeValueAsString(osaScanRequest);
+            return new StringEntity(osaScanRequestStr, ContentType.APPLICATION_JSON);
         } catch (JsonProcessingException e) {
             throw new CxRestClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
         }

@@ -1,0 +1,96 @@
+package com.checkmarx.cxconsole.cxosa.utils.ws;
+
+import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
+import org.whitesource.fs.ComponentScan;
+
+import java.util.Objects;
+import java.util.Properties;
+
+import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
+import static com.checkmarx.cxconsole.cxosa.utils.ws.OSAWSFSAUtil.StringType.*;
+
+/**
+ * Created by nirli on 06/02/2018.
+ */
+public class OSAWSFSAUtil {
+
+    private OSAWSFSAUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    enum StringType {BASE_DIRECTORIES, OSA_FOLDER_EXCLUDE, OSA_INCLUDE_FILES, OSA_EXCLUDE_FILES, OSA_EXTRACTABLE_FILES}
+
+    private static Logger log = Logger.getLogger(LOG_NAME);
+
+    public static String composeProjectOSASummaryLink(String url, long projectId) {
+        return String.format("%s/CxWebClient/SPA/#/viewer/project/%s", url, projectId);
+    }
+
+    private static Properties generateOsaScanProperties(String[] baseDirectories, String[] osaFolderExclude, String[] osaIncludedFiles, String[] osaExcludedFiles, String[] osaExtractableIncludeFiles, int unzipDepth) {
+        String osaDirectoriesToAnalyze = stringArrayToString(baseDirectories, BASE_DIRECTORIES);
+        String osaFolderExcludeString = stringArrayToString(osaFolderExclude, OSA_FOLDER_EXCLUDE);
+        String osaFilesIncludesString = stringArrayToString(osaIncludedFiles, OSA_INCLUDE_FILES);
+        String osaFilesExcludesString = stringArrayToString(osaExcludedFiles, OSA_EXCLUDE_FILES);
+        String osaExtractableIncludesString = stringArrayToString(osaExtractableIncludeFiles, OSA_EXTRACTABLE_FILES);
+
+        String osaExcludes = osaFolderExcludeString + " " + osaFilesExcludesString;
+
+        Properties ret = new Properties();
+        ret.put("d", osaDirectoriesToAnalyze);
+        ret.put("includes", osaFilesIncludesString);
+        ret.put("excludes", osaExcludes);
+        ret.put("archiveIncludes", osaExtractableIncludesString);
+        ret.put("archiveExtractionDepth", unzipDepth);
+
+        return ret;
+    }
+
+    private static String stringArrayToString(String[] strArr, StringType stringType) {
+        StringBuilder builder = new StringBuilder();
+        if (stringType.equals(StringType.BASE_DIRECTORIES)) {
+            for (String s : strArr) {
+                builder.append(s.trim());
+            }
+        }
+
+        if (stringType.equals(StringType.OSA_FOLDER_EXCLUDE) && !Objects.equals(strArr[0], "")) {
+            for (String s : strArr) {
+                builder.append("**/").append(s.trim()).append("/**");
+            }
+        }
+
+        if ((stringType.equals(StringType.OSA_EXCLUDE_FILES) || stringType.equals(StringType.OSA_EXTRACTABLE_FILES) || stringType.equals(StringType.OSA_INCLUDE_FILES)) && !Objects.equals(strArr[0], "")) {
+            for (String s : strArr) {
+                if (s.startsWith("*.")) {
+                    builder.append("**/").append(s.trim()).append(" ");
+                } else {
+                    builder.append("**/*.").append(s.trim()).append(" ");
+                }
+            }
+        }
+
+        return builder.toString().trim();
+    }
+
+
+    public static CreateOSAScanRequest createOsaScanRequest(long projectId, String[] baseDirectories, String[] osaIncludedFiles, String[] osaExcludedFiles,
+                                                            String[] osaExcludedFolder, String[] osaExtractableIncludeFiles, int unzipDepth) {
+        Properties scannerProperties = generateOsaScanProperties(baseDirectories, osaExcludedFolder, osaIncludedFiles, osaExcludedFiles, osaExtractableIncludeFiles, unzipDepth);
+
+        ComponentScan componentScan = new ComponentScan(scannerProperties);
+        String osaDependenciesJson = componentScan.scan();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            log.trace("List of files sent to WhiteSource: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaDependenciesJson));
+        } catch (JsonProcessingException e) {
+            log.error("Can't write list of files sent to WS " + e.getMessage());
+        }
+
+        return new CreateOSAScanRequest(projectId, osaDependenciesJson);
+    }
+
+
+}

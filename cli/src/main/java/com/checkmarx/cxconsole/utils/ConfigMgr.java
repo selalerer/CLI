@@ -17,7 +17,7 @@ import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 
 /**
  * Class responsible for loading CxConsole properties from corresponding
- * config folder <br>
+ * config folder
  */
 public class ConfigMgr {
 

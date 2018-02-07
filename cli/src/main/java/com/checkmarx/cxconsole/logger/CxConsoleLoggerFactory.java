@@ -26,7 +26,6 @@ public class CxConsoleLoggerFactory {
                         logFilePath, true);
 
                 Logger.getRootLogger().info("Log file location: " + logFilePath);
-
                 appender.setName("RA");
                 appender.setThreshold(Level.TRACE);
                 appender.setMaxFileSize(ConfigMgr.getCfgMgr().getProperty(
@@ -35,7 +34,6 @@ public class CxConsoleLoggerFactory {
                         ConfigMgr.KEY_FILE_APP_MAX_ROLLS));
                 appender.activateOptions();
                 log.addAppender(appender);
-
             } catch (Exception e) {
                 log.warn("The Log path is invalid. Default path for log: " + defaultPath);
             }

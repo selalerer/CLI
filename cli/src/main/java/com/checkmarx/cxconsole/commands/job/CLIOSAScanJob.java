@@ -1,7 +1,6 @@
 package com.checkmarx.cxconsole.commands.job;
 
 import com.checkmarx.clients.rest.osa.CxRestOSAClient;
-import com.checkmarx.clients.rest.osa.constant.FileNameAndShaOneForOsaScan;
 import com.checkmarx.clients.rest.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.clients.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.clients.soap.sast.CxSoapSASTClient;
@@ -9,11 +8,11 @@ import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.cxosa.OSAConsoleScanWaitHandler;
+import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanResponse;
 import com.checkmarx.cxconsole.cxosa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.cxosa.dto.OSASummaryResults;
-import com.checkmarx.cxconsole.cxosa.utils.Exception.OSAUtilException;
-import com.checkmarx.cxconsole.cxosa.utils.OSAUtil;
+import com.checkmarx.cxconsole.cxosa.utils.ws.OSAWSFSAUtil;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.CxWSResponseProjectsDisplayData;
 import com.checkmarx.cxviewer.ws.generated.ProjectDisplayData;
@@ -21,8 +20,6 @@ import com.checkmarx.parameters.CLIOSAParameters;
 import com.checkmarx.parameters.CLIScanParametersSingleton;
 import com.checkmarx.thresholds.dto.ThresholdDto;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.List;
 
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
 import static com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum.QUEUED;
@@ -69,27 +66,21 @@ public class CLIOSAScanJob extends CLIScanJob {
             long projectId = locateProjectOnServer();
 
             String[] osaLocationPath = cliosaParameters.getOsaLocationPath() != null ? cliosaParameters.getOsaLocationPath() : new String[]{params.getCliSharedParameters().getLocationPath()};
-            log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
-
             log.info("Setting up OSA analysis request");
-            List<FileNameAndShaOneForOsaScan> osaFilesToScan;
-            try {
-                osaFilesToScan = OSAUtil.scanFiles(osaLocationPath, cliosaParameters.getOsaIncludedFiles(), cliosaParameters.getOsaExcludedFiles(),
-                        cliosaParameters.getOsaExcludedFolders(), cliosaParameters.getOsaExtractableIncludeFiles(), Integer.parseInt(cliosaParameters.getOsaScanDepth()));
-            } catch (OSAUtilException e) {
-                log.trace(e.getMessage());
-                throw new CLIJobException("Error create OSA scan: " + e.getMessage());
-            }
+            log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
+            CreateOSAScanRequest osaScanRequest;
+            osaScanRequest = OSAWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters.getOsaIncludedFiles(), cliosaParameters.getOsaExcludedFiles(),
+                    cliosaParameters.getOsaExcludedFolders(), cliosaParameters.getOsaExtractableIncludeFiles(), Integer.parseInt(cliosaParameters.getOsaScanDepth()));
 
             log.info("Sending OSA scan request");
             CreateOSAScanResponse osaScan;
             try {
-                osaScan = cxRestOSAClient.createOSAScan(projectId, osaFilesToScan);
+                osaScan = cxRestOSAClient.createOSAScan(osaScanRequest);
             } catch (CxRestOSAClientException e) {
                 log.error("Error create OSA scan: " + e.getMessage());
                 throw new CLIJobException("Error create OSA scan: " + e.getMessage());
             }
-            String osaProjectSummaryLink = OSAUtil.composeProjectOSASummaryLink(params.getCliMandatoryParameters().getOriginalHost(), projectId);
+            String osaProjectSummaryLink = OSAWSFSAUtil.composeProjectOSASummaryLink(params.getCliMandatoryParameters().getOriginalHost(), projectId);
             log.info("OSA scan created successfully");
 
             if (isAsyncScan) {

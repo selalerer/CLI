@@ -3,8 +3,6 @@ package com.checkmarx.clients.rest.osa;
 import com.checkmarx.clients.rest.exceptions.CxRestClientException;
 import com.checkmarx.clients.rest.exceptions.CxRestClientValidatorException;
 import com.checkmarx.clients.rest.login.dto.RestLoginResponseDTO;
-import com.checkmarx.clients.rest.osa.constant.FileNameAndShaOneForOsaScan;
-import com.checkmarx.clients.rest.osa.constant.OsaShaOneDTO;
 import com.checkmarx.clients.rest.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.clients.rest.utils.RestHttpEntityBuilder;
 import com.checkmarx.clients.rest.utils.RestResourcesURIBuilder;
@@ -13,9 +11,7 @@ import com.checkmarx.cxconsole.cxosa.dto.*;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -30,7 +26,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,13 +60,12 @@ public class CxRestOSAClient {
         this.loginType = restLoginResponseDTO.getLoginType();
     }
 
-    public CreateOSAScanResponse createOSAScan(long projectId, List<FileNameAndShaOneForOsaScan> hashedFilesList) throws CxRestOSAClientException {
+    public CreateOSAScanResponse createOSAScan(CreateOSAScanRequest osaScanRequest) throws CxRestOSAClientException {
         HttpPost post = null;
         HttpResponse response = null;
-        OsaShaOneDTO osaShaOneDTO = new OsaShaOneDTO(projectId, CLI_ORIGIN_VALUE_IN_SERVER, hashedFilesList);
 
         try {
-            post = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildCreateOSASha1ScanURL(new URL(hostName))));
+            post = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildCreateOSAFSScanURL(new URL(hostName))));
             List<Header> defaultHeaders = new ArrayList<>();
             if (loginType == USERNAME_AND_PASSWORD) {
                 defaultHeaders.add(restLoginResponseDTO.getCxcsrfTokenHeader());
@@ -80,12 +74,12 @@ public class CxRestOSAClient {
                 defaultHeaders.add(restLoginResponseDTO.getTokenAuthorizationHeader());
                 apacheClient = HttpClientBuilder.create().setDefaultHeaders(defaultHeaders).build();
             }
-            post.setEntity(RestHttpEntityBuilder.createOsaShaOneEntity(osaShaOneDTO));
+            post.setEntity(RestHttpEntityBuilder.createOsaFSAEntity(osaScanRequest));
 
             //send scan request
             response = apacheClient.execute(post);
             //verify scan request
-            validateResponse(response, 202, "Fail to create OSA scan");
+            validateResponse(response, 201, "Fail to create OSA scan");
 
             //extract response as object and return the link
             return parseJsonFromResponse(response, CreateOSAScanResponse.class);
