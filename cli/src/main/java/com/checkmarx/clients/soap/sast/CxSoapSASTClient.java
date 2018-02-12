@@ -195,7 +195,7 @@ public class CxSoapSASTClient {
             throw new CxSoapSASTClientException("Error retrieving scan status from server: " + e.getMessage());
         }
 
-        log.trace("ScanStatus response: " + response);
+        log.trace("ScanStatus response: " + response.getCurrentStatus().toString());
         return response;
     }
 

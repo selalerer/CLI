@@ -69,8 +69,7 @@ public class CLIOSAScanJob extends CLIScanJob {
             log.info("Setting up OSA analysis request");
             log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
             CreateOSAScanRequest osaScanRequest;
-            osaScanRequest = OSAWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters.getOsaIncludedFiles(), cliosaParameters.getOsaExcludedFiles(),
-                    cliosaParameters.getOsaExcludedFolders(), cliosaParameters.getOsaExtractableIncludeFiles(), Integer.parseInt(cliosaParameters.getOsaScanDepth()));
+            osaScanRequest = OSAWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters);
 
             log.info("Sending OSA scan request");
             CreateOSAScanResponse osaScan;

@@ -28,7 +28,6 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private int osaHighThresholdValue = Integer.MAX_VALUE;
     private static final String SPLIT_REGEX = "\\s*,\\s*";
 
-
     private String[] osaLocationPath = new String[]{};
     private String[] osaExcludedFolders = new String[]{};
     private boolean hasOsaExcludedFoldersParam = false;
@@ -42,6 +41,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private String osaReportPDF;
     private String osaReportHTML;
     private String osaJson;
+    private boolean installNpmAndBoewer = false;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -60,11 +60,11 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
             .valueSeparator(',').build();
     private static final Option PARAM_OSA_SCAN_DEPTH = Option.builder("osascandepth").hasArg(true).argName("OSA analysis unzip depth").desc("Extraction depth for files to send for OSA analysis. Optional.").build();
 
-
     private static final Option PARAM_OSA_LOW_THRESHOLD = Option.builder("osalow").hasArg(true).argName("number of low OSA vulnerabilities").desc("OSA low severity vulnerability threshold. If the number of low vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
     private static final Option PARAM_OSA_MEDIUM_THRESHOLD = Option.builder("osamedium").hasArg(true).argName("number of medium OSA vulnerabilities").desc("OSA medium severity vulnerability threshold. If the number of medium vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
     private static final Option PARAM_OSA_HIGH_THRESHOLD = Option.builder("osahigh").hasArg(true).argName("number of high OSA vulnerabilities").desc("OSA high severity vulnerability threshold. If the number of high vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
 
+    private static final Option PARAM_OSA_INSTALL_NPM_AND_BOEWER = Option.builder("installnpmandboewer").hasArg(false).argName("Pre scan installation of NPM and Boewer").desc("Triggered in order to perform install command for NPM and Bower before initiate OSA analysis. Optional.").build();
 
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -87,6 +87,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         String osaLowThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_LOW_THRESHOLD.getOpt());
         String osaMediumThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_MEDIUM_THRESHOLD.getOpt());
         String osaHighThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_HIGH_THRESHOLD.getOpt());
+        installNpmAndBoewer = parsedCommandLineArguments.hasOption(PARAM_OSA_INSTALL_NPM_AND_BOEWER.getOpt());
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -202,6 +203,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return osaScanDepth;
     }
 
+    public boolean isInstallNpmAndBoewer() {
+        return installNpmAndBoewer;
+    }
+
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
@@ -219,6 +224,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_OSA_HIGH_THRESHOLD);
         commandLineOptions.addOption(PARAM_OSA_SCAN_DEPTH);
 
+        commandLineOptions.addOption(PARAM_OSA_INSTALL_NPM_AND_BOEWER);
     }
 
     @Override

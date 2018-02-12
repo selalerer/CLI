@@ -1,6 +1,7 @@
 package com.checkmarx.cxconsole.cxosa.utils.ws;
 
 import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanRequest;
+import com.checkmarx.parameters.CLIOSAParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
@@ -29,21 +30,41 @@ public class OSAWSFSAUtil {
         return String.format("%s/CxWebClient/SPA/#/viewer/project/%s", url, projectId);
     }
 
-    private static Properties generateOsaScanProperties(String[] baseDirectories, String[] osaFolderExclude, String[] osaIncludedFiles, String[] osaExcludedFiles, String[] osaExtractableIncludeFiles, int unzipDepth) {
-        String osaDirectoriesToAnalyze = stringArrayToString(baseDirectories, BASE_DIRECTORIES);
-        String osaFolderExcludeString = stringArrayToString(osaFolderExclude, OSA_FOLDER_EXCLUDE);
-        String osaFilesIncludesString = stringArrayToString(osaIncludedFiles, OSA_INCLUDE_FILES);
-        String osaFilesExcludesString = stringArrayToString(osaExcludedFiles, OSA_EXCLUDE_FILES);
-        String osaExtractableIncludesString = stringArrayToString(osaExtractableIncludeFiles, OSA_EXTRACTABLE_FILES);
+    private static Properties generateOsaScanProperties(String[] osaLocationPath, CLIOSAParameters cliosaParameters) {
+        Properties ret = new Properties();
+        String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
+        ret.put("d", osaDirectoriesToAnalyze);
+
+        String osaFolderExcludeString = null;
+        if (cliosaParameters.isHasOsaExcludedFoldersParam()) {
+            osaFolderExcludeString = stringArrayToString(cliosaParameters.getOsaExcludedFolders(), OSA_FOLDER_EXCLUDE);
+        }
+
+        String osaFilesIncludesString = null;
+        if (cliosaParameters.isHasOsaIncludedFilesParam()) {
+            osaFilesIncludesString = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
+            ret.put("includes", osaFilesIncludesString);
+        }
+
+        String osaFilesExcludesString = null;
+        if (cliosaParameters.isHasOsaExcludedFilesParam()) {
+            osaFilesExcludesString = stringArrayToString(cliosaParameters.getOsaExcludedFiles(), OSA_EXCLUDE_FILES);
+        }
+
+        String osaExtractableIncludesString = null;
+        if(cliosaParameters.isHasOsaExtractableIncludeFilesParam()) {
+            osaExtractableIncludesString = stringArrayToString(cliosaParameters.getOsaExtractableIncludeFiles(), OSA_EXTRACTABLE_FILES);
+            ret.put("archiveIncludes", osaExtractableIncludesString);
+        }
+
 
         String osaExcludes = osaFolderExcludeString + " " + osaFilesExcludesString;
-
-        Properties ret = new Properties();
-        ret.put("d", osaDirectoriesToAnalyze);
-        ret.put("includes", osaFilesIncludesString);
-        ret.put("excludes", osaExcludes);
-        ret.put("archiveIncludes", osaExtractableIncludesString);
-        ret.put("archiveExtractionDepth", unzipDepth);
+        ret.put("excludes", osaExcludes.trim());
+        ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
+        if (cliosaParameters.isInstallNpmAndBoewer()) {
+            ret.put("npm.runPreStep", "true");
+            ret.put("bower.runPreStep", "true");
+        }
 
         return ret;
     }
@@ -52,7 +73,7 @@ public class OSAWSFSAUtil {
         StringBuilder builder = new StringBuilder();
         if (stringType.equals(StringType.BASE_DIRECTORIES)) {
             for (String s : strArr) {
-                builder.append(s.trim());
+                builder.append(s.trim()).append(" ");
             }
         }
 
@@ -76,9 +97,8 @@ public class OSAWSFSAUtil {
     }
 
 
-    public static CreateOSAScanRequest createOsaScanRequest(long projectId, String[] baseDirectories, String[] osaIncludedFiles, String[] osaExcludedFiles,
-                                                            String[] osaExcludedFolder, String[] osaExtractableIncludeFiles, int unzipDepth) {
-        Properties scannerProperties = generateOsaScanProperties(baseDirectories, osaExcludedFolder, osaIncludedFiles, osaExcludedFiles, osaExtractableIncludeFiles, unzipDepth);
+    public static CreateOSAScanRequest createOsaScanRequest(long projectId, String[] osaLocationPath, CLIOSAParameters cliosaParametersr) {
+        Properties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
 
         ComponentScan componentScan = new ComponentScan(scannerProperties);
         String osaDependenciesJson = componentScan.scan();
