@@ -14,8 +14,8 @@ apply plugin: 'project-report'
 apply plugin: 'java-library-distribution'
 
 repositories {
-    maven { url 'http://cx-artifactory:8081/artifactory/libs-release' }
-    maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local' }
+    maven { url 'http://cx-artifactory:8081/artifactory/libs-release'}
+    maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local'}
 }
 
 group = 'com.checkmarx'
