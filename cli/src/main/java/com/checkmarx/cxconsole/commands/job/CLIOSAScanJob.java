@@ -69,7 +69,9 @@ public class CLIOSAScanJob extends CLIScanJob {
             log.info("Setting up OSA analysis request");
             log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
             CreateOSAScanRequest osaScanRequest;
+            log.trace("###############  Starting FSA    ############# ");
             osaScanRequest = OSAWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters);
+            log.trace("###############  FSA finished    ############# ");
 
             log.info("Sending OSA scan request");
             CreateOSAScanResponse osaScan;
