@@ -99,8 +99,10 @@ public class OSAWSFSAUtil {
 
     public static CreateOSAScanRequest createOsaScanRequest(long projectId, String[] osaLocationPath, CLIOSAParameters cliosaParametersr) {
         Properties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
+        log.info("Generated FSA properties for analysis");
 
         ComponentScan componentScan = new ComponentScan(scannerProperties);
+        log.info("Starting FSA component scan");
         String osaDependenciesJson = componentScan.scan();
         ObjectMapper mapper = new ObjectMapper();
         try {
