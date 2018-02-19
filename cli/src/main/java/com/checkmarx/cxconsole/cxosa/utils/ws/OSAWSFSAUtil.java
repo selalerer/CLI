@@ -39,7 +39,7 @@ public class OSAWSFSAUtil {
             osaFolderExcludeString = stringArrayToString(cliosaParameters.getOsaExcludedFolders(), OSA_FOLDER_EXCLUDE);
         }
 
-        String osaFilesIncludesString = null;
+        String osaFilesIncludesString;
         if (cliosaParameters.isHasOsaIncludedFilesParam()) {
             osaFilesIncludesString = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
             ret.put("includes", osaFilesIncludesString);
@@ -50,7 +50,7 @@ public class OSAWSFSAUtil {
             osaFilesExcludesString = stringArrayToString(cliosaParameters.getOsaExcludedFiles(), OSA_EXCLUDE_FILES);
         }
 
-        String osaExtractableIncludesString = null;
+        String osaExtractableIncludesString;
         if (cliosaParameters.isHasOsaExtractableIncludeFilesParam()) {
             osaExtractableIncludesString = stringArrayToString(cliosaParameters.getOsaExtractableIncludeFiles(), OSA_EXTRACTABLE_FILES);
             ret.put("archiveIncludes", osaExtractableIncludesString);
@@ -58,7 +58,9 @@ public class OSAWSFSAUtil {
 
 
         String osaExcludes = osaFolderExcludeString + " " + osaFilesExcludesString;
-        ret.put("excludes", osaExcludes.trim());
+        if (!Objects.equals(osaExcludes, "null null")) {
+            ret.put("excludes", osaExcludes.trim());
+        }
         ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
         if (cliosaParameters.isInstallNpmAndBower()) {
             ret.put("npm.runPreStep", "true");
@@ -95,7 +97,6 @@ public class OSAWSFSAUtil {
         return builder.toString().trim();
     }
 
-
     public static CreateOSAScanRequest createOsaScanRequest(long projectId, String[] osaLocationPath, CLIOSAParameters cliosaParametersr) {
         Properties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
         log.info("Generated FSA properties for analysis");
@@ -112,6 +113,5 @@ public class OSAWSFSAUtil {
 
         return new CreateOSAScanRequest(projectId, osaDependenciesJson);
     }
-
 
 }
