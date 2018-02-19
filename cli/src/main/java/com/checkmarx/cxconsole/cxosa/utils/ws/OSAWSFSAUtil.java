@@ -60,7 +60,7 @@ public class OSAWSFSAUtil {
         String osaExcludes = osaFolderExcludeString + " " + osaFilesExcludesString;
         ret.put("excludes", osaExcludes.trim());
         ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
-        if (cliosaParameters.isInstallNpmAndBoewer()) {
+        if (cliosaParameters.isInstallNpmAndBower()) {
             ret.put("npm.runPreStep", "true");
             ret.put("bower.runPreStep", "true");
         }

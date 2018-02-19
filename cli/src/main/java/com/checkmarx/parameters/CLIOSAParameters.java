@@ -41,7 +41,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private String osaReportPDF;
     private String osaReportHTML;
     private String osaJson;
-    private boolean installNpmAndBoewer = false;
+    private boolean installNpmAndBower = false;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -64,7 +64,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_MEDIUM_THRESHOLD = Option.builder("osamedium").hasArg(true).argName("number of medium OSA vulnerabilities").desc("OSA medium severity vulnerability threshold. If the number of medium vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
     private static final Option PARAM_OSA_HIGH_THRESHOLD = Option.builder("osahigh").hasArg(true).argName("number of high OSA vulnerabilities").desc("OSA high severity vulnerability threshold. If the number of high vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
 
-    private static final Option PARAM_OSA_INSTALL_NPM_AND_BOEWER = Option.builder("installnpmandboewer").hasArg(false).argName("Pre scan installation of NPM and Boewer").desc("Triggered in order to perform install command for NPM and Bower before initiate OSA analysis. Optional.").build();
+    private static final Option PARAM_OSA_INSTALL_NPM_AND_BOWER = Option.builder("installnpmandbower").hasArg(false).argName("Pre scan installation of NPM and Bower").desc("Triggered in order to perform install command for NPM and Bower before initiate OSA analysis. Optional.").build();
 
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -87,7 +87,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         String osaLowThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_LOW_THRESHOLD.getOpt());
         String osaMediumThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_MEDIUM_THRESHOLD.getOpt());
         String osaHighThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_HIGH_THRESHOLD.getOpt());
-        installNpmAndBoewer = parsedCommandLineArguments.hasOption(PARAM_OSA_INSTALL_NPM_AND_BOEWER.getOpt());
+        installNpmAndBower = parsedCommandLineArguments.hasOption(PARAM_OSA_INSTALL_NPM_AND_BOWER.getOpt());
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -203,8 +203,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return osaScanDepth;
     }
 
-    public boolean isInstallNpmAndBoewer() {
-        return installNpmAndBoewer;
+    public boolean isInstallNpmAndBower() {
+        return installNpmAndBower;
     }
 
     @Override
@@ -224,7 +224,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_OSA_HIGH_THRESHOLD);
         commandLineOptions.addOption(PARAM_OSA_SCAN_DEPTH);
 
-        commandLineOptions.addOption(PARAM_OSA_INSTALL_NPM_AND_BOEWER);
+        commandLineOptions.addOption(PARAM_OSA_INSTALL_NPM_AND_BOWER);
     }
 
     @Override

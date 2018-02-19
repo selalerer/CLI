@@ -47,7 +47,6 @@ class WaitScanCompletionJob implements Callable<Boolean> {
             do {
                 currTime = System.currentTimeMillis();
                 CxWSResponseScanStatus statusOfScanResult = cxSoapSASTClient.getStatusOfScan(runId, sessionId);
-                log.trace("getScanStatus: " + statusOfScanResult);
                 if (statusOfScanResult != null) {
                     // Update progress bar
                     int totalPercentScanned = statusOfScanResult.getTotalPercent();
