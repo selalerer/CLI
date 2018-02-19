@@ -4,8 +4,6 @@ import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 import com.checkmarx.cxconsole.cxosa.dto.OSASummaryResults;
 import org.apache.log4j.Logger;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by nirli on 06/11/2017.
  */
@@ -14,7 +12,7 @@ public class PrintResultsUtils {
     private static final String LINE_SPACER = "------------------------";
     private static final String RESULT_FOOTER = "-----------------------------------------------------------------------------------------";
 
-    protected static Logger log = Logger.getLogger(LOG_NAME);
+    protected static Logger log = Logger.getLogger(PrintResultsUtils.class);
 
     private PrintResultsUtils() {
         throw new IllegalStateException("Utility class");

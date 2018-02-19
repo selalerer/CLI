@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 
 /**
  * Created by nirli on 31/10/2017.
@@ -18,7 +17,7 @@ public class CommandParametersValidator {
         throw new IllegalStateException("Utility class");
     }
 
-    private static Logger log = Logger.getLogger(LOG_NAME);
+    private static Logger log = Logger.getLogger(CommandParametersValidator.class);
 
     private static final String MSG_ERR_SSO_WINDOWS_SUPPORT = "SSO login method is available only on Windows";
     private static final String MSG_ERR_MISSING_AUTHENTICATION_PARAMETERS = "Missing authentication parameters, please provide user name and password or token";

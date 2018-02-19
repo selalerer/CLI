@@ -7,7 +7,6 @@ import com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 import static com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum.QUEUED;
 
 
@@ -17,7 +16,7 @@ import static com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum.QUEUED;
  */
 public class OSAConsoleScanWaitHandler implements ScanWaitHandler<OSAScanStatus> {
 
-    private static Logger log = Logger.getLogger(LOG_NAME);
+    private static Logger log = Logger.getLogger(OSAConsoleScanWaitHandler.class);
     private long startTime;
     private long scanTimeoutInMin;
 

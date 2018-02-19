@@ -19,14 +19,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by nirli on 05/11/2017.
  */
 public class JobUtils {
 
-    protected static Logger log = Logger.getLogger(LOG_NAME);
+    protected static Logger log = Logger.getLogger(JobUtils.class);
 
     private JobUtils() {
         throw new IllegalStateException("Utility class");

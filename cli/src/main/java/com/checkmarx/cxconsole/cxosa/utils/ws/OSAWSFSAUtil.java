@@ -10,7 +10,6 @@ import org.whitesource.fs.ComponentScan;
 import java.util.Objects;
 import java.util.Properties;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 import static com.checkmarx.cxconsole.cxosa.utils.ws.OSAWSFSAUtil.StringType.*;
 
 /**
@@ -24,7 +23,7 @@ public class OSAWSFSAUtil {
 
     enum StringType {BASE_DIRECTORIES, OSA_FOLDER_EXCLUDE, OSA_INCLUDE_FILES, OSA_EXCLUDE_FILES, OSA_EXTRACTABLE_FILES}
 
-    private static Logger log = Logger.getLogger(LOG_NAME);
+    private static Logger log = Logger.getLogger(OSAWSFSAUtil.class);
 
     public static String composeProjectOSASummaryLink(String url, long projectId) {
         return String.format("%s/CxWebClient/SPA/#/viewer/project/%s", url, projectId);
@@ -52,7 +51,7 @@ public class OSAWSFSAUtil {
         }
 
         String osaExtractableIncludesString = null;
-        if(cliosaParameters.isHasOsaExtractableIncludeFilesParam()) {
+        if (cliosaParameters.isHasOsaExtractableIncludeFilesParam()) {
             osaExtractableIncludesString = stringArrayToString(cliosaParameters.getOsaExtractableIncludeFiles(), OSA_EXTRACTABLE_FILES);
             ret.put("archiveIncludes", osaExtractableIncludesString);
         }

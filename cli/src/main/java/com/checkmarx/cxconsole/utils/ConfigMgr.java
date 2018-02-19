@@ -13,13 +13,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Class responsible for loading CxConsole properties from corresponding
  * config folder
  */
 public class ConfigMgr {
+
+    private static Logger log = Logger.getLogger(ConfigMgr.class);
 
     /*
      * Property keys
@@ -58,8 +58,6 @@ public class ConfigMgr {
     private static CxRestLoginClient cxRestLoginClient;
 
     private static ConfigMgr mgr;
-
-    private static Logger log = Logger.getLogger(LOG_NAME);
 
     private ConfigMgr(String defConfig) {
         applicationProperties = new Properties();

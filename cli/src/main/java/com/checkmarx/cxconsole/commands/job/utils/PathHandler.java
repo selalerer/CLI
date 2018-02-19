@@ -8,14 +8,12 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by nirli on 05/11/2017.
  */
 public class PathHandler {
 
-    protected static Logger log = Logger.getLogger(LOG_NAME);
+    protected static Logger log = Logger.getLogger(PathHandler.class);
 
     private PathHandler() {
         throw new IllegalStateException("Utility class");

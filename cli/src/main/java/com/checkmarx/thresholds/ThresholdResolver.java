@@ -3,13 +3,12 @@ package com.checkmarx.thresholds;
 import com.checkmarx.thresholds.dto.ThresholdDto;
 import org.apache.log4j.Logger;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 import static com.checkmarx.exitcodes.Constants.ErrorMassages.*;
 import static com.checkmarx.exitcodes.Constants.ExitCodes.*;
 
 public class ThresholdResolver {
 
-    protected static Logger log = Logger.getLogger(LOG_NAME);
+    protected static Logger log = Logger.getLogger(ThresholdResolver.class);
     private static final int NO_THRESHOLD_EXCEEDED = 0;
 
     private ThresholdResolver() {

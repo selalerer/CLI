@@ -31,15 +31,13 @@ import java.util.List;
 
 import static com.checkmarx.clients.rest.login.dto.RestLoginResponseDTO.LOGIN_TYPE.USERNAME_AND_PASSWORD;
 import static com.checkmarx.clients.rest.utils.RestClientUtils.*;
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by: Dorg.
  * Date: 16/06/2016.
  */
 public class CxRestOSAClient {
 
-    private static Logger log = Logger.getLogger(LOG_NAME);
+    private static Logger log = Logger.getLogger(CxRestOSAClient.class);
 
     private String hostName;
     private HttpClient apacheClient;

@@ -12,14 +12,12 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by nirli on 26/10/2017.
  */
 class PresetProvider {
 
-    private static Logger log = Logger.getLogger(LOG_NAME);
+    private static Logger log = Logger.getLogger(PresetProvider.class);
 
     private String sessionId;
     private CxCLIWebServiceV1Soap cxSoapClient;

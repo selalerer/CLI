@@ -9,14 +9,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by nirli on 07/11/2017.
  */
 public class StoreReportUtils {
 
-    protected static Logger log = Logger.getLogger(LOG_NAME);
+    protected static Logger log = Logger.getLogger(StoreReportUtils.class);
 
     private StoreReportUtils() {
         throw new IllegalStateException("Utility class");

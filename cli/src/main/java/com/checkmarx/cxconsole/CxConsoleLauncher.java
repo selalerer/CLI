@@ -27,9 +27,7 @@ import static com.checkmarx.exitcodes.ErrorHandler.errorMsgResolver;
  */
 public class CxConsoleLauncher {
 
-    public static final String LOG_NAME = "com.checkmarx.cxconsole.CxConsoleLauncher";
-
-    private static final Logger log = Logger.getLogger(LOG_NAME);
+    private static final Logger log = Logger.getLogger(CxConsoleLauncher.class);
     private static final String INVALID_COMMAND_PARAMETERS_MSG = "Command parameters are invalid: ";
     private static String[] argumentsLessCommandName;
 

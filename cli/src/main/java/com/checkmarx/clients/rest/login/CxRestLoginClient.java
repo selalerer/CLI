@@ -33,14 +33,13 @@ import java.util.List;
 
 import static com.checkmarx.clients.rest.login.CxRestTokenClient.FAIL_TO_AUTHENTICATE_ERROR;
 import static com.checkmarx.clients.rest.utils.RestClientUtils.validateResponse;
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
 
 /**
  * Created by nirli on 24/10/2017.
  */
 public class CxRestLoginClient {
 
-    private Logger log = Logger.getLogger(LOG_NAME);
+    private Logger log = Logger.getLogger(CxRestLoginClient.class);
 
     private final String username;
     private final String password;
