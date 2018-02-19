@@ -50,10 +50,6 @@ tasks.withType(Tar) {
     compression = Compression.GZIP
 }
 
-configurations.all {
-    exclude group: 'ch.qos.logback', module: 'logback -classic'
-}
-
 dependencies {
     compile 'commons-collections:commons-collections:3.2.2',
             'org.apache.commons:commons-lang3:3.7',
@@ -75,7 +71,11 @@ dependencies {
             'com.github.junrar:junrar:0.7',
             'org.slf4j:slf4j-api:1.7.25',
             'org.slf4j:slf4j-log4j12:1.7.25',
-            'org.whitesource:whitesource-fs-agent:18.1.3'
+            compile('org.whitesource:whitesource-fs-agent:18.1.3') {
+                exclude group: 'org.slf4j', module: 'slf4j-api'
+                exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+                exclude group: 'ch.qos.logback', module: 'logback-classic'
+            }
 }
 
 wsdl2java {

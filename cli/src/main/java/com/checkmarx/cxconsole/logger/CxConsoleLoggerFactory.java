@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.logger;
 
 import com.checkmarx.cxconsole.utils.ConfigMgr;
-import org.apache.commons.lang3.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -18,7 +18,7 @@ public class CxConsoleLoggerFactory {
 
     private void initLogger(Logger log, String logFilePath) throws IOException {
         String defaultPath = System.getProperty("user.dir") + File.separator + "logs" + File.separator + "cx_console.log";
-        if (!StringUtils.isEmpty(logFilePath)) {
+        if (!Strings.isNullOrEmpty(logFilePath)) {
             try {
                 RollingFileAppender appender;
                 appender = new RollingFileAppender(new PatternLayout(ConfigMgr
