@@ -56,9 +56,6 @@ public class CLIOSAScanJob extends CLIScanJob {
             }
             cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
 
-            long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_OSA_MAX_ZIP_SIZE);
-            maxZipSize *= (1024 * 1024);
-
             //Request osa Scan
             log.info("");
             log.info("Request OSA scan");
@@ -69,9 +66,9 @@ public class CLIOSAScanJob extends CLIScanJob {
             log.info("Setting up OSA analysis request");
             log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
             CreateOSAScanRequest osaScanRequest;
-            log.trace("###############  Starting FSA    ############# ");
+            log.debug("    #############################################  Starting FSA    ###########################################    ");
             osaScanRequest = OSAWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters);
-            log.trace("###############  FSA finished    ############# ");
+            log.debug("    #############################################  Finished FSA   ###########################################    ");
 
             log.info("Sending OSA scan request");
             CreateOSAScanResponse osaScan;
