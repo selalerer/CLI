@@ -21,7 +21,6 @@ public class RetryableRESTLogin extends RetryableOperation {
 
     @Override
     protected void operation() throws CLIJobException {
-        log.trace("");
         log.info("Logging into the Checkmarx service.");
 
         // Login

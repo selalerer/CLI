@@ -57,7 +57,6 @@ public class CLIOSAScanJob extends CLIScanJob {
             cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
 
             //Request osa Scan
-            log.info("");
             log.info("Request OSA scan");
 
             long projectId = locateProjectOnServer();
