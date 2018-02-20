@@ -1,8 +1,8 @@
 package com.checkmarx.cxconsole.utils;
 
-import com.checkmarx.clients.rest.login.CxRestLoginClient;
-import com.checkmarx.clients.soap.login.CxSoapLoginClient;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.clients.rest.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.soap.login.CxSoapLoginClient;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
 
 import java.io.File;

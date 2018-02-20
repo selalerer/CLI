@@ -6,7 +6,7 @@ import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorE
 import com.checkmarx.cxconsole.commands.job.CLIOSAScanJob;
 import com.checkmarx.cxconsole.commands.job.CLIScanJob;
 import com.checkmarx.cxconsole.commands.utils.CommandParametersValidator;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;

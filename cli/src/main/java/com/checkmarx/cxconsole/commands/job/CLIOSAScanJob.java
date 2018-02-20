@@ -1,9 +1,9 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.clients.rest.osa.CxRestOSAClient;
-import com.checkmarx.clients.rest.osa.exceptions.CxRestOSAClientException;
-import com.checkmarx.clients.soap.exceptions.CxSoapClientValidatorException;
-import com.checkmarx.clients.soap.sast.CxSoapSASTClient;
+import com.checkmarx.cxconsole.clients.rest.osa.CxRestOSAClient;
+import com.checkmarx.cxconsole.clients.rest.osa.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clients.soap.exceptions.CxSoapClientValidatorException;
+import com.checkmarx.cxconsole.clients.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
@@ -13,19 +13,18 @@ import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanResponse;
 import com.checkmarx.cxconsole.cxosa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.cxosa.dto.OSASummaryResults;
 import com.checkmarx.cxconsole.cxosa.utils.ws.OSAWSFSAUtil;
-import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.CxWSResponseProjectsDisplayData;
 import com.checkmarx.cxviewer.ws.generated.ProjectDisplayData;
-import com.checkmarx.parameters.CLIOSAParameters;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
-import com.checkmarx.thresholds.dto.ThresholdDto;
+import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.commons.lang3.StringUtils;
 
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
 import static com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum.QUEUED;
-import static com.checkmarx.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
-import static com.checkmarx.exitcodes.ErrorHandler.errorCodeResolver;
-import static com.checkmarx.thresholds.ThresholdResolver.resolveThresholdExitCode;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
+import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
+import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
 
 /**
  * Created by nirli on 05/11/2017.

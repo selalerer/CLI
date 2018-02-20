@@ -6,14 +6,14 @@ import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorE
 import com.checkmarx.cxconsole.commands.job.CLISASTScanJob;
 import com.checkmarx.cxconsole.commands.job.CLIScanJob;
 import com.checkmarx.cxconsole.commands.utils.CommandParametersValidator;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.checkmarx.cxconsole.commands.constants.Commands.ASYNC_OSA_SCAN;
 import static com.checkmarx.cxconsole.commands.constants.Commands.OSA_SCAN;
-import static com.checkmarx.exitcodes.Constants.ExitCodes.*;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.*;
 
 /**
  * Created by nirli on 31/10/2017.

@@ -1,12 +1,12 @@
 package com.checkmarx.cxconsole.commands.job.retriableoperation;
 
-import com.checkmarx.clients.soap.login.CxSoapLoginClient;
-import com.checkmarx.clients.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.clients.soap.utils.SoapClientUtils;
+import com.checkmarx.cxconsole.clients.soap.login.CxSoapLoginClient;
+import com.checkmarx.cxconsole.clients.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clients.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxviewer.ws.generated.CxWSResponseLoginData;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 
 import java.net.MalformedURLException;
 import java.net.URL;

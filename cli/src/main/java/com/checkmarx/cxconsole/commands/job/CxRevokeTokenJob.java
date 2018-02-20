@@ -1,14 +1,14 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.clients.rest.exceptions.CxRestClientException;
+import com.checkmarx.cxconsole.clients.rest.exceptions.CxRestClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLITokenJobException;
-import com.checkmarx.parameters.CLIMandatoryParameters;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static com.checkmarx.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
 
 public class CxRevokeTokenJob extends CLITokenJob {
 

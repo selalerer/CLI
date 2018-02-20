@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.cxosa;
 
 
-import com.checkmarx.clients.rest.osa.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clients.rest.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.cxosa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum;
 import org.apache.commons.lang3.StringUtils;

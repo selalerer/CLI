@@ -1,10 +1,10 @@
 package com.checkmarx.cxconsole.commands;
 
-import com.checkmarx.clients.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clients.soap.login.exceptions.CxSoapLoginClientException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.cxconsole.logger.CxConsoleLoggerFactory;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +17,9 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.checkmarx.clients.soap.utils.SoapClientUtils.resolveServerProtocol;
-import static com.checkmarx.exitcodes.Constants.ErrorMassages.SERVER_CONNECTIVITY_VALIDATION_ERROR;
-import static com.checkmarx.exitcodes.ErrorHandler.errorCodeResolver;
+import static com.checkmarx.cxconsole.clients.soap.utils.SoapClientUtils.resolveServerProtocol;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ErrorMassages.SERVER_CONNECTIVITY_VALIDATION_ERROR;
+import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 
 /**
  * Created by nirli on 30/10/2017.

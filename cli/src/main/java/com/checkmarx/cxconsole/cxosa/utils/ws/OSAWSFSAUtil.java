@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.cxosa.utils.ws;
 
 import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanRequest;
-import com.checkmarx.parameters.CLIOSAParameters;
+import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;

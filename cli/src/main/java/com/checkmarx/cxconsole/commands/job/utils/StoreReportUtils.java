@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.commands.job.utils;
 
-import com.checkmarx.clients.soap.sast.CxSoapSASTClient;
-import com.checkmarx.clients.soap.sast.exceptions.CxSoapSASTClientException;
+import com.checkmarx.cxconsole.clients.soap.sast.CxSoapSASTClient;
+import com.checkmarx.cxconsole.clients.soap.sast.exceptions.CxSoapSASTClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import org.apache.log4j.Logger;
 

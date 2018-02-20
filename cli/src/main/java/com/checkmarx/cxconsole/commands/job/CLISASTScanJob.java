@@ -1,14 +1,14 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.clients.soap.exceptions.CxSoapClientValidatorException;
-import com.checkmarx.clients.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.clients.soap.providers.ScanPrerequisitesValidator;
-import com.checkmarx.clients.soap.providers.dto.ConfigurationDTO;
-import com.checkmarx.clients.soap.providers.dto.PresetDTO;
-import com.checkmarx.clients.soap.providers.exceptions.CLISoapProvidersException;
-import com.checkmarx.clients.soap.sast.CxSoapSASTClient;
-import com.checkmarx.clients.soap.sast.exceptions.CxSoapSASTClientException;
-import com.checkmarx.clients.soap.utils.SoapClientUtils;
+import com.checkmarx.cxconsole.clients.soap.exceptions.CxSoapClientValidatorException;
+import com.checkmarx.cxconsole.clients.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clients.soap.providers.ScanPrerequisitesValidator;
+import com.checkmarx.cxconsole.clients.soap.providers.dto.ConfigurationDTO;
+import com.checkmarx.cxconsole.clients.soap.providers.dto.PresetDTO;
+import com.checkmarx.cxconsole.clients.soap.providers.exceptions.CLISoapProvidersException;
+import com.checkmarx.cxconsole.clients.soap.sast.CxSoapSASTClient;
+import com.checkmarx.cxconsole.clients.soap.sast.exceptions.CxSoapSASTClientException;
+import com.checkmarx.cxconsole.clients.soap.utils.SoapClientUtils;
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
@@ -20,8 +20,8 @@ import com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils;
 import com.checkmarx.cxconsole.commands.job.utils.StoreReportUtils;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.*;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
-import com.checkmarx.thresholds.dto.ThresholdDto;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,8 +36,8 @@ import java.util.concurrent.Future;
 
 import static com.checkmarx.cxconsole.commands.constants.LocationType.FOLDER;
 import static com.checkmarx.cxconsole.commands.constants.LocationType.getCorrespondingType;
-import static com.checkmarx.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
-import static com.checkmarx.thresholds.ThresholdResolver.resolveThresholdExitCode;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
+import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
 
 /**
  * Created by nirli on 05/11/2017.
