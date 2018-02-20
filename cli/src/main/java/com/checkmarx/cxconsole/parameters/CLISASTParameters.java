@@ -353,7 +353,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
                 + "[ " + PARAM_EXCLUDE_FOLDERS + " \"DirName1,DirName2,DirName3\" ] "
                 + "[ " + PARAM_EXCLUDE_FILES + " \"FileName1,FileName2,FileName3\" ] "
                 + "[ " + cliSharedParameters.getParamLogFile() + " logFile.log ] "
-                + "[ " + cliSharedParameters.getParamConfigFile() + " config ] ";
+                + "[ " + cliSharedParameters.getParamConfigFilePath() + " config ] ";
     }
 
     @Override
@@ -374,7 +374,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         keys.append(KEY_DESCR_INTEND_SINGLE);
         keys.append("- Name or path to log file. Optional.\n");
 
-        keys.append(cliSharedParameters.getParamConfigFile());
+        keys.append(cliSharedParameters.getParamConfigFilePath());
         keys.append(KEY_DESCR_INTEND_SMALL);
         keys.append(KEY_DESCR_INTEND_SINGLE);
         keys.append("- Name or path to config file. Optional.\n");

@@ -19,7 +19,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
      */
     private Options commandLineOptions;
 
-    private String logFile = "cx_scan.log";
+    private String logFilePath = "cx_scan.log";
     private boolean isVerbose = false;
     private String scanComment;
     private boolean isSsoLoginUsed = false;
@@ -31,12 +31,12 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
 
     private static final Option PARAM_VERBOSE = Option.builder("v").desc("Turns on verbose mode. All messages and events will be sent to the console/log file.  Optional.")
             .longOpt("verbose").hasArg(false).build();
-    private static final Option PARAM_LOG_FILE = Option.builder("log").hasArg().argName("file").desc("Log file. Optional.").build();
+    private static final Option PARAM_LOG_FILE_PATH = Option.builder("log").hasArg().argName("file").desc("Log file path. Optional.").build();
     private static final Option PARAM_PRIVATE = Option.builder("private").desc("Scan will not be visible to other users. Optional.").build();
     private static final Option PARAM_USE_SSO = Option.builder("usesso").desc("SSO login method is used, available only on Windows. Optional.").build();
     private static final Option PARAM_SCAN_COMMENT = Option.builder("comment").argName("text").desc("Scan comment. Example: -comment 'important scan1'. Optional.")
             .hasArg().build();
-    private static final Option PARAM_CONFIG_FILE = Option.builder("config").hasArg().argName("file").desc("Config file. Optional.").build();
+    private static final Option PARAM_CONFIG_FILE_PATH = Option.builder("config").hasArg().argName("file").desc("Config file path. Optional.").build();
     private static final Option PARAM_LOCATION_TYPE = Option.builder("locationtype").argName(LocationType.stringOfValues()).hasArg()
             .desc("Source location type: folder, shared, SVN, TFS, GIT, Perforce").build();
     private static final Option PARAM_LOCATION_PATH = Option.builder("locationpath").argName("path").hasArg()
@@ -48,7 +48,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
     }
 
     void initSharedParams(CommandLine parsedCommandLineArguments) {
-        logFile = parsedCommandLineArguments.getOptionValue(PARAM_LOG_FILE.getOpt());
+        logFilePath = parsedCommandLineArguments.getOptionValue(PARAM_LOG_FILE_PATH.getOpt());
         isVerbose = parsedCommandLineArguments.hasOption(PARAM_VERBOSE.getOpt());
         scanComment = parsedCommandLineArguments.getOptionValue(PARAM_SCAN_COMMENT.getOpt());
         isSsoLoginUsed = parsedCommandLineArguments.hasOption(PARAM_USE_SSO.getOpt());
@@ -68,8 +68,8 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
         }
     }
 
-    public String getLogFile() {
-        return logFile;
+    public String getLogFilePath() {
+        return logFilePath;
     }
 
     public boolean isVerbose() {
@@ -113,23 +113,23 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
     }
 
     public Option getParamLogFile() {
-        return PARAM_LOG_FILE;
+        return PARAM_LOG_FILE_PATH;
     }
 
     public Option getParamLocationType() {
         return PARAM_LOCATION_TYPE;
     }
 
-    public Option getParamConfigFile() {
-        return PARAM_CONFIG_FILE;
+    public Option getParamConfigFilePath() {
+        return PARAM_CONFIG_FILE_PATH;
     }
 
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
         commandLineOptions.addOption(PARAM_VERBOSE);
-        commandLineOptions.addOption(PARAM_LOG_FILE);
-        commandLineOptions.addOption(PARAM_CONFIG_FILE);
+        commandLineOptions.addOption(PARAM_LOG_FILE_PATH);
+        commandLineOptions.addOption(PARAM_CONFIG_FILE_PATH);
         commandLineOptions.addOption(PARAM_LOCATION_TYPE);
         commandLineOptions.addOption(PARAM_LOCATION_PATH);
         commandLineOptions.addOption(PARAM_PRIVATE);

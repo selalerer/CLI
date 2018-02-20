@@ -120,7 +120,7 @@ public abstract class CLICommand {
 
     private void initLogging() throws IOException {
         String logPath = "";
-        String logPathFromParam = params.getCliSharedParameters().getLogFile();
+        String logPathFromParam = params.getCliSharedParameters().getLogFilePath();
         if (logPathFromParam != null) {
             logPath = getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
         }
