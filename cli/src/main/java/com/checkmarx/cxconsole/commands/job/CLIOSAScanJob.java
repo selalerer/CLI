@@ -48,8 +48,8 @@ public class CLIOSAScanJob extends CLIScanJob {
 
             // Connect to Checkmarx service, if not already connected.
             super.restLogin();
-            cxRestOSAClient = new CxRestOSAClient(params.getCliMandatoryParameters().getOriginalHost(), this.cxRestLoginClient.getRestLoginResponseDTO());
-            if (this.cxSoapLoginClient.getSessionId() == null && this.cxRestLoginClient.getRestLoginResponseDTO().getSessionId() == null) {
+            cxRestOSAClient = new CxRestOSAClient(cxRestLoginClient);
+            if (this.cxSoapLoginClient.getSessionId() == null ) {
                 super.soapLogin();
                 sessionId = cxSoapLoginClient.getSessionId();
             }

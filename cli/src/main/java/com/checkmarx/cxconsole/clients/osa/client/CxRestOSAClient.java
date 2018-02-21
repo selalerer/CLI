@@ -1,36 +1,32 @@
 package com.checkmarx.cxconsole.clients.osa.client;
 
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.osa.ScanWaitHandler;
+import com.checkmarx.cxconsole.clients.osa.client.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clients.osa.dto.*;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
-import com.checkmarx.cxconsole.clients.login.dto.RestLoginResponseDTO;
-import com.checkmarx.cxconsole.clients.osa.client.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clientsold.rest.utils.RestHttpEntityBuilder;
 import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
-import com.checkmarx.cxconsole.clients.osa.ScanWaitHandler;
-import com.checkmarx.cxconsole.clients.osa.dto.*;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.checkmarx.cxconsole.clients.login.dto.RestLoginResponseDTO.LOGIN_TYPE.USERNAME_AND_PASSWORD;
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonFromResponse;
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
 
@@ -42,23 +38,19 @@ public class CxRestOSAClient {
 
     private static Logger log = Logger.getLogger(CxRestOSAClient.class);
 
-    private String hostName;
     private HttpClient apacheClient;
-    private RestLoginResponseDTO restLoginResponseDTO;
-    private RestLoginResponseDTO.LOGIN_TYPE loginType;
+    private String hostName;
     private static int waitForScanToFinishRetry = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.KEY_OSA_PROGRESS_INTERVAL);
 
     private static final String OSA_SUMMARY_NAME = "CxOSASummary";
     private static final String OSA_LIBRARIES_NAME = "CxOSALibraries";
     private static final String OSA_VULNERABILITIES_NAME = "CxOSAVulnerabilities";
-    private static final String CLI_ORIGIN_VALUE_IN_SERVER = "CLI";
     private static final String JSON_FILE = ".json";
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public CxRestOSAClient(String hostName, RestLoginResponseDTO restLoginResponseDTO) {
-        this.hostName = hostName;
-        this.restLoginResponseDTO = restLoginResponseDTO;
-        this.loginType = restLoginResponseDTO.getLoginType();
+    public CxRestOSAClient(CxRestLoginClient restClient) {
+        this.apacheClient = restClient.getApacheClient();
+        this.hostName = restClient.getHostName();
     }
 
     public CreateOSAScanResponse createOSAScan(CreateOSAScanRequest osaScanRequest) throws CxRestOSAClientException {
@@ -67,20 +59,12 @@ public class CxRestOSAClient {
 
         try {
             post = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildCreateOSAFSScanURL(new URL(hostName))));
-            List<Header> defaultHeaders = new ArrayList<>();
-            if (loginType == USERNAME_AND_PASSWORD) {
-                defaultHeaders.add(restLoginResponseDTO.getCxcsrfTokenHeader());
-                apacheClient = HttpClientBuilder.create().setDefaultHeaders(defaultHeaders).setDefaultCookieStore(restLoginResponseDTO.getCookieStore()).build();
-            } else {
-                defaultHeaders.add(restLoginResponseDTO.getTokenAuthorizationHeader());
-                apacheClient = HttpClientBuilder.create().setDefaultHeaders(defaultHeaders).build();
-            }
             post.setEntity(RestHttpEntityBuilder.createOsaFSAEntity(osaScanRequest));
 
             //send scan request
             response = apacheClient.execute(post);
             //verify scan request
-            RestClientUtils.validateLoginResponse(response, 201, "Fail to create OSA scan");
+            RestClientUtils.validateTokenResponse(response, 201, "Fail to create OSA scan");
 
             //extract response as object and return the link
             return parseJsonFromResponse(response, CreateOSAScanResponse.class);
@@ -102,7 +86,7 @@ public class CxRestOSAClient {
         try {
             getRequest = createHttpRequest(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateLoginResponse(response, 200, "fail get OSA scan summary results");
+            RestClientUtils.validateTokenResponse(response, 200, "fail get OSA scan summary results");
 
             return parseJsonFromResponse(response, OSASummaryResults.class);
         } catch (IOException | CxRestClientValidatorException e) {
@@ -139,13 +123,12 @@ public class CxRestOSAClient {
 
     private void writeReport(Object data, String filePath, String toLog) throws IOException {
         File file = new File(filePath);
-        switch (FilenameUtils.getExtension(filePath)) {
-            case ("json"):
-                objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, data);
-                break;
-            default:
-                log.error("OSA " + toLog + " location is invalid");
-                return;
+        String s = FilenameUtils.getExtension(filePath);
+        if (s.equals("json")) {
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, data);
+        } else {
+            log.error("OSA " + toLog + " location is invalid");
+            return;
         }
         log.info("OSA " + toLog + " location: " + file.getAbsolutePath());
     }
@@ -155,7 +138,7 @@ public class CxRestOSAClient {
         HttpResponse response = null;
         try {
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateLoginResponse(response, 200, "Failed to get OSA libraries");
+            RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA libraries");
 
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, Library.class));
         } finally {
@@ -169,7 +152,7 @@ public class CxRestOSAClient {
         HttpResponse response = null;
         try {
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateLoginResponse(response, 200, "Failed to get OSA vulnerabilities");
+            RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA vulnerabilities");
 
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, CVE.class));
         } finally {
@@ -191,7 +174,7 @@ public class CxRestOSAClient {
         try {
             getRequest = new HttpGet(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanStatusURL(new URL(hostName), scanId)));
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateLoginResponse(response, 200, "Failed to get OSA scan status");
+            RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA scan status");
 
             return parseJsonFromResponse(response, OSAScanStatus.class);
         } catch (IOException e) {

@@ -61,7 +61,7 @@ public class RestClientUtils {
         return mapper.readValue(result.toString(), dtoClass);
     }
 
-    public static void validateLoginResponse(HttpResponse response, int status, String message) throws CxRestClientValidatorException {
+    public static void validateTokenResponse(HttpResponse response, int status, String message) throws CxRestClientValidatorException {
         try {
             if (response.getStatusLine().getStatusCode() != status) {
                 String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());

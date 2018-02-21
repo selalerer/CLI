@@ -10,8 +10,8 @@ import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableRESTLogi
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableSOAPLogin;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
-import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.utils.ConfigMgr;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -55,11 +55,8 @@ public abstract class CLIScanJob implements Callable<Integer> {
     void restLogin() throws CLIJobException {
         final RetryableOperation login = new RetryableRESTLogin(params, cxRestLoginClient);
         login.run();
-        if (cxRestLoginClient.getRestLoginResponseDTO().getSessionId() != null) {
-            sessionId = cxRestLoginClient.getRestLoginResponseDTO().getSessionId();
-        } else {
-            sessionId = cxSoapLoginClient.getSessionId();
-        }
+
+        sessionId = cxSoapLoginClient.getSessionId();
         if (cxSoapLoginClient.getCxSoapClient() == null) {
             URL wsdlLocation;
             cxSoapLoginClient = ConfigMgr.getWSMgr();

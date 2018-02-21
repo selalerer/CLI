@@ -21,7 +21,6 @@ public class RetryableRESTLogin extends RetryableOperation {
 
     @Override
     protected void operation() throws CLIJobException {
-        log.trace("");
         log.info("Logging into the Checkmarx service.");
 
         // Login
@@ -32,20 +31,19 @@ public class RetryableRESTLogin extends RetryableOperation {
                 cxRestLoginClient.tokenLogin();
             }
 
-            if (cxRestLoginClient.getRestLoginResponseDTO() == null) {
+            if (cxRestLoginClient.getApacheClient() == null) {
                 throw new CLIJobException("Unsuccessful login.");
             }
         } catch (CxRestLoginClientException e) {
             throw new CLIJobException("Unsuccessful login.");
         }
 
-        log.trace("REST login was completed successfully");
         log.trace("Login was completed successfully");
         finished = true;
     }
 
     @Override
     public String getOperationName() {
-        return "REST login";
+        return "Login";
     }
 }

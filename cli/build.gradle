@@ -59,7 +59,7 @@ dependencies {
             'com.checkmarx.components:zipper:1.+',
             'org.apache.cxf:cxf-rt-frontend-jaxws:3.2.1',
             'org.apache.cxf:cxf-rt-transports-http-jetty:3.2.1',
-            'org.apache.httpcomponents:httpmime:4.5.4',
+            'org.apache.httpcomponents:httpclient:4.5.5',
             'javax.ws.rs:javax.ws.rs-api:2.1',
             'com.fasterxml.jackson.core:jackson-databind:2.9.3',
             'commons-io:commons-io:2.5',

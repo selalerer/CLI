@@ -33,7 +33,6 @@ public class RetryableSOAPLogin extends RetryableOperation {
             throw new CLIJobException(e.getMessage());
         }
 
-        log.trace("");
         log.info("Logging into the Checkmarx service.");
 
         // Login

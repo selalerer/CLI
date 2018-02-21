@@ -1,6 +1,6 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.cxconsole.clients.login.CxRestTokenClient;
+import com.checkmarx.cxconsole.clients.token.CxRestTokenClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLITokenJobException;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;

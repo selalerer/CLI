@@ -1,10 +1,9 @@
 package com.checkmarx.cxconsole.clients.login;
 
+import com.checkmarx.cxconsole.clients.login.dto.RestGetAccessTokenDTO;
+import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
-import com.checkmarx.cxconsole.clients.login.dto.RestGetAccessTokenDTO;
-import com.checkmarx.cxconsole.clients.login.dto.RestLoginResponseDTO;
-import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clientsold.rest.utils.RestHttpEntityBuilder;
 import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
 import org.apache.http.Header;
@@ -28,8 +27,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.checkmarx.cxconsole.clients.login.CxRestTokenClient.FAIL_TO_AUTHENTICATE_ERROR;
-
 /**
  * Created by nirli on 24/10/2017.
  */
@@ -43,19 +40,17 @@ public class CxRestLoginClient {
     private final String token;
 
     private HttpClient apacheClient;
-    private CookieStore cookieStore;
+    private static CookieStore cookieStore = new BasicCookieStore();
+    private static List<Header> headers = new ArrayList<>();
     private Header cxCsrfTokenHeader;
-    private Header authorizationHeader;
     private String cookies;
     private String csrfToken;
-    private RestLoginResponseDTO restLoginResponseDTO;
 
-    private static final String CX_ORIGIN_HEADER_KEY = "cxOrigin";
-    private static final String CX_ORIGIN_HEADER_VALUE = "cx-CLI";
-    private static final Header CLI_ORIGIN_HEADER = new BasicHeader(CX_ORIGIN_HEADER_KEY, CX_ORIGIN_HEADER_VALUE);
-    private static final String CSRF_TOKEN_HEADER = "CXCSRFToken";
+    private static final Header CLI_ORIGIN_HEADER = new BasicHeader("cxOrigin", "cx-CLI");
+    private static final String CSRF_TOKEN_HEADER_KEY = "CXCSRFToken";
 
     private static final String SERVER_STACK_TRACE_ERROR_MESSAGE = "Failed to get access token: Fail to authenticate: status code: HTTP/1.1 400 Bad Request. error:\"error\":\"invalid_grant\"";
+    private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
 
     public CxRestLoginClient(String hostname, String token) {
         this.hostName = hostname;
@@ -64,11 +59,9 @@ public class CxRestLoginClient {
         this.password = null;
 
         //create http client
-        List<Header> headers = new ArrayList<>();
         apacheClient = HttpClientBuilder.create().build();
         try {
-            String accessToken = getAccessTokenFromRefreshToken(token);
-            authorizationHeader = new BasicHeader("Authorization", "Bearer " + accessToken);
+            getAccessTokenFromRefreshToken(token);
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
@@ -77,7 +70,6 @@ public class CxRestLoginClient {
                 log.error("Failed to login with token: " + e.getMessage());
             }
         }
-        headers.add(authorizationHeader);
         headers.add(CLI_ORIGIN_HEADER);
         apacheClient = HttpClientBuilder.create().setDefaultHeaders(headers).build();
     }
@@ -89,8 +81,6 @@ public class CxRestLoginClient {
         this.token = null;
 
         //create http client
-        cookieStore = new BasicCookieStore();
-        List<Header> headers = new ArrayList<>();
         headers.add(cxCsrfTokenHeader);
         headers.add(CLI_ORIGIN_HEADER);
         apacheClient = HttpClientBuilder.create().addInterceptorLast(responseFilter).setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
@@ -99,12 +89,13 @@ public class CxRestLoginClient {
     private final HttpResponseInterceptor responseFilter = new HttpResponseInterceptor() {
         public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
             for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
-                if (CSRF_TOKEN_HEADER.equals(c.getName())) {
+                if (CSRF_TOKEN_HEADER_KEY.equals(c.getName())) {
                     csrfToken = c.getValue();
                 }
             }
             if (csrfToken != null) {
-                cxCsrfTokenHeader = new BasicHeader(CSRF_TOKEN_HEADER, csrfToken);
+                cxCsrfTokenHeader = new BasicHeader(CSRF_TOKEN_HEADER_KEY, csrfToken);
+                headers.add(cxCsrfTokenHeader);
             }
 
             Header[] setCookies = httpResponse.getHeaders("Set-Cookie");
@@ -130,7 +121,7 @@ public class CxRestLoginClient {
             loginResponse = apacheClient.execute(loginPost);
 
             //validate login response
-            RestClientUtils.validateLoginResponse(loginResponse, 200, "Fail to authenticate");
+            RestClientUtils.validateTokenResponse(loginResponse, 200, "Fail to authenticate");
         } catch (IOException | CxRestClientValidatorException e) {
             log.error("Fail to login with credentials: " + e.getMessage());
             throw new CxRestLoginClientException("Fail to login with credentials: " + e.getMessage());
@@ -141,15 +132,15 @@ public class CxRestLoginClient {
             HttpClientUtils.closeQuietly(loginResponse);
         }
 
-        restLoginResponseDTO = new RestLoginResponseDTO(cxCsrfTokenHeader, cookieStore);
+        apacheClient = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
     }
 
     public void tokenLogin() throws CxRestLoginClientException {
-        String accessToken = getAccessTokenFromRefreshToken(token);
-        restLoginResponseDTO = new RestLoginResponseDTO(authorizationHeader, RestClientUtils.getSessionIdFromAccessToken(accessToken));
+        getAccessTokenFromRefreshToken(token);
+        apacheClient = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
     }
 
-    private String getAccessTokenFromRefreshToken(String refreshToken) throws CxRestLoginClientException {
+    private void getAccessTokenFromRefreshToken(String refreshToken) throws CxRestLoginClientException {
         HttpResponse getAccessTokenResponse = null;
         String accessToken;
         HttpPost postRequest = null;
@@ -160,7 +151,7 @@ public class CxRestLoginClient {
             postRequest.setEntity(RestHttpEntityBuilder.createGetAccessTokenParamsEntity(refreshToken));
             getAccessTokenResponse = apacheClient.execute(postRequest);
 
-            RestClientUtils.validateLoginResponse(getAccessTokenResponse, 200, FAIL_TO_AUTHENTICATE_ERROR);
+            RestClientUtils.validateTokenResponse(getAccessTokenResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
 
             RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(getAccessTokenResponse, RestGetAccessTokenDTO.class);
             accessToken = jsonResponse.getAccessToken();
@@ -174,14 +165,14 @@ public class CxRestLoginClient {
             HttpClientUtils.closeQuietly(getAccessTokenResponse);
         }
 
-        return accessToken;
-    }
-
-    public RestLoginResponseDTO getRestLoginResponseDTO() {
-        return restLoginResponseDTO;
+        headers.add(new BasicHeader("Authorization", "Bearer " + accessToken));
     }
 
     public HttpClient getApacheClient() {
         return apacheClient;
+    }
+
+    public String getHostName() {
+        return hostName;
     }
 }
