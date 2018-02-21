@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.commands.job.utils;
 
 import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
-import com.checkmarx.cxconsole.cxosa.dto.OSASummaryResults;
+import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
 import org.apache.log4j.Logger;
 
 /**

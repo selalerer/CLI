@@ -1,18 +1,18 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.cxconsole.clients.rest.osa.CxRestOSAClient;
-import com.checkmarx.cxconsole.clients.rest.osa.exceptions.CxRestOSAClientException;
-import com.checkmarx.cxconsole.clients.soap.exceptions.CxSoapClientValidatorException;
-import com.checkmarx.cxconsole.clients.soap.sast.CxSoapSASTClient;
+import com.checkmarx.cxconsole.clients.osa.client.CxRestOSAClient;
+import com.checkmarx.cxconsole.clients.osa.client.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
+import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
-import com.checkmarx.cxconsole.cxosa.OSAConsoleScanWaitHandler;
-import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanRequest;
-import com.checkmarx.cxconsole.cxosa.dto.CreateOSAScanResponse;
-import com.checkmarx.cxconsole.cxosa.dto.OSAScanStatus;
-import com.checkmarx.cxconsole.cxosa.dto.OSASummaryResults;
-import com.checkmarx.cxconsole.cxosa.utils.ws.OSAWSFSAUtil;
+import com.checkmarx.cxconsole.clients.osa.OSAConsoleScanWaitHandler;
+import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
+import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanResponse;
+import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
+import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
+import com.checkmarx.cxconsole.clients.osa.utils.OSAWSFSAUtil;
 import com.checkmarx.cxviewer.ws.generated.CxWSResponseProjectsDisplayData;
 import com.checkmarx.cxviewer.ws.generated.ProjectDisplayData;
 import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
@@ -21,7 +21,7 @@ import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.commons.lang3.StringUtils;
 
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
-import static com.checkmarx.cxconsole.cxosa.dto.OSAScanStatusEnum.QUEUED;
+import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
 import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;

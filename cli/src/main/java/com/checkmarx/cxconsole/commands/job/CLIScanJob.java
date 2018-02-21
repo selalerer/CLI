@@ -1,9 +1,9 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.cxconsole.clients.rest.login.CxRestLoginClient;
-import com.checkmarx.cxconsole.clients.soap.login.CxSoapLoginClient;
-import com.checkmarx.cxconsole.clients.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.cxconsole.clients.soap.utils.SoapClientUtils;
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clientsold.soap.login.CxSoapLoginClient;
+import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableOperation;
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableRESTLogin;

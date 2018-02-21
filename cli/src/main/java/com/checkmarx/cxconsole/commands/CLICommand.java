@@ -1,6 +1,6 @@
 package com.checkmarx.cxconsole.commands;
 
-import com.checkmarx.cxconsole.clients.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.cxconsole.logger.CxConsoleLoggerFactory;
@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.checkmarx.cxconsole.clients.soap.utils.SoapClientUtils.resolveServerProtocol;
+import static com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils.resolveServerProtocol;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ErrorMassages.SERVER_CONNECTIVITY_VALIDATION_ERROR;
 import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 

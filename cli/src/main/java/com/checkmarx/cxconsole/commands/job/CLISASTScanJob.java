@@ -1,14 +1,14 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.cxconsole.clients.soap.exceptions.CxSoapClientValidatorException;
-import com.checkmarx.cxconsole.clients.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.cxconsole.clients.soap.providers.ScanPrerequisitesValidator;
-import com.checkmarx.cxconsole.clients.soap.providers.dto.ConfigurationDTO;
-import com.checkmarx.cxconsole.clients.soap.providers.dto.PresetDTO;
-import com.checkmarx.cxconsole.clients.soap.providers.exceptions.CLISoapProvidersException;
-import com.checkmarx.cxconsole.clients.soap.sast.CxSoapSASTClient;
-import com.checkmarx.cxconsole.clients.soap.sast.exceptions.CxSoapSASTClientException;
-import com.checkmarx.cxconsole.clients.soap.utils.SoapClientUtils;
+import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
+import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clientsold.soap.providers.ScanPrerequisitesValidator;
+import com.checkmarx.cxconsole.clientsold.soap.providers.dto.ConfigurationDTO;
+import com.checkmarx.cxconsole.clientsold.soap.providers.dto.PresetDTO;
+import com.checkmarx.cxconsole.clientsold.soap.providers.exceptions.CLISoapProvidersException;
+import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
+import com.checkmarx.cxconsole.clientsold.soap.sast.exceptions.CxSoapSASTClientException;
+import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.cxconsole.commands.constants.LocationType;

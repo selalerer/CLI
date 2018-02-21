@@ -1,6 +1,6 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.cxconsole.clients.rest.login.CxRestTokenClient;
+import com.checkmarx.cxconsole.clients.login.CxRestTokenClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLITokenJobException;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
@@ -14,7 +14,7 @@ abstract class CLITokenJob implements Callable<Integer> {
 
     protected CxRestTokenClient cxRestTokenClient;
 
-    protected Logger log = Logger.getLogger(CLITokenJob.class);
+    protected static Logger log = Logger.getLogger(CLITokenJob.class);
 
     protected CLIScanParametersSingleton params;
 
