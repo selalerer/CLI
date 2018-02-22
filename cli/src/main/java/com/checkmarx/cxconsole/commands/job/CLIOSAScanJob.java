@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.commands.job;
 
 import com.checkmarx.cxconsole.clients.osa.client.CxRestOSAClient;
-import com.checkmarx.cxconsole.clients.osa.client.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
@@ -12,7 +12,7 @@ import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanResponse;
 import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
-import com.checkmarx.cxconsole.clients.osa.utils.OSAWSFSAUtil;
+import com.checkmarx.cxconsole.clients.osa.utils.OsaWSFSAUtil;
 import com.checkmarx.cxviewer.ws.generated.CxWSResponseProjectsDisplayData;
 import com.checkmarx.cxviewer.ws.generated.ProjectDisplayData;
 import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
@@ -66,7 +66,7 @@ public class CLIOSAScanJob extends CLIScanJob {
             log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
             CreateOSAScanRequest osaScanRequest;
             log.debug("    #############################################  Starting FSA    ###########################################    ");
-            osaScanRequest = OSAWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters);
+            osaScanRequest = OsaWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters);
             log.debug("    #############################################  Finished FSA   ###########################################    ");
 
             log.info("Sending OSA scan request");
@@ -77,7 +77,7 @@ public class CLIOSAScanJob extends CLIScanJob {
                 log.error("Error create OSA scan: " + e.getMessage());
                 throw new CLIJobException("Error create OSA scan: " + e.getMessage());
             }
-            String osaProjectSummaryLink = OSAWSFSAUtil.composeProjectOSASummaryLink(params.getCliMandatoryParameters().getOriginalHost(), projectId);
+            String osaProjectSummaryLink = OsaWSFSAUtil.composeProjectOSASummaryLink(params.getCliMandatoryParameters().getOriginalHost(), projectId);
             log.info("OSA scan created successfully");
 
             if (isAsyncScan) {

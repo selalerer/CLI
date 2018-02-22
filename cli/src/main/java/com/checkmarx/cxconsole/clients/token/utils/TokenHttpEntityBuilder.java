@@ -1,13 +1,9 @@
-package com.checkmarx.cxconsole.clientsold.rest.utils;
+package com.checkmarx.cxconsole.clients.token.utils;
 
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
-import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -17,9 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by nirli on 23/10/2017.
+ * Created by nirli on 21/02/2018.
  */
-public class RestHttpEntityBuilder {
+public class TokenHttpEntityBuilder {
+
+    private TokenHttpEntityBuilder() {
+        throw new IllegalStateException("Utility class");
+    }
+
 
     private static final String CLIENT_ID_KEY = "client_id";
     private static final String CLI_CLIENT = "cli_client";
@@ -29,10 +30,6 @@ public class RestHttpEntityBuilder {
     private static final String PASS_KEY = "password";
     private static final String USERNAME_KEY = "username";
     private static final String ERROR_MESSAGE_PREFIX = "Failed to create body entity, due to: ";
-
-    private RestHttpEntityBuilder() {
-        throw new IllegalStateException("Utility class");
-    }
 
     public static StringEntity createGenerateTokenParamsEntity(String userName, String password) throws CxRestClientException {
         List<NameValuePair> urlParameters = new ArrayList<>();
@@ -76,29 +73,5 @@ public class RestHttpEntityBuilder {
         } catch (UnsupportedEncodingException e) {
             throw new CxRestLoginClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
         }
-    }
-
-    public static UrlEncodedFormEntity createLoginParamsEntity(String userName, String password) throws CxRestLoginClientException {
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
-        urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
-
-        try {
-            return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new CxRestLoginClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
-        }
-    }
-
-    public static StringEntity createOsaFSAEntity(CreateOSAScanRequest osaScanRequest) throws CxRestClientException {
-        ObjectMapper mapper = new ObjectMapper();
-        String osaScanRequestStr;
-        try {
-            osaScanRequestStr = mapper.writeValueAsString(osaScanRequest);
-            return new StringEntity(osaScanRequestStr, ContentType.APPLICATION_JSON);
-        } catch (JsonProcessingException e) {
-            throw new CxRestClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
-        }
-
     }
 }

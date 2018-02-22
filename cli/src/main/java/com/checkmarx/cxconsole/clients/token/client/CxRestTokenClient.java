@@ -1,9 +1,9 @@
-package com.checkmarx.cxconsole.clients.token;
+package com.checkmarx.cxconsole.clients.token.client;
 
 import com.checkmarx.cxconsole.clients.login.dto.RestGenerateTokenDTO;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
+import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
-import com.checkmarx.cxconsole.clientsold.rest.utils.RestHttpEntityBuilder;
 import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -33,7 +33,7 @@ public class CxRestTokenClient {
         HttpResponse generateTokenResponse = null;
         String token;
         try {
-            postRequest.setEntity(RestHttpEntityBuilder.createGenerateTokenParamsEntity(userName, password));
+            postRequest.setEntity(TokenHttpEntityBuilder.createGenerateTokenParamsEntity(userName, password));
             generateTokenResponse = client.execute(postRequest);
 
             validateTokenResponse(generateTokenResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
@@ -56,7 +56,7 @@ public class CxRestTokenClient {
 
         HttpResponse generateTokenResponse = null;
         try {
-            postRequest.setEntity(RestHttpEntityBuilder.createRevokeTokenParamsEntity(token));
+            postRequest.setEntity(TokenHttpEntityBuilder.createRevokeTokenParamsEntity(token));
             generateTokenResponse = client.execute(postRequest);
 
             validateTokenResponse(generateTokenResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);

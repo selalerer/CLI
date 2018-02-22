@@ -1,4 +1,4 @@
-package com.checkmarx.cxconsole.clients.osa.client.exceptions;
+package com.checkmarx.cxconsole.clients.osa.exceptions;
 
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
 

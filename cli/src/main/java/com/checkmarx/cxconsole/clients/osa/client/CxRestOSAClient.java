@@ -2,13 +2,13 @@ package com.checkmarx.cxconsole.clients.osa.client;
 
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
 import com.checkmarx.cxconsole.clients.osa.ScanWaitHandler;
-import com.checkmarx.cxconsole.clients.osa.client.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.dto.*;
+import com.checkmarx.cxconsole.clients.osa.utils.OsaHttpEntityBuilder;
+import com.checkmarx.cxconsole.clients.osa.utils.OsaResourcesURIBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
-import com.checkmarx.cxconsole.clientsold.rest.utils.RestHttpEntityBuilder;
-import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -58,8 +58,8 @@ public class CxRestOSAClient {
         HttpResponse response = null;
 
         try {
-            post = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildCreateOSAFSScanURL(new URL(hostName))));
-            post.setEntity(RestHttpEntityBuilder.createOsaFSAEntity(osaScanRequest));
+            post = new HttpPost(String.valueOf(OsaResourcesURIBuilder.buildCreateOSAFSScanURL(new URL(hostName))));
+            post.setEntity(OsaHttpEntityBuilder.createOsaFSAEntity(osaScanRequest));
 
             //send scan request
             response = apacheClient.execute(post);
@@ -84,7 +84,7 @@ public class CxRestOSAClient {
         HttpResponse response = null;
 
         try {
-            getRequest = createHttpRequest(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
+            getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
             response = apacheClient.execute(getRequest);
             RestClientUtils.validateTokenResponse(response, 200, "fail get OSA scan summary results");
 
@@ -134,7 +134,7 @@ public class CxRestOSAClient {
     }
 
     private List<Library> getOSALibraries(String scanId) throws IOException, CxRestClientValidatorException {
-        HttpGet getRequest = createHttpRequest(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanLibrariesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
+        HttpGet getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanLibrariesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
         HttpResponse response = null;
         try {
             response = apacheClient.execute(getRequest);
@@ -148,7 +148,7 @@ public class CxRestOSAClient {
     }
 
     private List<CVE> getOSAVulnerabilities(String scanId) throws IOException, CxRestClientValidatorException {
-        HttpGet getRequest = createHttpRequest(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanVulnerabilitiesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
+        HttpGet getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanVulnerabilitiesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
         HttpResponse response = null;
         try {
             response = apacheClient.execute(getRequest);
@@ -172,7 +172,7 @@ public class CxRestOSAClient {
         HttpGet getRequest = null;
 
         try {
-            getRequest = new HttpGet(String.valueOf(RestResourcesURIBuilder.buildGetOSAScanStatusURL(new URL(hostName), scanId)));
+            getRequest = new HttpGet(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanStatusURL(new URL(hostName), scanId)));
             response = apacheClient.execute(getRequest);
             RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA scan status");
 

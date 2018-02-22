@@ -2,9 +2,10 @@ package com.checkmarx.cxconsole.clients.login;
 
 import com.checkmarx.cxconsole.clients.login.dto.RestGetAccessTokenDTO;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
+import com.checkmarx.cxconsole.clients.login.utils.LoginHttpEntityBuilder;
+import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
-import com.checkmarx.cxconsole.clientsold.rest.utils.RestHttpEntityBuilder;
 import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
@@ -116,7 +117,7 @@ public class CxRestLoginClient {
         HttpPost loginPost = null;
         try {
             loginPost = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildCredentialsLoginURL(new URL(hostName))));
-            loginPost.setEntity(RestHttpEntityBuilder.createLoginParamsEntity(username, password));
+            loginPost.setEntity(LoginHttpEntityBuilder.createLoginParamsEntity(username, password));
             //send login request
             loginResponse = apacheClient.execute(loginPost);
 
@@ -148,7 +149,7 @@ public class CxRestLoginClient {
         try {
             postRequest = new HttpPost(String.valueOf(RestResourcesURIBuilder.getAccessTokenURL(new URL(hostName))));
             postRequest.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
-            postRequest.setEntity(RestHttpEntityBuilder.createGetAccessTokenParamsEntity(refreshToken));
+            postRequest.setEntity(TokenHttpEntityBuilder.createGetAccessTokenParamsEntity(refreshToken));
             getAccessTokenResponse = apacheClient.execute(postRequest);
 
             RestClientUtils.validateTokenResponse(getAccessTokenResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);

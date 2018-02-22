@@ -10,20 +10,20 @@ import org.whitesource.fs.ComponentScan;
 import java.util.Objects;
 import java.util.Properties;
 
-import static com.checkmarx.cxconsole.clients.osa.utils.OSAWSFSAUtil.StringType.*;
+import static com.checkmarx.cxconsole.clients.osa.utils.OsaWSFSAUtil.StringType.*;
 
 /**
  * Created by nirli on 06/02/2018.
  */
-public class OSAWSFSAUtil {
+public class OsaWSFSAUtil {
 
-    private OSAWSFSAUtil() {
+    private OsaWSFSAUtil() {
         throw new IllegalStateException("Utility class");
     }
 
     enum StringType {BASE_DIRECTORIES, OSA_FOLDER_EXCLUDE, OSA_INCLUDE_FILES, OSA_EXCLUDE_FILES, OSA_EXTRACTABLE_FILES}
 
-    private static Logger log = Logger.getLogger(OSAWSFSAUtil.class);
+    private static Logger log = Logger.getLogger(OsaWSFSAUtil.class);
 
     public static String composeProjectOSASummaryLink(String url, long projectId) {
         return String.format("%s/CxWebClient/SPA/#/viewer/project/%s", url, projectId);
