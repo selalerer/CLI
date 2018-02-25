@@ -62,7 +62,7 @@ public class OSAWSFSAUtil {
             ret.put("excludes", osaExcludes.trim());
         }
         ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
-        if (cliosaParameters.isInstallNpmAndBower()) {
+        if (cliosaParameters.isExecuteNpmAndBower()) {
             ret.put("npm.runPreStep", "true");
             ret.put("bower.runPreStep", "true");
         }
