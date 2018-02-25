@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
  */
 public abstract class CLIScanJob implements Callable<Integer> {
 
-    protected Logger log = Logger.getLogger(CLIScanJob.class);
+    private static Logger log = Logger.getLogger(CLIScanJob.class);
 
     CxSoapLoginClient cxSoapLoginClient = ConfigMgr.getWSMgr();
     CxRestLoginClient cxRestLoginClient;

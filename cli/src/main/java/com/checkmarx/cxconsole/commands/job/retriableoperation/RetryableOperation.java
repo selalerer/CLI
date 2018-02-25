@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class RetryableOperation {
 
-    protected Logger log = org.apache.log4j.Logger.getLogger(RetryableOperation.class);
+    private static Logger log = Logger.getLogger(RetryableOperation.class);
 
     protected boolean finished = false;
     protected String error;

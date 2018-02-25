@@ -7,7 +7,7 @@ import java.net.PasswordAuthentication;
 
 public class CxNTLMAuthetication extends Authenticator {
 
-    protected Logger log;
+    private static Logger log = Logger.getLogger(CxNTLMAuthetication.class);
 
     private String defaultUser;
     private String defaultPassword;

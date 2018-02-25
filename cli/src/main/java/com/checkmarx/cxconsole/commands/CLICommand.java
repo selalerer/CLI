@@ -3,16 +3,14 @@ package com.checkmarx.cxconsole.commands;
 import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
-import com.checkmarx.cxconsole.logger.CxConsoleLoggerFactory;
+import com.checkmarx.cxconsole.logger.utils.LoggerUtils;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,7 +24,7 @@ import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
  */
 public abstract class CLICommand {
 
-    protected Logger log = Logger.getLogger(CLICommand.class);
+    private static Logger log = Logger.getLogger(CLICommand.class);
 
     protected CLIScanParametersSingleton params;
 
@@ -77,7 +75,6 @@ public abstract class CLICommand {
         } catch (CLICommandException e) {
             return errorCodeResolver(e.getMessage());
         } finally {
-            releaseLog();
             executor.shutdown();
         }
     }
@@ -122,91 +119,11 @@ public abstract class CLICommand {
         String logPath = "";
         String logPathFromParam = params.getCliSharedParameters().getLogFilePath();
         if (logPathFromParam != null) {
-            logPath = getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
+            logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
         }
 
-        log = CxConsoleLoggerFactory.getLoggerFactory().getLogger(logPath);
-    }
-
-    private void releaseLog() {
-        log.removeAllAppenders();
-    }
-
-    private String getLogFileLocation(String logPath, String projectNameFromParam) {
-        String logFileLocation = logPath;
-        String projectName = projectNameFromParam;
-        String[] parts = new String[0];
-        if (projectName != null) {
-            projectName = projectName.replaceAll("/", "\\\\");
-            parts = projectName.split("\\\\");
-        }
-        String usrDir = System.getProperty("user.dir") + File.separator + normalizeLogPath(parts[parts.length - 1]) + File.separator;
-
-        if (logFileLocation == null) {
-            logFileLocation = usrDir + normalizeLogPath(parts[parts.length - 1]) + ".log";
-        } else {
-            String origPath = logFileLocation;
-            try {
-                logFileLocation = Paths.get(logFileLocation).toFile().getCanonicalPath();
-            } catch (IOException e) {
-                logFileLocation = origPath;
-            }
-
-            File logpath = new File(logFileLocation);
-            if (logpath.isAbsolute()) {
-                // Path is absolute
-                if (logFileLocation.endsWith(File.separator)) {
-                    // Directory path
-                    logFileLocation = logFileLocation + parts[parts.length - 1] + ".log";
-                } else {
-                    // File path
-                    if (logFileLocation.contains(File.separator)) {
-                        String dirPath = logFileLocation.substring(0, logFileLocation.lastIndexOf(File.separator));
-                        File logDirs = new File(dirPath);
-                        if (!logDirs.exists()) {
-                            logDirs.mkdirs();
-                        }
-                    }
-                }
-            } else {
-                // Path is not absolute
-                if (logFileLocation.endsWith(File.separator)) {
-                    // Directory path
-                    logFileLocation = usrDir + logFileLocation + parts[parts.length - 1] + ".log";
-                } else {
-                    // File path
-                    if (logFileLocation.contains(File.separator)) {
-                        String dirPath = logFileLocation.substring(0, logFileLocation.lastIndexOf(File.separator));
-                        File logDirs = new File(usrDir + dirPath);
-                        if (!logDirs.exists()) {
-                            logDirs.mkdirs();
-                        }
-                    }
-
-                    logFileLocation = usrDir + logFileLocation;
-                }
-            }
-        }
-
-        return logFileLocation;
-    }
-
-    private String normalizeLogPath(String projectName) {
-        if (projectName == null || projectName.isEmpty()) {
-            return "cx_scan.log";
-        }
-
-        String normalPathName = "";
-        normalPathName = projectName.replace("\\", "_");
-        normalPathName = normalPathName.replace("/", "_");
-        normalPathName = normalPathName.replace(":", "_");
-        normalPathName = normalPathName.replace("?", "_");
-        normalPathName = normalPathName.replace("*", "_");
-        normalPathName = normalPathName.replace("\"", "_");
-        normalPathName = normalPathName.replace("<", "_");
-        normalPathName = normalPathName.replace(">", "_");
-        normalPathName = normalPathName.replace("|", "_");
-        return normalPathName;
+        log = Logger.getLogger(logPath);
+//        Logger.getLogger(CLICommand.class).getLoggerRepository().resetConfiguration();
     }
 
     public abstract String getUsageExamples();

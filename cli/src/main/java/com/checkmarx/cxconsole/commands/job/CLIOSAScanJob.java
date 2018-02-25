@@ -19,6 +19,7 @@ import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
 import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
@@ -30,6 +31,8 @@ import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresh
  * Created by nirli on 05/11/2017.
  */
 public class CLIOSAScanJob extends CLIScanJob {
+
+    private static Logger log = Logger.getLogger(CLIOSAScanJob.class);
 
     private static final String OSA_REPORT_NAME = "CxOSAReport";
     private CxRestOSAClient cxRestOSAClient;

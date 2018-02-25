@@ -4,11 +4,14 @@ import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import org.apache.log4j.Logger;
 
 /**
  * Created by nirli on 06/11/2017.
  */
 public class RetryableRESTLogin extends RetryableOperation {
+
+    private static Logger log = Logger.getLogger(RetryableRESTLogin.class);
 
     private CxRestLoginClient cxRestLoginClient;
     private CLIScanParametersSingleton params;

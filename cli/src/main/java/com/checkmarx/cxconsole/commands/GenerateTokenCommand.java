@@ -6,6 +6,7 @@ import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorE
 import com.checkmarx.cxconsole.commands.job.CxGenerateTokenJob;
 import com.checkmarx.cxconsole.commands.utils.CommandParametersValidator;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,8 @@ import java.util.concurrent.TimeUnit;
  * Created by nirli on 31/10/2017.
  */
 class GenerateTokenCommand extends CLICommand {
+
+    private static final Logger log = Logger.getLogger(GenerateTokenCommand.class);
 
     GenerateTokenCommand(CLIScanParametersSingleton params) {
         super(params);

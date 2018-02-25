@@ -6,13 +6,14 @@ import com.checkmarx.cxconsole.commands.CommandFactory;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandFactoryException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxconsole.utils.ConsoleUtils;
 import com.checkmarx.cxconsole.utils.CustomStringList;
-import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
-import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,8 @@ import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorMsgResolver;
  */
 public class CxConsoleLauncher {
 
-    private static final Logger log = Logger.getLogger(CxConsoleLauncher.class);
+    private static Logger log = Logger.getLogger(CxConsoleLauncher.class);
+
     private static final String INVALID_COMMAND_PARAMETERS_MSG = "Command parameters are invalid: ";
     private static String[] argumentsLessCommandName;
 
@@ -38,7 +40,8 @@ public class CxConsoleLauncher {
      */
     public static void main(String[] args) {
         int exitCode = -1;
-        log.setLevel(Level.TRACE);
+        DOMConfigurator.configure("./log4j.xml");
+
 
         exitCode = runCli(args);
         if (exitCode == SCAN_SUCCEEDED_EXIT_CODE) {
@@ -58,16 +61,18 @@ public class CxConsoleLauncher {
      */
     public static int runCli(String[] args) {
 
-        log.info("CxConsole version " + ConsoleUtils.getBuildVersion());
-        log.info("CxConsole scan session started");
-        log.info("");
-
         if (args == null || args.length == 0) {
             log.fatal("Missing command name. Available commands: " + CommandFactory.getCommandNames());
             return GENERAL_ERROR_EXIT_CODE;
         }
 
         validateVerboseCommand(args);
+
+        log.info("CxConsole version " + ConsoleUtils.getBuildVersion());
+        log.info("CxConsole scan session started");
+        log.info("");
+
+
         initConfigurationManager(args);
 
         // Temporary solution
@@ -129,8 +134,7 @@ public class CxConsoleLauncher {
     private static void validateVerboseCommand(String[] args) {
         ArrayList<String> customArgs = new CustomStringList(Arrays.asList(args));
         if (!customArgs.contains("-v".trim()) && !customArgs.contains("-verbose")) {
-            ((AppenderSkeleton) Logger.getRootLogger().getAppender("CA"))
-                    .setThreshold(Level.ERROR);
+            LogManager.getRootLogger().setLevel(Level.ERROR);
         } else {
             log.info("Verbose mode is activated. All messages and events will be sent to the console or log file.");
         }

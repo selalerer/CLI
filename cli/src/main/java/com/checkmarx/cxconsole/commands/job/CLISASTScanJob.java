@@ -1,5 +1,7 @@
 package com.checkmarx.cxconsole.commands.job;
 
+import com.checkmarx.components.zipper.ZipListener;
+import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
 import com.checkmarx.cxconsole.clientsold.soap.providers.ScanPrerequisitesValidator;
@@ -9,8 +11,6 @@ import com.checkmarx.cxconsole.clientsold.soap.providers.exceptions.CLISoapProvi
 import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.clientsold.soap.sast.exceptions.CxSoapSASTClientException;
 import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
-import com.checkmarx.components.zipper.ZipListener;
-import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
@@ -18,12 +18,13 @@ import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils;
 import com.checkmarx.cxconsole.commands.job.utils.StoreReportUtils;
-import com.checkmarx.cxconsole.utils.ConfigMgr;
-import com.checkmarx.cxviewer.ws.generated.*;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
+import com.checkmarx.cxconsole.utils.ConfigMgr;
+import com.checkmarx.cxviewer.ws.generated.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -43,6 +44,8 @@ import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresh
  * Created by nirli on 05/11/2017.
  */
 public class CLISASTScanJob extends CLIScanJob {
+
+    private static Logger log = Logger.getLogger(CLISASTScanJob.class);
 
     private CxWSResponseProjectConfig projectConfig;
     private PresetDTO selectedPreset;

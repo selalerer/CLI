@@ -5,8 +5,9 @@ import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClien
 import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
-import com.checkmarx.cxviewer.ws.generated.CxWSResponseLoginData;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxviewer.ws.generated.CxWSResponseLoginData;
+import org.apache.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,6 +16,8 @@ import java.net.URL;
  * Created by nirli on 05/11/2017.
  */
 public class RetryableSOAPLogin extends RetryableOperation {
+
+    private static Logger log = Logger.getLogger(RetryableSOAPLogin.class);
 
     private CxSoapLoginClient cxSoapLoginClient;
     private CLIScanParametersSingleton params;
