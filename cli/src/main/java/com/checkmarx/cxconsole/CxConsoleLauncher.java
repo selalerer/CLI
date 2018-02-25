@@ -10,8 +10,9 @@ import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxconsole.utils.ConsoleUtils;
 import com.checkmarx.cxconsole.utils.CustomStringList;
+import org.apache.log4j.Appender;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -42,7 +43,6 @@ public class CxConsoleLauncher {
         int exitCode = -1;
         DOMConfigurator.configure("./log4j.xml");
 
-
         exitCode = runCli(args);
         if (exitCode == SCAN_SUCCEEDED_EXIT_CODE) {
             log.info("Job completed successfully - exit code " + exitCode);
@@ -71,7 +71,6 @@ public class CxConsoleLauncher {
         log.info("CxConsole version " + ConsoleUtils.getBuildVersion());
         log.info("CxConsole scan session started");
         log.info("");
-
 
         initConfigurationManager(args);
 
@@ -134,7 +133,8 @@ public class CxConsoleLauncher {
     private static void validateVerboseCommand(String[] args) {
         ArrayList<String> customArgs = new CustomStringList(Arrays.asList(args));
         if (!customArgs.contains("-v".trim()) && !customArgs.contains("-verbose")) {
-            LogManager.getRootLogger().setLevel(Level.ERROR);
+            Appender caAppender = Logger.getRootLogger().getAppender("CA");
+            ((ConsoleAppender) caAppender).setThreshold(Level.ERROR);
         } else {
             log.info("Verbose mode is activated. All messages and events will be sent to the console or log file.");
         }

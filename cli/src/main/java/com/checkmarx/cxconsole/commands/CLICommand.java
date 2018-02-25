@@ -5,12 +5,18 @@ import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.cxconsole.logger.utils.LoggerUtils;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.google.common.base.Strings;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.RollingFileAppender;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,11 +59,15 @@ public abstract class CLICommand {
     }
 
     public final int execute() throws CLICommandException {
-        try {
-            initLogging();
-        } catch (IOException e) {
-            log.error("Error initiate the logger: " + e.getMessage());
-            throw new CLICommandException("Error initiate the logger: " + e.getMessage());
+
+        if (!Strings.isNullOrEmpty(params.getCliSharedParameters().getLogFilePath())) {
+            try {
+                initLogging();
+            } catch (IOException e) {
+                log.error("Can't create new log file to path: " + params.getCliSharedParameters().getLogFilePath());
+            }
+        } else {
+            log.info("Default log file location: " + System.getProperty("user.dir") + File.separator + "logs\\cx_console.log");
         }
 
         try {
@@ -118,12 +128,14 @@ public abstract class CLICommand {
     private void initLogging() throws IOException {
         String logPath = "";
         String logPathFromParam = params.getCliSharedParameters().getLogFilePath();
-        if (logPathFromParam != null) {
-            logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
+        logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
+        Appender faAppender = Logger.getRootLogger().getAppender("FA");
+        try (Writer writer = new FileWriter(logPath)) {
+            ((RollingFileAppender) faAppender).setWriter(writer);
+            log.info("Log file location: " + logPath);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        log = Logger.getLogger(logPath);
-//        Logger.getLogger(CLICommand.class).getLoggerRepository().resetConfiguration();
     }
 
     public abstract String getUsageExamples();

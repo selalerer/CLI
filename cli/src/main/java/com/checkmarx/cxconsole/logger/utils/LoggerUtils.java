@@ -1,7 +1,5 @@
 package com.checkmarx.cxconsole.logger.utils;
 
-import org.apache.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -10,8 +8,6 @@ import java.nio.file.Paths;
  * Created by nirli on 25/02/2018.
  */
 public class LoggerUtils {
-
-    private Logger log = Logger.getLogger(LoggerUtils.class);
 
     public static String getLogFileLocation(String logPath, String projectNameFromParam) {
         String logFileLocation = logPath;
@@ -74,7 +70,7 @@ public class LoggerUtils {
 
     private static String normalizeLogPath(String projectName) {
         if (projectName == null || projectName.isEmpty()) {
-            return "cx_scan.log";
+            return "cx_console.log";
         }
 
         String normalPathName = "";
@@ -89,20 +85,4 @@ public class LoggerUtils {
         normalPathName = normalPathName.replace("|", "_");
         return normalPathName;
     }
-
-//    private void updateLog4jConfiguration(String logFile) {
-//        Properties props = new Properties();
-//        try {
-//            InputStream configStream = getClass().getResourceAsStream("/log4j.properties");
-//            props.load(configStream);
-//            configStream.close();
-//        } catch (IOException e) {
-//            log.error("Error loading logger configuration file " + e.getMessage());
-//        }
-//        props.setProperty("log4j.appender.FILE.file", logFile);
-//        LogManager.resetConfiguration();
-//        PropertyConfigurator.configure(props);
-//    }
-
-
 }
