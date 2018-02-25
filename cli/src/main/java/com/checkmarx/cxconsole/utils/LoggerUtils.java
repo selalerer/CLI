@@ -1,4 +1,4 @@
-package com.checkmarx.cxconsole.logger.utils;
+package com.checkmarx.cxconsole.utils;
 
 import java.io.File;
 import java.io.IOException;
