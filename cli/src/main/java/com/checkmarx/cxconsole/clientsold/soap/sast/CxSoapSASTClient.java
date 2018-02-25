@@ -173,7 +173,6 @@ public class CxSoapSASTClient {
             throw new CxSoapSASTClientException("Error scanning project: " + e.getMessage());
         }
 
-        log.trace("cliScan response: " + response);
         return response;
     }
 
