@@ -89,15 +89,12 @@ public class CxConsoleLauncher {
             command = CommandFactory.getCommand(commandName, cliScanParametersSingleton);
             command.checkParameters();
             log.trace("Parameters were checked successfully");
-        } catch (ExceptionInInitializerError | CLICommandFactoryException | CLICommandParameterValidatorException e) {
-            if (e instanceof CLICommandParameterValidatorException) {
-                if (command != null) {
-                    command.printHelp();
-                }
-                log.fatal(INVALID_COMMAND_PARAMETERS_MSG + e.getMessage() + "\n");
-            } else {
-                log.fatal(e.getMessage());
-            }
+        } catch (CLICommandParameterValidatorException e) {
+            command.printHelp();
+            log.fatal(INVALID_COMMAND_PARAMETERS_MSG + e.getMessage() + "\n");
+            return errorCodeResolver(e.getMessage());
+        } catch (ExceptionInInitializerError | CLICommandFactoryException e) {
+            log.fatal(e.getMessage());
             return errorCodeResolver(e.getMessage());
         }
 

@@ -9,6 +9,10 @@ import java.nio.file.Paths;
  */
 public class LoggerUtils {
 
+    private LoggerUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static String getLogFileLocation(String logPath, String projectNameFromParam) {
         String logFileLocation = logPath;
         String projectName = projectNameFromParam;
