@@ -39,11 +39,8 @@ public class OSAWSFSAUtil {
             osaFolderExcludeString = stringArrayToString(cliosaParameters.getOsaExcludedFolders(), OSA_FOLDER_EXCLUDE);
         }
 
-        String osaFilesIncludesString;
-        if (cliosaParameters.isHasOsaIncludedFilesParam()) {
-            osaFilesIncludesString = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
-            ret.put("includes", osaFilesIncludesString);
-        }
+        String osaFilesIncludesString  = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
+        ret.put("includes", osaFilesIncludesString);
 
         String osaFilesExcludesString = null;
         if (cliosaParameters.isHasOsaExcludedFilesParam()) {
