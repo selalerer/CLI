@@ -39,22 +39,16 @@ public class OsaWSFSAUtil {
             osaFolderExcludeString = stringArrayToString(cliosaParameters.getOsaExcludedFolders(), OSA_FOLDER_EXCLUDE);
         }
 
-        String osaFilesIncludesString;
-        if (cliosaParameters.isHasOsaIncludedFilesParam()) {
-            osaFilesIncludesString = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
-            ret.put("includes", osaFilesIncludesString);
-        }
-
         String osaFilesExcludesString = null;
         if (cliosaParameters.isHasOsaExcludedFilesParam()) {
             osaFilesExcludesString = stringArrayToString(cliosaParameters.getOsaExcludedFiles(), OSA_EXCLUDE_FILES);
         }
 
-        String osaExtractableIncludesString;
-        if (cliosaParameters.isHasOsaExtractableIncludeFilesParam()) {
-            osaExtractableIncludesString = stringArrayToString(cliosaParameters.getOsaExtractableIncludeFiles(), OSA_EXTRACTABLE_FILES);
-            ret.put("archiveIncludes", osaExtractableIncludesString);
-        }
+        String osaFilesIncludesString = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
+        ret.put("includes", osaFilesIncludesString);
+
+        String osaExtractableIncludesString = stringArrayToString(cliosaParameters.getOsaExtractableIncludeFiles(), OSA_EXTRACTABLE_FILES);
+        ret.put("archiveIncludes", osaExtractableIncludesString);
 
 
         String osaExcludes = osaFolderExcludeString + " " + osaFilesExcludesString;
