@@ -44,7 +44,9 @@ public class ScanPrerequisitesValidator {
 
     private void validateScanEngineConfiguration() {
         for (EngineConfigurationDTO engineConfiguration : engineConfigurations) {
-            if (engineConfiguration)
+            if (engineConfiguration.getName().equalsIgnoreCase(engineConfigurationInput.getName())) {
+                engineConfigurationInput.setId(engineConfiguration.getId());
+            }
         }
 
     }
