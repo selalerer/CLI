@@ -1,28 +1,25 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.cxconsole.clients.osa.client.CxRestOSAClient;
-import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
-import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
-import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
-import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
-import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
-import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.clients.osa.OSAConsoleScanWaitHandler;
+import com.checkmarx.cxconsole.clients.osa.client.CxRestOSAClient;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanResponse;
 import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaWSFSAUtil;
-import com.checkmarx.cxviewer.ws.generated.CxWSResponseProjectsDisplayData;
-import com.checkmarx.cxviewer.ws.generated.ProjectDisplayData;
+import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
+import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
+import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
+import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
 import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
+import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
 import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
@@ -50,18 +47,20 @@ public class CLIOSAScanJob extends CLIScanJob {
             log.info("Project name is \"" + params.getCliMandatoryParameters().getProjectName() + "\"");
 
             // Connect to Checkmarx service, if not already connected.
-            super.restLogin();
-            cxRestOSAClient = new CxRestOSAClient(cxRestLoginClient);
-            if (this.cxSoapLoginClient.getSessionId() == null ) {
-                super.soapLogin();
-                sessionId = cxSoapLoginClient.getSessionId();
+            if (!cxRestLoginClient.isLoggedIn()) {
+                super.restLogin();
             }
-            cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
+            cxRestOSAClient = new CxRestOSAClient(cxRestLoginClient);
+//            if (this.cxSoapLoginClient.getSessionId() == null ) {
+//                super.soapLogin();
+//                sessionId = cxSoapLoginClient.getSessionId();
+//            }
+//            cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
 
             //Request osa Scan
             log.info("Request OSA scan");
 
-            long projectId = locateProjectOnServer();
+//            long projectId = locateProjectOnServer();
 
             String[] osaLocationPath = cliosaParameters.getOsaLocationPath() != null ? cliosaParameters.getOsaLocationPath() : new String[]{params.getCliSharedParameters().getLocationPath()};
             log.info("Setting up OSA analysis request");
@@ -153,20 +152,20 @@ public class CLIOSAScanJob extends CLIScanJob {
         return SCAN_SUCCEEDED_EXIT_CODE;
     }
 
-    private long locateProjectOnServer() throws CLIJobException {
-        CxWSResponseProjectsDisplayData projectData;
-        try {
-            projectData = cxSoapSASTClient.getProjectsDisplayData(sessionId);
-            for (ProjectDisplayData data : projectData.getProjectList().getProjectDisplayData()) {
-                String projectFullName = data.getGroup() + "\\" + data.getProjectName();
-                if (projectFullName.equalsIgnoreCase(params.getCliMandatoryParameters().getProjectNameWithPath())) {
-                    return data.getProjectID();
-                }
-            }
-        } catch (CxSoapClientValidatorException e) {
-            throw new CLIJobException("The project: " + params.getCliMandatoryParameters().getProjectNameWithPath() + " was not found on the server. OSA scan requires an existing project on the server");
-        }
-
-        throw new CLIJobException("The project: " + params.getCliMandatoryParameters().getProjectNameWithPath() + " was not found on the server. OSA scan requires an existing project on the server");
-    }
+//    private long locateProjectOnServer() throws CLIJobException {
+//        CxWSResponseProjectsDisplayData projectData;
+//        try {
+//            projectData = cxSoapSASTClient.getProjectsDisplayData(sessionId);
+//            for (ProjectDisplayData data : projectData.getProjectList().getProjectDisplayData()) {
+//                String projectFullName = data.getGroup() + "\\" + data.getProjectName();
+//                if (projectFullName.equalsIgnoreCase(params.getCliMandatoryParameters().getProjectNameWithTeamPath())) {
+//                    return data.getProjectID();
+//                }
+//            }
+//        } catch (CxSoapClientValidatorException e) {
+//            throw new CLIJobException("The project: " + params.getCliMandatoryParameters().getProjectNameWithTeamPath() + " was not found on the server. OSA scan requires an existing project on the server");
+//        }
+//
+//        throw new CLIJobException("The project: " + params.getCliMandatoryParameters().getProjectNameWithTeamPath() + " was not found on the server. OSA scan requires an existing project on the server");
+//    }
 }

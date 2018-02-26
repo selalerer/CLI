@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.parameters;
 
+import com.checkmarx.cxconsole.clients.sast.dto.TeamDTO;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -22,7 +23,8 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
     private String password;
     private String token;
     private String projectName;
-    private String projectNameWithPath;
+    private String projectNameWithTeamPath;
+    private TeamDTO teamPath;
     private String srcPath;
     private String folderProjectName;
     private boolean hasPasswordParam = false;
@@ -33,7 +35,7 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_USER = Option.builder("cxuser").hasArg(true).argName("username").desc("Login username. Mandatory, Unless token is used or SSO login is used on Windows ('-useSSO' flag)").build();
     private static final Option PARAM_PASSWORD = Option.builder("cxpassword").hasArg(true).argName("password").desc("Login password. Mandatory, Unless token is used or SSO login is used on Windows ('-useSSO' flag)").build();
     private static final Option PARAM_TOKEN = Option.builder("cxtoken").hasArg(true).argName("token").desc("Login token. Mandatory, Unless use rname and password are provided or SSO login is used on Windows ('-useSSO' flag)").build();
-    private static final Option PARAM_PRJ_NAME = Option.builder("projectname").argName("project name").hasArg(true).desc("A full absolute name of a project. " +
+    private static final Option PARAM_PROJECT_NAME = Option.builder("projectname").argName("project name").hasArg(true).desc("A full absolute name of a project. " +
             "The full Project name includes the whole path to the project, including Server, service provider, company, and team. " +
             "Example:  -ProjectName \"CxServer\\SP\\Company\\Users\\bs java\" " +
             "If project with such a name doesn't exist in the system, new project will be created.").build();
@@ -54,21 +56,27 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         hasPasswordParam = parsedCommandLineArguments.hasOption(PARAM_PASSWORD.getOpt());
         hasTokenParam = parsedCommandLineArguments.hasOption(PARAM_TOKEN.getOpt());
 
-        projectNameWithPath = parsedCommandLineArguments.getOptionValue(PARAM_PRJ_NAME.getOpt());
-        projectName = extractProjectName(projectNameWithPath);
+        projectNameWithTeamPath = parsedCommandLineArguments.getOptionValue(PARAM_PROJECT_NAME.getOpt()).replaceAll("/", "\\\\");
+        projectName = extractProjectName(projectNameWithTeamPath);
+        teamPath = extractTeamPath(projectNameWithTeamPath);
     }
 
     private String extractProjectName(String projectNameWithFullPath) {
-        if (projectNameWithFullPath != null) {
-            projectNameWithFullPath = projectNameWithFullPath.replaceAll("/", "\\\\");
-            String[] pathParts = projectNameWithFullPath.split("\\\\");
-            if ((pathParts.length <= 0)) {
-                return projectNameWithFullPath;
-            } else {
-                return pathParts[pathParts.length - 1];
-            }
+        String[] pathParts = projectNameWithFullPath.split("\\\\");
+        if ((pathParts.length <= 0)) {
+            return projectNameWithFullPath;
+        } else {
+            return pathParts[pathParts.length - 1];
         }
-        return null;
+    }
+
+    private TeamDTO extractTeamPath(String projectNameWithFullPath) {
+        String[] pathParts = projectNameWithFullPath.split("\\\\");
+        if ((pathParts.length <= 0)) {
+            return null;
+        } else {
+            return new TeamDTO(projectNameWithFullPath.replace("\\" + projectName, ""));
+        }
     }
 
 
@@ -96,8 +104,8 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         return projectName;
     }
 
-    public String getProjectNameWithPath() {
-        return projectNameWithPath;
+    public String getProjectNameWithTeamPath() {
+        return projectNameWithTeamPath;
     }
 
     public String getFolderProjectName() {
@@ -128,12 +136,16 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         return srcPath;
     }
 
+    public TeamDTO getTeam() {
+        return teamPath;
+    }
+
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
         commandLineOptions.addOption(PARAM_HOST);
         commandLineOptions.addOption(PARAM_PASSWORD);
-        commandLineOptions.addOption(PARAM_PRJ_NAME);
+        commandLineOptions.addOption(PARAM_PROJECT_NAME);
         commandLineOptions.addOption(PARAM_TOKEN);
         commandLineOptions.addOption(PARAM_USER);
     }
@@ -188,7 +200,7 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         keys.append("- Login token. Mandatory\n");
 
         keys.append(leftSpacing);
-        keys.append(PARAM_PRJ_NAME);
+        keys.append(PARAM_PROJECT_NAME);
         keys.append(KEY_DESCR_INTEND_SMALL);
         keys.append("- Full Project name. Mandatory\n");
 
@@ -234,7 +246,7 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
 
     public String getMandatoryParams() {
         return PARAM_HOST + " hostName " + PARAM_USER + " login "
-                + PARAM_PASSWORD + " password, or" + PARAM_TOKEN + " token. " + PARAM_PRJ_NAME + " fullProjectName ";
+                + PARAM_PASSWORD + " password, or" + PARAM_TOKEN + " token. " + PARAM_PROJECT_NAME + " fullProjectName ";
     }
 
     public String getMandatoryParamsGenerateToken() {

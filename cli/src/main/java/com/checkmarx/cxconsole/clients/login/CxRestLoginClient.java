@@ -39,6 +39,7 @@ public class CxRestLoginClient {
     private final String password;
     private final String hostName;
     private final String token;
+    private boolean isLoggedIn = false;
 
     private HttpClient apacheClient;
     private static CookieStore cookieStore = new BasicCookieStore();
@@ -134,11 +135,13 @@ public class CxRestLoginClient {
         }
 
         apacheClient = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
+        isLoggedIn = true;
     }
 
     public void tokenLogin() throws CxRestLoginClientException {
         getAccessTokenFromRefreshToken(token);
         apacheClient = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
+        isLoggedIn = true;
     }
 
     private void getAccessTokenFromRefreshToken(String refreshToken) throws CxRestLoginClientException {
@@ -175,5 +178,9 @@ public class CxRestLoginClient {
 
     public String getHostName() {
         return hostName;
+    }
+
+    public boolean isLoggedIn() {
+        return isLoggedIn;
     }
 }

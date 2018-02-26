@@ -19,7 +19,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
      */
     private Options commandLineOptions;
 
-    private String logFilePath = "cx_scan.log";
+    private String logFilePath = null;
     private boolean isVerbose = false;
     private String scanComment;
     private boolean isSsoLoginUsed = false;

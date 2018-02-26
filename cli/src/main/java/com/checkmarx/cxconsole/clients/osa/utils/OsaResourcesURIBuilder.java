@@ -8,6 +8,10 @@ import java.net.URL;
  */
 public class OsaResourcesURIBuilder {
 
+    private OsaResourcesURIBuilder() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static final String APPLICATION_NAME = "cxrestapi";
 
     private static final String OSA_SCAN_STATUS_RESOURCE = "scans/{scanId}";
@@ -16,13 +20,10 @@ public class OsaResourcesURIBuilder {
     private static final String OSA_SCAN_VULNERABILITIES_PATH = "/osa/vulnerabilities";
     private static final String OSA_CREATE_SCAN_WITH_FS = "osa/inventory";
     private static final String SCAN_ID_QUERY_PARAM = "?scanId=";
+
     private static final String ITEM_PER_PAGE_QUERY_PARAM = "&itemsPerPage=";
 
     private static final long MAX_ITEMS = 1000000;
-
-    private OsaResourcesURIBuilder() {
-        throw new IllegalStateException("Utility class");
-    }
 
 
     public static URL buildCreateOSAFSScanURL(URL serverUrl) {

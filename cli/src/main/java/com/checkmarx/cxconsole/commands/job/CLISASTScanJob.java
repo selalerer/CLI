@@ -2,15 +2,15 @@ package com.checkmarx.cxconsole.commands.job;
 
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
+import com.checkmarx.cxconsole.clients.sast.client.CxRestSASTClient;
+import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
+import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
+import com.checkmarx.cxconsole.clients.sast.utils.ScanPrerequisitesValidator;
+import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
-import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.cxconsole.clientsold.soap.providers.ScanPrerequisitesValidator;
-import com.checkmarx.cxconsole.clientsold.soap.providers.dto.ConfigurationDTO;
-import com.checkmarx.cxconsole.clientsold.soap.providers.dto.PresetDTO;
-import com.checkmarx.cxconsole.clientsold.soap.providers.exceptions.CLISoapProvidersException;
 import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.clientsold.soap.sast.exceptions.CxSoapSASTClientException;
-import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
@@ -27,8 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -49,13 +47,16 @@ public class CLISASTScanJob extends CLIScanJob {
 
     private CxWSResponseProjectConfig projectConfig;
     private PresetDTO selectedPreset;
-    private ConfigurationDTO selectedConfiguration;
-    private CxSoapSASTClient cxSoapSASTClient;
+    private EngineConfigurationDTO selectedConfiguration;
+    private CxRestSASTClient cxRestSASTClient;
+
+
+
+//    private CxSoapSASTClient cxSoapSASTClient;
     private byte[] zippedSourcesBytes;
     private String runId;
     private SourceLocationType sourceLocationType;
     private RepositoryType repoType;
-
 
     public CLISASTScanJob(CLIScanParametersSingleton params, boolean isAsyncScan) {
         super(params, isAsyncScan);
@@ -64,31 +65,42 @@ public class CLISASTScanJob extends CLIScanJob {
     @Override
     public Integer call() throws CLIJobException {
         log.info("Project name is \"" + params.getCliMandatoryParameters().getProjectName() + "\"");
-
-        if (params.getCliMandatoryParameters().isHasTokenParam()) {
+        if (!cxRestLoginClient.isLoggedIn()) {
             super.restLogin();
-            URL wsdlLocation = null;
-            try {
-                wsdlLocation = new URL(SoapClientUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
-                this.cxSoapLoginClient.initSoapClient(wsdlLocation);
-            } catch (MalformedURLException | CxSoapLoginClientException e) {
-                log.error("Error initiate SOAP client: " + e.getMessage());
-                throw new CLIJobException("Error initiate SOAP client: " + e.getMessage());
-            }
-        } else {
-            super.soapLogin();
         }
-        cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
-
+        cxRestSASTClient = new CxRestSASTClient(cxRestLoginClient);
         ScanPrerequisitesValidator scanPrerequisitesValidator;
         try {
-            scanPrerequisitesValidator = new ScanPrerequisitesValidator(cxSoapLoginClient.getCxSoapClient(), sessionId);
-            selectedPreset = scanPrerequisitesValidator.validateJobPreset(params.getCliSastParameters().getPresetName());
-            selectedConfiguration = scanPrerequisitesValidator.validateJobConfiguration(params.getCliSastParameters().getConfiguration());
-            log.info("Scan prerequisites validated successfully");
-        } catch (CLISoapProvidersException e) {
+            scanPrerequisitesValidator = new ScanPrerequisitesValidator(cxRestSASTClient, params.getCliMandatoryParameters().getTeam(),
+                    params.getCliSastParameters().getConfiguration(), params.getCliSastParameters().getPreset());
+        } catch (CxRestSASTClientException | CxRestClientValidatorException e) {
             throw new CLIJobException("Error initialize project prerequisites: " + e.getMessage());
         }
+
+
+//        if (params.getCliMandatoryParameters().isHasTokenParam()) {
+//            super.restLogin();
+//            URL wsdlLocation = null;
+//            try {
+//                wsdlLocation = new URL(SoapClientUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
+//                this.cxSoapLoginClient.initSoapClient(wsdlLocation);
+//            } catch (MalformedURLException | CxSoapLoginClientException e) {
+//                log.error("Error initiate SOAP client: " + e.getMessage());
+//                throw new CLIJobException("Error initiate SOAP client: " + e.getMessage());
+//            }
+//        } else {
+//            super.soapLogin();
+//        }
+//        cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
+
+//        try {
+//            scanPrerequisitesValidator = new ScanPrerequisitesValidator(cxSoapLoginClient.getCxSoapClient(), sessionId);
+//            selectedPreset = scanPrerequisitesValidator.validateJobPreset(params.getCliSastParameters().getPreset());
+//            selectedConfiguration = scanPrerequisitesValidator.validateJobConfiguration(params.getCliSastParameters().getConfiguration());
+//            log.info("Scan prerequisites validated successfully");
+//        } catch (CLISoapProvidersException e) {
+//            throw new CLIJobException("Error initialize project prerequisites: " + e.getMessage());
+//        }
 
         if (projectConfig != null && !projectConfig.getProjectConfig().getSourceCodeSettings().getSourceOrigin().equals(SourceLocationType.LOCAL)) {
             params.getCliSharedParameters().setLocationType(getLocationType(projectConfig.getProjectConfig().getSourceCodeSettings()));

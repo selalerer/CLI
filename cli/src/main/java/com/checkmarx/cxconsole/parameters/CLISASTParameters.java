@@ -1,5 +1,7 @@
 package com.checkmarx.cxconsole.parameters;
 
+import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import com.checkmarx.cxconsole.parameters.utils.ParametersUtils;
@@ -25,8 +27,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     private CLIMandatoryParameters cliMandatoryParameters;
     private CLISharedParameters cliSharedParameters;
 
-    private String presetName;
-    private String configuration;
+    private PresetDTO presetName;
+    private EngineConfigurationDTO configuration;
     private boolean isIncrementalScan = false;
     private boolean forceScan = true;
     private List<String> reportType = new ArrayList<>();
@@ -98,8 +100,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     }
 
     void initSastParams(CommandLine parsedCommandLineArguments, LocationType locationType) throws CLIParameterParsingException {
-        presetName = parsedCommandLineArguments.getOptionValue(PARAM_PRESET.getOpt());
-        configuration = parsedCommandLineArguments.getOptionValue(PARAM_CONFIGURATION.getOpt());
+        presetName = new PresetDTO(parsedCommandLineArguments.getOptionValue(PARAM_PRESET.getOpt()));
+        configuration = new EngineConfigurationDTO(parsedCommandLineArguments.getOptionValue(PARAM_CONFIGURATION.getOpt()));
         isIncrementalScan = parsedCommandLineArguments.hasOption(PARAM_INCREMENTAL.getOpt());
         forceScan = !parsedCommandLineArguments.hasOption(PARAM_FORCE_SCAN.getOpt());
         isOsaEnabled = parsedCommandLineArguments.hasOption(PARAM_ENABLE_OSA.getOpt());
@@ -215,11 +217,11 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         return sastHighThresholdValue;
     }
 
-    public String getPresetName() {
+    public PresetDTO getPreset() {
         return presetName;
     }
 
-    public String getConfiguration() {
+    public EngineConfigurationDTO getConfiguration() {
         return configuration;
     }
 

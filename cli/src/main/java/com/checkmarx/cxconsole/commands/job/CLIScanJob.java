@@ -28,10 +28,10 @@ public abstract class CLIScanJob implements Callable<Integer> {
 
     private static Logger log = Logger.getLogger(CLIScanJob.class);
 
-    CxSoapLoginClient cxSoapLoginClient = ConfigMgr.getWSMgr();
     CxRestLoginClient cxRestLoginClient;
-    String sessionId;
     boolean isAsyncScan;
+//    CxSoapLoginClient cxSoapLoginClient = ConfigMgr.getWSMgr();
+//    String sessionId;
 
     private String errorMsg;
     protected CLIScanParametersSingleton params;
@@ -42,32 +42,32 @@ public abstract class CLIScanJob implements Callable<Integer> {
         cxRestLoginClient = ConfigMgr.getRestWSMgr(this.params);
     }
 
-    void soapLogin() throws CLIJobException {
-        final RetryableOperation login = new RetryableSOAPLogin(params, cxSoapLoginClient);
-        login.run();
-        sessionId = cxSoapLoginClient.getSessionId();
-        errorMsg = login.getError();
-        if (errorMsg != null) {
-            throw new CLIJobException(errorMsg);
-        }
-    }
+//    void soapLogin() throws CLIJobException {
+//        final RetryableOperation login = new RetryableSOAPLogin(params, cxSoapLoginClient);
+//        login.run();
+//        sessionId = cxSoapLoginClient.getSessionId();
+//        errorMsg = login.getError();
+//        if (errorMsg != null) {
+//            throw new CLIJobException(errorMsg);
+//        }
+//    }
 
     void restLogin() throws CLIJobException {
         final RetryableOperation login = new RetryableRESTLogin(params, cxRestLoginClient);
         login.run();
 
-        sessionId = cxSoapLoginClient.getSessionId();
-        if (cxSoapLoginClient.getCxSoapClient() == null) {
-            URL wsdlLocation;
-            cxSoapLoginClient = ConfigMgr.getWSMgr();
-            try {
-                wsdlLocation = new URL(SoapClientUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
-                cxSoapLoginClient.initSoapClient(wsdlLocation);
-            } catch (MalformedURLException | CxSoapLoginClientException e) {
-                log.error("Error initialize SOAP SAST client: " + e.getMessage());
-                throw new CLIJobException("Error initialize SOAP SAST client: " + e.getMessage());
-            }
-        }
+//        sessionId = cxSoapLoginClient.getSessionId();
+//        if (cxSoapLoginClient.getCxSoapClient() == null) {
+//            URL wsdlLocation;
+//            cxSoapLoginClient = ConfigMgr.getWSMgr();
+//            try {
+//                wsdlLocation = new URL(SoapClientUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
+//                cxSoapLoginClient.initSoapClient(wsdlLocation);
+//            } catch (MalformedURLException | CxSoapLoginClientException e) {
+//                log.error("Error initialize SOAP SAST client: " + e.getMessage());
+//                throw new CLIJobException("Error initialize SOAP SAST client: " + e.getMessage());
+//            }
+//        }
     }
 
     void storeXMLResults(String fileName, byte[] resultBytes) throws CLIJobException {

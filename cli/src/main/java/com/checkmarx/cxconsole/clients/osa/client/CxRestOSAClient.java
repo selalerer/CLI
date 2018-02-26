@@ -2,8 +2,8 @@ package com.checkmarx.cxconsole.clients.osa.client;
 
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
 import com.checkmarx.cxconsole.clients.osa.ScanWaitHandler;
-import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.dto.*;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaResourcesURIBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
