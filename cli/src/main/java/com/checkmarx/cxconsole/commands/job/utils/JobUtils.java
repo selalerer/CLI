@@ -38,7 +38,7 @@ public class JobUtils {
         String folderPath = parameters.getCliMandatoryParameters().getSrcPath();
         if (folderPath == null || folderPath.isEmpty()) {
             //in case of ScanProject command
-            String prjName = PathHandler.normalizePathString(parameters.getCliMandatoryParameters().getProjectName());
+            String prjName = PathHandler.normalizePathString(parameters.getCliMandatoryParameters().getProject().getName());
             folderPath = System.getProperty("user.dir") + File.separator + prjName;
             File folder = new File(folderPath);
             if (!folder.exists()) {

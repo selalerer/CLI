@@ -2,8 +2,8 @@ package com.checkmarx.cxconsole.clientsold.soap.login;
 
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.cxconsole.clients.login.utils.CXFConfigurationUtils;
-import com.checkmarx.cxconsole.clients.login.utils.DynamicAuthSupplier;
+import com.checkmarx.cxconsole.utils.CXFConfigurationUtils;
+import com.checkmarx.cxconsole.utils.DynamicAuthSupplier;
 import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.Credentials;

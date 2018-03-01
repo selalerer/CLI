@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.thresholds;
 
+import com.checkmarx.cxconsole.constants.ScanType;
 import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.log4j.Logger;
 
@@ -19,7 +20,7 @@ public class ThresholdResolver {
         int thresholdScore = NO_THRESHOLD_EXCEEDED;
 
         if (thresholdDto.getHighSeverityScanResult() > thresholdDto.getHighSeverityThreshold()) {
-            if (thresholdDto.getScanType() == ThresholdDto.ScanType.SAST_SCAN) {
+            if (thresholdDto.getScanType() == ScanType.SAST_SCAN) {
                 log.info(SAST_HIGH_THRESHOLD_ERROR_MSG);
                 thresholdScore = SAST_HIGH_THRESHOLD_ERROR_EXIT_CODE;
             } else {
@@ -29,7 +30,7 @@ public class ThresholdResolver {
         }
 
         if (thresholdDto.getMediumSeverityScanResult() > thresholdDto.getMediumSeverityThreshold()) {
-            if (thresholdDto.getScanType() == ThresholdDto.ScanType.SAST_SCAN) {
+            if (thresholdDto.getScanType() == ScanType.SAST_SCAN) {
                 log.info(SAST_MEDIUM_THRESHOLD_ERROR_MSG);
                 if (thresholdScore == NO_THRESHOLD_EXCEEDED) {
                     thresholdScore = SAST_MEDIUM_THRESHOLD_ERROR_EXIT_CODE;
@@ -43,7 +44,7 @@ public class ThresholdResolver {
         }
 
         if (thresholdDto.getLowSeverityScanResult() > thresholdDto.getLowSeverityThreshold()) {
-            if (thresholdDto.getScanType() == ThresholdDto.ScanType.SAST_SCAN) {
+            if (thresholdDto.getScanType() == ScanType.SAST_SCAN) {
                 log.info(SAST_LOW_THRESHOLD_ERROR_MSG);
                 if (thresholdScore == NO_THRESHOLD_EXCEEDED) {
                     thresholdScore = SAST_LOW_THRESHOLD_ERROR_EXIT_CODE;

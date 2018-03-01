@@ -1,15 +1,14 @@
 package com.checkmarx.cxconsole.clients.utils;
 
-import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
-import com.checkmarx.cxconsole.clients.login.jwt.dto.JwtAccessTokenDto;
-import com.checkmarx.cxconsole.clients.login.jwt.exceptions.JWTException;
-import com.checkmarx.cxconsole.clients.login.jwt.utils.JwtUtils;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
+import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
+import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTODeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,83 +21,72 @@ import java.util.List;
  */
 public class RestClientUtils {
 
-    private static Logger log = Logger.getLogger(RestClientUtils.class);
+    public static JSONObject parseJsonObjectFromResponse(HttpResponse response) throws IOException {
+        String responseInString = createStringFromResponse(response).toString();
+        return new JSONObject(responseInString);
+    }
 
-
-    public static <ResponseObj> ResponseObj parseJsonFromString(String jsonInString, Class<ResponseObj> dtoClass) throws JWTException {
+    public static <ResponseObj> ResponseObj parseJsonFromResponse(HttpResponse response, Class<ResponseObj> dtoClass) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(createStringFromResponse(response).toString(), dtoClass);
+    }
 
+    public static <ResponseObj> List<ResponseObj> parseJsonListFromResponse(HttpResponse response, CollectionType dtoClass) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(createStringFromResponse(response).toString(), dtoClass);
+    }
+
+    private static StringBuilder createStringFromResponse(HttpResponse response) throws IOException {
+        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+        StringBuilder result = new StringBuilder();
+        String line;
+        while ((line = rd.readLine()) != null) {
+            result.append(line);
+        }
+
+        return result;
+    }
+
+    public static ScanSettingDTO parseScanSettingResponse(HttpResponse response) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(ScanSettingDTO.class, new ScanSettingDTODeserializer());
+        mapper.registerModule(module);
+
+        return mapper.readValue(createStringFromResponse(response).toString(), ScanSettingDTO.class);
+    }
+
+
+    public static void validateClientResponse(HttpResponse response, int status, String message) throws CxValidateResponseException {
         try {
-            return mapper.readValue(jsonInString, dtoClass);
+            if (response.getStatusLine().getStatusCode() != status) {
+                String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+                if (responseBody.contains("<!DOCTYPE html PUBLIC \"")) {
+                    responseBody = "No body";
+                }
+                throw new CxValidateResponseException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". Error message:" + responseBody);
+            }
         } catch (IOException e) {
-            throw new JWTException("Can't convert string into JSON");
+            throw new CxValidateResponseException("Error parse REST response body: " + e.getMessage());
         }
     }
 
-    public static <ResponseObj> ResponseObj parseJsonFromResponse(HttpResponse generateTokenResponse, Class<ResponseObj> dtoClass) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(generateTokenResponse.getEntity().getContent()));
-
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-
-        return mapper.readValue(result.toString(), dtoClass);
-    }
-
-    public static <ResponseObj> List<ResponseObj> parseJsonListFromResponse(HttpResponse generateTokenResponse, CollectionType dtoClass) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(generateTokenResponse.getEntity().getContent()));
-
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-
-        return mapper.readValue(result.toString(), dtoClass);
-    }
-
-    public static void validateTokenResponse(HttpResponse response, int status, String message) throws CxRestClientValidatorException {
+    public static void validateTokenResponse(HttpResponse response, int status, String message) throws CxValidateResponseException {
         try {
             if (response.getStatusLine().getStatusCode() != status) {
                 String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
                 responseBody = responseBody.replace("{", "").replace("}", "").replace(System.getProperty("line.separator"), " ").replace("  ", "");
                 if (responseBody.contains("<!DOCTYPE html>")) {
-                    throw new CxRestClientValidatorException(message + ": " + "status code: 500. Error message: Internal Server Error");
+                    throw new CxValidateResponseException(message + ": " + "status code: 500. Error message: Internal Server Error");
                 } else if (responseBody.contains("\"error\":\"invalid_grant\"")) {
-                    throw new CxRestClientValidatorException(message);
+                    throw new CxValidateResponseException(message);
                 } else {
-                    throw new CxRestClientValidatorException(message + ": " + "status code: " + response.getStatusLine() + ". Error message:" + responseBody);
+                    throw new CxValidateResponseException(message + ": " + "status code: " + response.getStatusLine() + ". Error message:" + responseBody);
                 }
             }
         } catch (IOException e) {
-            throw new CxRestClientValidatorException("Error parse REST response body: " + e.getMessage());
+            throw new CxValidateResponseException("Error parse REST response body: " + e.getMessage());
         }
-    }
-
-    private static String getPayloadSectionFromAccessJWT(String accessJWT) throws JWTException {
-        String[] accessJWTDividedToSection = accessJWT.split("\\.");
-        if (accessJWTDividedToSection.length != 3) {
-            throw new JWTException("Access token is incomplete");
-        }
-
-        return accessJWTDividedToSection[1];
-    }
-
-    public static String getSessionIdFromAccessToken(String accessToken) throws CxRestLoginClientException {
-        JwtAccessTokenDto jwtAccessTokenDto;
-        try {
-            String payload = RestClientUtils.getPayloadSectionFromAccessJWT(accessToken);
-            String decodedPayload = JwtUtils.convertBase64ToString(payload);
-            jwtAccessTokenDto = RestClientUtils.parseJsonFromString(decodedPayload, JwtAccessTokenDto.class);
-        } catch (JWTException e) {
-            log.error("Failed to get session ID from token: " + e.getMessage());
-            throw new CxRestLoginClientException("Failed to get session ID from token: " + e.getMessage());
-        }
-
-        return jwtAccessTokenDto.getSessionId();
     }
 }

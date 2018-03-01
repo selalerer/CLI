@@ -75,7 +75,6 @@ public abstract class CLICommand {
             params.getCliMandatoryParameters().setOriginalHost(hostWithProtocol);
             log.info("Server connectivity test succeeded to: " + params.getCliMandatoryParameters().getOriginalHost());
         } catch (CxSoapLoginClientException e) {
-            log.error(SERVER_CONNECTIVITY_VALIDATION_ERROR + e.getMessage());
             throw new CLICommandException(SERVER_CONNECTIVITY_VALIDATION_ERROR + e.getMessage());
         }
 
@@ -128,7 +127,7 @@ public abstract class CLICommand {
     private void initLogging() throws IOException {
         String logPath = "";
         String logPathFromParam = params.getCliSharedParameters().getLogFilePath();
-        logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
+        logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProject().getName());
         Appender faAppender = Logger.getRootLogger().getAppender("FA");
         try (Writer writer = new FileWriter(logPath)) {
             ((RollingFileAppender) faAppender).setWriter(writer);

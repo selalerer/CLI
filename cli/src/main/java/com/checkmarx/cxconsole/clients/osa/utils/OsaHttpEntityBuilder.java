@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.clients.osa.utils;
 
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.entity.ContentType;

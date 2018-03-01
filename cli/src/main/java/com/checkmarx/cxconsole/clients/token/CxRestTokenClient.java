@@ -1,10 +1,10 @@
-package com.checkmarx.cxconsole.clients.token.client;
+package com.checkmarx.cxconsole.clients.token;
 
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import com.checkmarx.cxconsole.clients.login.dto.RestGenerateTokenDTO;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
-import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
+import com.checkmarx.cxconsole.clients.token.utils.TokenResourceURIBuilder;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonFromResponse;
+import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.validateClientResponse;
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.validateTokenResponse;
 
 public class CxRestTokenClient {
@@ -27,7 +28,7 @@ public class CxRestTokenClient {
     private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
 
     public String generateToken(URL serverUrl, String userName, String password) throws CxRestClientException {
-        HttpPost postRequest = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildLoginURL(serverUrl)));
+        HttpPost postRequest = new HttpPost(String.valueOf(TokenResourceURIBuilder.buildGenerateTokenURL(serverUrl)));
         postRequest.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 
         HttpResponse generateTokenResponse = null;
@@ -51,7 +52,7 @@ public class CxRestTokenClient {
     }
 
     public void revokeToken(URL serverUrl, String token) throws CxRestClientException {
-        HttpPost postRequest = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildRevokeURL(serverUrl)));
+        HttpPost postRequest = new HttpPost(String.valueOf(TokenResourceURIBuilder.buildRevokeURL(serverUrl)));
         postRequest.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 
         HttpResponse generateTokenResponse = null;

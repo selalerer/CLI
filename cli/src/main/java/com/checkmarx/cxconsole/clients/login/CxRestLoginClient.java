@@ -1,12 +1,12 @@
 package com.checkmarx.cxconsole.clients.login;
 
+import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.dto.RestGetAccessTokenDTO;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clients.login.utils.LoginHttpEntityBuilder;
+import com.checkmarx.cxconsole.clients.login.utils.LoginResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
-import com.checkmarx.cxconsole.clientsold.rest.utils.RestResourcesURIBuilder;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
@@ -117,14 +117,14 @@ public class CxRestLoginClient {
         HttpResponse loginResponse = null;
         HttpPost loginPost = null;
         try {
-            loginPost = new HttpPost(String.valueOf(RestResourcesURIBuilder.buildCredentialsLoginURL(new URL(hostName))));
+            loginPost = new HttpPost(String.valueOf(LoginResourceURIBuilder.buildCredentialsLoginURL(new URL(hostName))));
             loginPost.setEntity(LoginHttpEntityBuilder.createLoginParamsEntity(username, password));
             //send login request
             loginResponse = apacheClient.execute(loginPost);
 
             //validate login response
-            RestClientUtils.validateTokenResponse(loginResponse, 200, "Fail to authenticate");
-        } catch (IOException | CxRestClientValidatorException e) {
+            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
+        } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with credentials: " + e.getMessage());
             throw new CxRestLoginClientException("Fail to login with credentials: " + e.getMessage());
         } finally {
@@ -150,7 +150,7 @@ public class CxRestLoginClient {
         HttpPost postRequest = null;
 
         try {
-            postRequest = new HttpPost(String.valueOf(RestResourcesURIBuilder.getAccessTokenURL(new URL(hostName))));
+            postRequest = new HttpPost(String.valueOf(LoginResourceURIBuilder.getAccessTokenURL(new URL(hostName))));
             postRequest.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
             postRequest.setEntity(TokenHttpEntityBuilder.createGetAccessTokenParamsEntity(refreshToken));
             getAccessTokenResponse = apacheClient.execute(postRequest);
@@ -159,7 +159,7 @@ public class CxRestLoginClient {
 
             RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(getAccessTokenResponse, RestGetAccessTokenDTO.class);
             accessToken = jsonResponse.getAccessToken();
-        } catch (IOException | CxRestClientValidatorException e) {
+        } catch (IOException | CxValidateResponseException e) {
             log.trace("Failed to get access token: " + e.getMessage());
             throw new CxRestLoginClientException("User authentication failed");
         } finally {

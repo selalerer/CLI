@@ -14,18 +14,10 @@ public class SastResourceURIBuilder {
 
     private static final String APPLICATION_NAME = "cxrestapi";
 
-    private static final String TEAMS_RESOURCE = "/auth/teams";
     private static final String PRESET_RESOURCE = "/sast/presets";
-    private static final String ENGINE_CONFIGURATION_RESOURCE = "sast/engineConfigurations";
+    private static final String ENGINE_CONFIGURATION_RESOURCE = "/sast/engineConfigurations";
+    private static final String SCAN_SETTING_RESOURCE = "/sast/scanSettings";
     private static final String SYSTEM_CONFIGURATION_RESOURCE = "/Configurations/systemSettings";
-
-    public static URL buildGetTeamsURL(URL serverUrl) {
-        try {
-            return new URL(serverUrl, APPLICATION_NAME + TEAMS_RESOURCE);
-        } catch (MalformedURLException e) {
-            return serverUrl;
-        }
-    }
 
     public static URL buildGetSastPresetsURL(URL serverUrl) {
         try {
@@ -43,6 +35,21 @@ public class SastResourceURIBuilder {
         }
     }
 
+    public static URL buildGetSASTScanSettingURL(URL serverUrl, int projectId) {
+        try {
+            return new URL(buildSASTScanSettingURL(serverUrl) +  "/" + projectId);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildSASTScanSettingURL(URL serverUrl) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + SCAN_SETTING_RESOURCE );
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
 
 
 }

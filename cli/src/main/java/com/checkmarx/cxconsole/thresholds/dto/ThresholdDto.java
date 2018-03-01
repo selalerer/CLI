@@ -1,13 +1,9 @@
 package com.checkmarx.cxconsole.thresholds.dto;
 
+import com.checkmarx.cxconsole.constants.ScanType;
 import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 
 public class ThresholdDto {
-
-    public enum ScanType {
-        OSA_SCAN,
-        SAST_SCAN
-    }
 
     private ScanType scanType;
 

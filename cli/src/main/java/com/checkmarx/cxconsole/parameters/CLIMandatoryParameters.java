@@ -1,6 +1,7 @@
 package com.checkmarx.cxconsole.parameters;
 
-import com.checkmarx.cxconsole.clients.sast.dto.TeamDTO;
+import com.checkmarx.cxconsole.clients.general.dto.ProjectDTO;
+import com.checkmarx.cxconsole.clients.general.dto.TeamDTO;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -24,7 +25,8 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
     private String token;
     private String projectName;
     private String projectNameWithTeamPath;
-    private TeamDTO teamPath;
+    private ProjectDTO project;
+    private TeamDTO team;
     private String srcPath;
     private String folderProjectName;
     private boolean hasPasswordParam = false;
@@ -58,7 +60,8 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
 
         projectNameWithTeamPath = parsedCommandLineArguments.getOptionValue(PARAM_PROJECT_NAME.getOpt()).replaceAll("/", "\\\\");
         projectName = extractProjectName(projectNameWithTeamPath);
-        teamPath = extractTeamPath(projectNameWithTeamPath);
+        team = extractTeamPath(projectNameWithTeamPath);
+        project = new ProjectDTO(projectName);
     }
 
     private String extractProjectName(String projectNameWithFullPath) {
@@ -72,10 +75,15 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
 
     private TeamDTO extractTeamPath(String projectNameWithFullPath) {
         String[] pathParts = projectNameWithFullPath.split("\\\\");
+        String team;
         if ((pathParts.length <= 0)) {
             return null;
         } else {
-            return new TeamDTO(projectNameWithFullPath.replace("\\" + projectName, ""));
+            team = projectNameWithFullPath.replace("\\" + projectName, "");
+            if (!team.startsWith("\\")) {
+                team = "\\" + team;
+            }
+            return new TeamDTO(team);
         }
     }
 
@@ -100,12 +108,8 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         return token;
     }
 
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public String getProjectNameWithTeamPath() {
-        return projectNameWithTeamPath;
+    public ProjectDTO getProject() {
+        return project;
     }
 
     public String getFolderProjectName() {
@@ -137,7 +141,7 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
     }
 
     public TeamDTO getTeam() {
-        return teamPath;
+        return team;
     }
 
     @Override

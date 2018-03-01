@@ -88,7 +88,7 @@ public class CxConsoleLauncher {
             cliScanParametersSingleton = CLIScanParametersSingleton.getCLIScanParameter();
             command = CommandFactory.getCommand(commandName, cliScanParametersSingleton);
             command.checkParameters();
-            log.trace("Parameters were checked successfully");
+            log.info("Command line parameters were checked successfully");
         } catch (CLICommandParameterValidatorException e) {
             command.printHelp();
             log.fatal(INVALID_COMMAND_PARAMETERS_MSG + e.getMessage() + "\n");

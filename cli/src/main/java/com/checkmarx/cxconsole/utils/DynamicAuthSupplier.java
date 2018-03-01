@@ -1,4 +1,4 @@
-package com.checkmarx.cxconsole.clients.login.utils;
+package com.checkmarx.cxconsole.utils;
 
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.message.Message;

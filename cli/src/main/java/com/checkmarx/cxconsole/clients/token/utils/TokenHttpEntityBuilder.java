@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.clients.token.utils;
 
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.StringEntity;

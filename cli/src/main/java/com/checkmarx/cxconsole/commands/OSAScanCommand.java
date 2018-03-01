@@ -46,7 +46,7 @@ class OSAScanCommand extends CLICommand {
                 exitCode = future.get();
             }
         } catch (Exception e) {
-            log.error("Error executing OSA scan command: " + e.getMessage());
+            log.trace("Error executing OSA scan command: " + e.getMessage());
             throw new CLICommandException("Error executing OSA scan command: " + e.getMessage());
         }
         return exitCode;

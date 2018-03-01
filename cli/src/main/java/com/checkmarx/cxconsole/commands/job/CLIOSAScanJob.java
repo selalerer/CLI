@@ -1,7 +1,9 @@
 package com.checkmarx.cxconsole.commands.job;
 
+import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
+import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
+import com.checkmarx.cxconsole.clients.osa.CxRestOSAClient;
 import com.checkmarx.cxconsole.clients.osa.OSAConsoleScanWaitHandler;
-import com.checkmarx.cxconsole.clients.osa.client.CxRestOSAClient;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanResponse;
 import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
@@ -12,11 +14,11 @@ import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
+import com.checkmarx.cxconsole.constants.ScanType;
 import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
@@ -29,11 +31,8 @@ import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresh
  */
 public class CLIOSAScanJob extends CLIScanJob {
 
-    private static Logger log = Logger.getLogger(CLIOSAScanJob.class);
-
     private static final String OSA_REPORT_NAME = "CxOSAReport";
     private CxRestOSAClient cxRestOSAClient;
-    private CxSoapSASTClient cxSoapSASTClient;
 
     public CLIOSAScanJob(CLIScanParametersSingleton params, boolean isAsyncScan) {
         super(params, isAsyncScan);
@@ -44,30 +43,31 @@ public class CLIOSAScanJob extends CLIScanJob {
         OSASummaryResults osaSummaryResults;
         CLIOSAParameters cliosaParameters = params.getCliOsaParameters();
         try {
-            log.info("Project name is \"" + params.getCliMandatoryParameters().getProjectName() + "\"");
+            log.info("Project name is \"" + params.getCliMandatoryParameters().getProject().getName() + "\"");
 
             // Connect to Checkmarx service, if not already connected.
             if (!cxRestLoginClient.isLoggedIn()) {
-                super.restLogin();
+                super.login();
             }
             cxRestOSAClient = new CxRestOSAClient(cxRestLoginClient);
-//            if (this.cxSoapLoginClient.getSessionId() == null ) {
-//                super.soapLogin();
-//                sessionId = cxSoapLoginClient.getSessionId();
-//            }
-//            cxSoapSASTClient = new CxSoapSASTClient(this.cxSoapLoginClient.getCxSoapClient());
+            try {
+                ScanPrerequisitesValidator scanPrerequisitesValidator = new ScanPrerequisitesValidator(cxRestGeneralClient,
+                        params.getCliMandatoryParameters().getTeam(), params.getCliMandatoryParameters().getProject());
+            } catch (CxScanPrerequisitesValidatorException e) {
+//                log.error("Failed to initialize OSA scan prerequisites: " + e.getMessage());
+                throw new CLIJobException("Failed to initialize OSA scan prerequisites: " + e.getMessage());
+            }
 
             //Request osa Scan
             log.info("Request OSA scan");
-
-//            long projectId = locateProjectOnServer();
 
             String[] osaLocationPath = cliosaParameters.getOsaLocationPath() != null ? cliosaParameters.getOsaLocationPath() : new String[]{params.getCliSharedParameters().getLocationPath()};
             log.info("Setting up OSA analysis request");
             log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
             CreateOSAScanRequest osaScanRequest;
             log.debug("    #############################################  Starting FSA    ###########################################    ");
-            osaScanRequest = OsaWSFSAUtil.createOsaScanRequest(projectId, osaLocationPath, cliosaParameters);
+            osaScanRequest = OsaWSFSAUtil.createOsaScanRequest(params.getCliMandatoryParameters().getProject().getId(),
+                    osaLocationPath, cliosaParameters);
             log.debug("    #############################################  Finished FSA   ###########################################    ");
 
             log.info("Sending OSA scan request");
@@ -78,7 +78,8 @@ public class CLIOSAScanJob extends CLIScanJob {
                 log.error("Error create OSA scan: " + e.getMessage());
                 throw new CLIJobException("Error create OSA scan: " + e.getMessage());
             }
-            String osaProjectSummaryLink = OsaWSFSAUtil.composeProjectOSASummaryLink(params.getCliMandatoryParameters().getOriginalHost(), projectId);
+            String osaProjectSummaryLink = OsaWSFSAUtil.composeProjectOSASummaryLink(params.getCliMandatoryParameters().getOriginalHost(),
+                    params.getCliMandatoryParameters().getProject().getId());
             log.info("OSA scan created successfully");
 
             if (isAsyncScan) {
@@ -121,7 +122,7 @@ public class CLIOSAScanJob extends CLIScanJob {
 
                         //OSA json reports
                         if (jsonFile != null) {
-                            String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProjectName(), "JSON", jsonFile, "", workDirectory);
+                            String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProject().getName(), "JSON", jsonFile, "", workDirectory);
                             cxRestOSAClient.createOsaJson(osaScan.getScanId(), resultFilePath, osaSummaryResults);
                         }
                     }
@@ -132,7 +133,7 @@ public class CLIOSAScanJob extends CLIScanJob {
 
                 //Osa threshold calculation
                 if (cliosaParameters.isOsaThresholdEnabled()) {
-                    ThresholdDto thresholdDto = new ThresholdDto(ThresholdDto.ScanType.OSA_SCAN, cliosaParameters.getOsaHighThresholdValue(), cliosaParameters.getOsaMediumThresholdValue(),
+                    ThresholdDto thresholdDto = new ThresholdDto(ScanType.OSA_SCAN, cliosaParameters.getOsaHighThresholdValue(), cliosaParameters.getOsaMediumThresholdValue(),
                             cliosaParameters.getOsaLowThresholdValue(), osaSummaryResults.getTotalHighVulnerabilities(),
                             osaSummaryResults.getTotalMediumVulnerabilities(), osaSummaryResults.getTotalLowVulnerabilities());
                     return resolveThresholdExitCode(thresholdDto);
@@ -152,20 +153,4 @@ public class CLIOSAScanJob extends CLIScanJob {
         return SCAN_SUCCEEDED_EXIT_CODE;
     }
 
-//    private long locateProjectOnServer() throws CLIJobException {
-//        CxWSResponseProjectsDisplayData projectData;
-//        try {
-//            projectData = cxSoapSASTClient.getProjectsDisplayData(sessionId);
-//            for (ProjectDisplayData data : projectData.getProjectList().getProjectDisplayData()) {
-//                String projectFullName = data.getGroup() + "\\" + data.getProjectName();
-//                if (projectFullName.equalsIgnoreCase(params.getCliMandatoryParameters().getProjectNameWithTeamPath())) {
-//                    return data.getProjectID();
-//                }
-//            }
-//        } catch (CxSoapClientValidatorException e) {
-//            throw new CLIJobException("The project: " + params.getCliMandatoryParameters().getProjectNameWithTeamPath() + " was not found on the server. OSA scan requires an existing project on the server");
-//        }
-//
-//        throw new CLIJobException("The project: " + params.getCliMandatoryParameters().getProjectNameWithTeamPath() + " was not found on the server. OSA scan requires an existing project on the server");
-//    }
 }

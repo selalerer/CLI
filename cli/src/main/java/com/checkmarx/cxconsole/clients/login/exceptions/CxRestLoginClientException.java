@@ -1,6 +1,6 @@
 package com.checkmarx.cxconsole.clients.login.exceptions;
 
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 
 /**
  * Created by: Dorg.

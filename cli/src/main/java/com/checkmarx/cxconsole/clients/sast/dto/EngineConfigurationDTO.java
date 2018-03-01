@@ -5,7 +5,7 @@ package com.checkmarx.cxconsole.clients.sast.dto;
  */
 public class EngineConfigurationDTO {
 
-    private String id;
+    private int id;
 
     private String name;
 
@@ -16,11 +16,11 @@ public class EngineConfigurationDTO {
         this.name = name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

@@ -1,4 +1,4 @@
-package com.checkmarx.cxconsole.clients.sast.dto;
+package com.checkmarx.cxconsole.clients.general.dto;
 
 /**
  * Created by nirli on 25/02/2018.

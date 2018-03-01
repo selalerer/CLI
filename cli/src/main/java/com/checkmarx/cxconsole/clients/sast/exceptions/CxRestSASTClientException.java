@@ -1,6 +1,6 @@
 package com.checkmarx.cxconsole.clients.sast.exceptions;
 
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 
 /**
  * Created by nirli on 25/02/2018.

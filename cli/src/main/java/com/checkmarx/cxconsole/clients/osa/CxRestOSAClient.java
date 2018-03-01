@@ -1,14 +1,13 @@
-package com.checkmarx.cxconsole.clients.osa.client;
+package com.checkmarx.cxconsole.clients.osa;
 
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
+import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
-import com.checkmarx.cxconsole.clients.osa.ScanWaitHandler;
 import com.checkmarx.cxconsole.clients.osa.dto.*;
 import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaResourcesURIBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientException;
-import com.checkmarx.cxconsole.clientsold.rest.exceptions.CxRestClientValidatorException;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -64,7 +63,7 @@ public class CxRestOSAClient {
             //send scan request
             response = apacheClient.execute(post);
             //verify scan request
-            RestClientUtils.validateTokenResponse(response, 201, "Fail to create OSA scan");
+            RestClientUtils.validateClientResponse(response, 201, "Fail to create OSA scan");
 
             //extract response as object and return the link
             return parseJsonFromResponse(response, CreateOSAScanResponse.class);
@@ -86,10 +85,10 @@ public class CxRestOSAClient {
         try {
             getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateTokenResponse(response, 200, "fail get OSA scan summary results");
+            RestClientUtils.validateClientResponse(response, 200, "fail get OSA scan summary results");
 
             return parseJsonFromResponse(response, OSASummaryResults.class);
-        } catch (IOException | CxRestClientValidatorException e) {
+        } catch (IOException | CxValidateResponseException e) {
             log.error("Failed to get OSA scan summary results: " + e.getMessage());
             throw new CxRestOSAClientException("Failed to get OSA scan summary results: " + e.getMessage());
         } finally {
@@ -112,7 +111,8 @@ public class CxRestOSAClient {
             List<CVE> osaVulnerabilities = getOSAVulnerabilities(scanId);
             specificFilePath = filePath.replace(JSON_FILE, "_" + OSA_VULNERABILITIES_NAME + JSON_FILE);
             writeReport(osaVulnerabilities, specificFilePath, "vulnerabilities json");
-        } catch (IOException | CxRestClientValidatorException e) {
+        } catch (IOException e) {
+            log.error("Failed to create OSA JSON report: " + e.getMessage());
             throw new CxRestOSAClientException("Failed to create OSA JSON report: " + e.getMessage());
         }
     }
@@ -133,30 +133,42 @@ public class CxRestOSAClient {
         log.info("OSA " + toLog + " location: " + file.getAbsolutePath());
     }
 
-    private List<Library> getOSALibraries(String scanId) throws IOException, CxRestClientValidatorException {
-        HttpGet getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanLibrariesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
+    private List<Library> getOSALibraries(String scanId) throws CxRestOSAClientException {
         HttpResponse response = null;
+        HttpGet getRequest = null;
         try {
+            getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanLibrariesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA libraries");
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get OSA libraries");
 
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, Library.class));
+        } catch (IOException | CxValidateResponseException e) {
+            log.error("Failed to get OSA libraries: " + e.getMessage());
+            throw new CxRestOSAClientException("Failed to get OSA libraries: " + e.getMessage());
         } finally {
-            getRequest.releaseConnection();
+            if (getRequest != null) {
+                getRequest.releaseConnection();
+            }
             HttpClientUtils.closeQuietly(response);
         }
     }
 
-    private List<CVE> getOSAVulnerabilities(String scanId) throws IOException, CxRestClientValidatorException {
-        HttpGet getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanVulnerabilitiesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
+    private List<CVE> getOSAVulnerabilities(String scanId) throws CxRestOSAClientException {
         HttpResponse response = null;
+        HttpGet getRequest = null;
         try {
+            getRequest = createHttpRequest(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanVulnerabilitiesResultsURL(new URL(hostName), scanId)), MediaType.APPLICATION_JSON);
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA vulnerabilities");
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get OSA vulnerabilities");
 
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, CVE.class));
+        } catch (IOException | CxValidateResponseException e) {
+            log.error("Failed to get OSA vulnerabilities: " + e.getMessage());
+            throw new CxRestOSAClientException("Failed to get OSA vulnerabilities: " + e.getMessage());
         } finally {
-            getRequest.releaseConnection();
+            if (getRequest != null) {
+                getRequest.releaseConnection();
+            }
             HttpClientUtils.closeQuietly(response);
         }
     }
@@ -167,17 +179,18 @@ public class CxRestOSAClient {
         return getRequest;
     }
 
-    private OSAScanStatus getOSAScanStatus(String scanId) throws CxRestOSAClientException, CxRestClientValidatorException {
+    private OSAScanStatus getOSAScanStatus(String scanId) throws CxRestOSAClientException {
         HttpResponse response = null;
         HttpGet getRequest = null;
 
         try {
             getRequest = new HttpGet(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanStatusURL(new URL(hostName), scanId)));
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateTokenResponse(response, 200, "Failed to get OSA scan status");
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get OSA scan status");
 
             return parseJsonFromResponse(response, OSAScanStatus.class);
-        } catch (IOException e) {
+        } catch (IOException | CxValidateResponseException e) {
+            log.error("Failed to get OSA scan status: " + e.getMessage());
             throw new CxRestOSAClientException("Failed to get OSA scan status: " + e.getMessage());
         } finally {
             if (getRequest != null) {
@@ -246,5 +259,10 @@ public class CxRestOSAClient {
         }
 
         return retry;
+    }
+
+
+    public HttpClient getApacheClient() {
+        return apacheClient;
     }
 }

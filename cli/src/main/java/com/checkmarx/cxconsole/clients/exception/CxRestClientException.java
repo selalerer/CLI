@@ -1,4 +1,4 @@
-package com.checkmarx.cxconsole.clientsold.rest.exceptions;
+package com.checkmarx.cxconsole.clients.exception;
 
 /**
  * Created by nirli on 25/10/2017.

@@ -1,13 +1,11 @@
 package com.checkmarx.cxconsole.commands.job;
 
+import com.checkmarx.cxconsole.clients.general.CxRestGeneralClient;
+import com.checkmarx.cxconsole.clients.general.CxRestGeneralClientImpl;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
-import com.checkmarx.cxconsole.clientsold.soap.login.CxSoapLoginClient;
-import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableOperation;
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableRESTLogin;
-import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableSOAPLogin;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
@@ -17,8 +15,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.concurrent.Callable;
 
 /**
@@ -26,12 +22,11 @@ import java.util.concurrent.Callable;
  */
 public abstract class CLIScanJob implements Callable<Integer> {
 
-    private static Logger log = Logger.getLogger(CLIScanJob.class);
+    protected static Logger log = Logger.getLogger(CLIScanJob.class);
 
     CxRestLoginClient cxRestLoginClient;
+    CxRestGeneralClient cxRestGeneralClient;
     boolean isAsyncScan;
-//    CxSoapLoginClient cxSoapLoginClient = ConfigMgr.getWSMgr();
-//    String sessionId;
 
     private String errorMsg;
     protected CLIScanParametersSingleton params;
@@ -42,32 +37,10 @@ public abstract class CLIScanJob implements Callable<Integer> {
         cxRestLoginClient = ConfigMgr.getRestWSMgr(this.params);
     }
 
-//    void soapLogin() throws CLIJobException {
-//        final RetryableOperation login = new RetryableSOAPLogin(params, cxSoapLoginClient);
-//        login.run();
-//        sessionId = cxSoapLoginClient.getSessionId();
-//        errorMsg = login.getError();
-//        if (errorMsg != null) {
-//            throw new CLIJobException(errorMsg);
-//        }
-//    }
-
-    void restLogin() throws CLIJobException {
+    void login() throws CLIJobException {
         final RetryableOperation login = new RetryableRESTLogin(params, cxRestLoginClient);
         login.run();
-
-//        sessionId = cxSoapLoginClient.getSessionId();
-//        if (cxSoapLoginClient.getCxSoapClient() == null) {
-//            URL wsdlLocation;
-//            cxSoapLoginClient = ConfigMgr.getWSMgr();
-//            try {
-//                wsdlLocation = new URL(SoapClientUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
-//                cxSoapLoginClient.initSoapClient(wsdlLocation);
-//            } catch (MalformedURLException | CxSoapLoginClientException e) {
-//                log.error("Error initialize SOAP SAST client: " + e.getMessage());
-//                throw new CLIJobException("Error initialize SOAP SAST client: " + e.getMessage());
-//            }
-//        }
+        cxRestGeneralClient = new CxRestGeneralClientImpl(cxRestLoginClient);
     }
 
     void storeXMLResults(String fileName, byte[] resultBytes) throws CLIJobException {
@@ -82,7 +55,7 @@ public abstract class CLIScanJob implements Callable<Integer> {
 
     private File initFile(String fileName) throws CLIJobException {
         String folderPath = JobUtils.gerWorkDirectory(params);
-        String resultFilePath = PathHandler.initFilePath(params.getCliMandatoryParameters().getProjectName(), fileName, ".xml", folderPath);
+        String resultFilePath = PathHandler.initFilePath(params.getCliMandatoryParameters().getProject().getName(), fileName, ".xml", folderPath);
         return new File(resultFilePath);
     }
 

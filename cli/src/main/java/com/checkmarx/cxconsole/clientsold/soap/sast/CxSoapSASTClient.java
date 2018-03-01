@@ -80,7 +80,7 @@ public class CxSoapSASTClient {
         args.setIsPrivateScan(!parameters.getCliSharedParameters().isVisibleOthers());
         args.setIgnoreScanWithUnchangedCode(parameters.getCliSastParameters().isForceScan());
         ProjectSettings projectSettings = new ProjectSettings();
-        projectSettings.setProjectName(parameters.getCliMandatoryParameters().getProjectNameWithTeamPath());
+//        projectSettings.setProjectName(parameters.getCliMandatoryParameters().getProjectNameWithTeamPath());
         projectSettings.setPresetID(presetId);
         projectSettings.setScanConfigurationID(configId);
 

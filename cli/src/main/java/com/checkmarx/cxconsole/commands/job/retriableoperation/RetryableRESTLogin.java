@@ -23,7 +23,7 @@ public class RetryableRESTLogin extends RetryableOperation {
 
     @Override
     protected void operation() throws CLIJobException {
-        log.info("Logging into the Checkmarx service.");
+        log.info("Logging into Checkmarx server.");
 
         // Login
         try {
@@ -40,7 +40,7 @@ public class RetryableRESTLogin extends RetryableOperation {
             throw new CLIJobException("Unsuccessful login.");
         }
 
-        log.trace("Login was completed successfully");
+        log.info("Login was completed successfully");
         finished = true;
     }
 
