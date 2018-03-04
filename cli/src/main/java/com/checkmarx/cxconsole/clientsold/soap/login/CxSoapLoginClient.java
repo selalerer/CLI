@@ -2,9 +2,9 @@ package com.checkmarx.cxconsole.clientsold.soap.login;
 
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.commands.utils.CommandUtils;
 import com.checkmarx.cxconsole.utils.CXFConfigurationUtils;
 import com.checkmarx.cxconsole.utils.DynamicAuthSupplier;
-import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.Credentials;
 import com.checkmarx.cxviewer.ws.generated.CxCLIWebServiceV1;
@@ -56,7 +56,7 @@ public class CxSoapLoginClient {
 
         CxWSResponseLoginData response = cxSoapClient.login(credentials, 1033);
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             log.fatal("Failed to login :" + response.getErrorMessage());
             throw new CxSoapLoginClientException("Failed to login: " + response.getErrorMessage());
@@ -73,7 +73,7 @@ public class CxSoapLoginClient {
 
         CxWSResponseLoginData response = cxSoapClient.ssoLogin(credentials, 1033);
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             log.fatal("Failed to login :" + response.getErrorMessage());
             throw new CxSoapLoginClientException("Failed to login: " + response.getErrorMessage());

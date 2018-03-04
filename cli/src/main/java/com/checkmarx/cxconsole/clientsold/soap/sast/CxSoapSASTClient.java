@@ -2,7 +2,7 @@ package com.checkmarx.cxconsole.clientsold.soap.sast;
 
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.sast.exceptions.CxSoapSASTClientException;
-import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
+import com.checkmarx.cxconsole.commands.utils.CommandUtils;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.*;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
@@ -37,7 +37,7 @@ public class CxSoapSASTClient {
         CxWSBasicRepsonse response = cxSoapClient.updateScanComment(sessionID, scanID, comment);
 
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             throw new CxSoapClientValidatorException("Error retrieve comment update response from server: " + e.getMessage());
         }
@@ -50,7 +50,7 @@ public class CxSoapSASTClient {
         CxWSResponseProjectsDisplayData response = cxSoapClient.getProjectsDisplayData(sessionId);
 
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             throw new CxSoapClientValidatorException("Error retrieve project display data from server: " + e.getMessage());
         }
@@ -63,7 +63,7 @@ public class CxSoapSASTClient {
         CxWSResponseProjectConfig response = cxSoapClient.getProjectConfiguration(sessionId, projectId);
 
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             log.error("Error retrieve configuration from server: " + e.getMessage());
             throw new CxSoapClientValidatorException("Error retrieve configuration from server: " + e.getMessage());
@@ -168,7 +168,7 @@ public class CxSoapSASTClient {
 
         CxWSResponseRunID response = cxSoapClient.scan(sessionId, args);
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             throw new CxSoapSASTClientException("Error scanning project: " + e.getMessage());
         }
@@ -187,7 +187,7 @@ public class CxSoapSASTClient {
         CxWSResponseScanStatus response = cxSoapClient.getStatusOfSingleScan(sessionId, runId);
 
         try {
-            SoapClientUtils.validateResponse(response);
+            CommandUtils.validateResponse(response);
         } catch (CxSoapClientValidatorException e) {
             throw new CxSoapSASTClientException("Error retrieving scan status from server: " + e.getMessage());
         }

@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils.resolveServerProtocol;
+import static com.checkmarx.cxconsole.commands.utils.CommandUtils.resolveServerProtocol;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ErrorMassages.SERVER_CONNECTIVITY_VALIDATION_ERROR;
 import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 

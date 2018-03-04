@@ -2,9 +2,9 @@ package com.checkmarx.cxconsole.commands.job.retriableoperation;
 
 import com.checkmarx.cxconsole.clientsold.soap.login.CxSoapLoginClient;
 import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
-import com.checkmarx.cxconsole.clientsold.soap.utils.SoapClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
+import com.checkmarx.cxconsole.commands.utils.CommandUtils;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxviewer.ws.generated.CxWSResponseLoginData;
 import org.apache.log4j.Logger;
@@ -30,7 +30,7 @@ public class RetryableSOAPLogin extends RetryableOperation {
     @Override
     protected void operation() throws CLIJobException {
         try {
-            URL wsdlLocation = new URL(SoapClientUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
+            URL wsdlLocation = new URL(CommandUtils.buildHostWithWSDL(params.getCliMandatoryParameters().getOriginalHost()));
             cxSoapLoginClient.initSoapClient(wsdlLocation);
         } catch (CxSoapLoginClientException | MalformedURLException e) {
             throw new CLIJobException(e.getMessage());

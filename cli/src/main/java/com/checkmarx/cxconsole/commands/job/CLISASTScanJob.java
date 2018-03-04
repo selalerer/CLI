@@ -1,7 +1,6 @@
 package com.checkmarx.cxconsole.commands.job;
 
-import com.checkmarx.components.zipper.ZipListener;
-import com.checkmarx.components.zipper.Zipper;
+import com.checkmarx.cxconsole.clients.general.dto.ProjectDTO;
 import com.checkmarx.cxconsole.clients.general.exception.CxRestGeneralClientException;
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
@@ -13,16 +12,12 @@ import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
+import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,7 +35,6 @@ public class CLISASTScanJob extends CLIScanJob {
     private EngineConfigurationDTO selectedConfiguration;
     private CxRestSASTClientImpl cxRestSASTClient;
 
-    private byte[] zippedSourcesBytes;
     private String runId;
     private SourceLocationType sourceLocationType;
     private RepositoryType repoType;
@@ -65,29 +59,27 @@ public class CLISASTScanJob extends CLIScanJob {
             throw new CLIJobException("Failed to initialize SAST scan prerequisites: " + e.getMessage());
         }
 
-        ScanSettingDTO scanSetting;
         try {
             if (!scanPrerequisitesValidator.isProjectExists()) {
-                cxRestGeneralClient.createNewProject(cliMandatoryParameters.getProject());
-                log.info("New project was created successfully");
-                log.trace("New project id= " + cliMandatoryParameters.getProject().getId());
-                scanSetting = new ScanSettingDTO();
-                scanSetting.setProjectId(cliMandatoryParameters.getProject().getId());
-                scanSetting.setPresetId(params.getCliSastParameters().getPreset().getId());
-                scanSetting.setEngineConfigurationId(params.getCliSastParameters().getConfiguration().getId());
-                cxRestSASTClient.createProjectScanSetting(scanSetting);
+                createNewSastProject(params.getCliMandatoryParameters().getProject());
             } else {
-                scanSetting = cxRestSASTClient.getProjectScanSetting(cliMandatoryParameters.getProject().getId());
-                scanSetting.setPresetId(params.getCliSastParameters().getPreset().getId());
-                scanSetting.setEngineConfigurationId(params.getCliSastParameters().getConfiguration().getId());
-                cxRestSASTClient.updateProjectScanSetting(scanSetting);
+                updateExistingSastProject(params.getCliMandatoryParameters().getProject());
             }
         } catch (CxRestGeneralClientException | CxRestSASTClientException e) {
             throw new CLIJobException(e);
         }
 
+        //If location is local folder -> zipping the sources taking into consideration excluded folders\files
+        if (params.getCliSharedParameters().getLocationType() == FOLDER) {
+            long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_MAX_ZIP_SIZE);
+            maxZipSize *= (1024 * 1024);
+            if (!FilesUtils.zipFolder(params.getCliSharedParameters(), params.getCliSastParameters(), maxZipSize)) {
+                throw new CLIJobException("Error during packing sources.");
+            }
+            FilesUtils.validateZippedSources(maxZipSize);
+        }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////untouched/////////////////////////////////////////////////////////////
 
 
         if (projectConfig != null && !projectConfig.getProjectConfig().getSourceCodeSettings().getSourceOrigin().equals(SourceLocationType.LOCAL)) {
@@ -98,26 +90,6 @@ public class CLISASTScanJob extends CLIScanJob {
             }
         }
 
-        if (params.getCliSharedParameters().getLocationType() == FOLDER) {
-            long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_MAX_ZIP_SIZE);
-            maxZipSize *= (1024 * 1024);
-            if (!packFolder(maxZipSize)) {
-                throw new CLIJobException("Error during packing sources.");
-            }
-
-            // check packed sources size
-            if (zippedSourcesBytes == null || zippedSourcesBytes.length == 0) {
-                // if size is greater that restricted value, stop scan
-                log.error("Packing sources has failed: empty packed source ");
-                throw new CLIJobException("Packing sources has failed: empty packed source ");
-            }
-
-            if (zippedSourcesBytes.length > maxZipSize) {
-                // if size greater that restricted value, stop scan
-                log.error("Packed project size is greater than " + maxZipSize);
-                throw new CLIJobException("Packed project size is greater than " + maxZipSize);
-            }
-        }
 
         // request scan
         log.info("Request SAST scan");
@@ -207,6 +179,24 @@ public class CLISASTScanJob extends CLIScanJob {
         return SCAN_SUCCEEDED_EXIT_CODE;
     }
 
+    private void updateExistingSastProject(ProjectDTO project) throws CxRestSASTClientException {
+        ScanSettingDTO scanSetting = cxRestSASTClient.getProjectScanSetting(project.getId());
+        scanSetting.setPresetId(params.getCliSastParameters().getPreset().getId());
+        scanSetting.setEngineConfigurationId(params.getCliSastParameters().getConfiguration().getId());
+        cxRestSASTClient.updateProjectScanSetting(scanSetting);
+    }
+
+    private void createNewSastProject(ProjectDTO project) throws CxRestSASTClientException, CxRestGeneralClientException {
+        cxRestGeneralClient.createNewProject(project);
+        log.info("New project was created successfully");
+        log.trace("New project id= " + project.getId());
+        ScanSettingDTO scanSetting = new ScanSettingDTO();
+        scanSetting.setProjectId(project.getId());
+        scanSetting.setPresetId(params.getCliSastParameters().getPreset().getId());
+        scanSetting.setEngineConfigurationId(params.getCliSastParameters().getConfiguration().getId());
+        cxRestSASTClient.createProjectScanSetting(scanSetting);
+    }
+
     private void requestScan(String sessionId) throws CLIJobException {
         int retriesNum = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.KEY_RETIRES);
         CxWSResponseRunID runScanResult = null;
@@ -288,73 +278,5 @@ public class CLISASTScanJob extends CLIScanJob {
         }
 
         return null;
-    }
-
-    private boolean packFolder(long maxZipSize) {
-        if (!isProjectDirectoryValid()) {
-            return false;
-        }
-        try {
-            Zipper zipper = new Zipper();
-            String[] excludePatterns = createExcludePatternsArray();
-            String[] includeAllPatterns = new String[]{"**/*"};//the default is to include all files
-            ZipListener zipListener = new ZipListener() {
-                @Override
-                public void updateProgress(String fileName, long size) {
-                    log.debug("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
-                }
-            };
-            zippedSourcesBytes = zipper.zip(new File(params.getCliSharedParameters().getLocationPath()), excludePatterns, includeAllPatterns, maxZipSize, zipListener);
-
-        } catch (Exception e) {
-            log.trace(e);
-            log.error("Error occurred during zipping source files. Error message: " + e.getMessage());
-
-            return false;
-        }
-        return true;
-    }
-
-    private String[] createExcludePatternsArray() {
-        LinkedList<String> excludePatterns = new LinkedList<>();
-        try {
-            String defaultExcludedFolders = ConfigMgr.getCfgMgr().getProperty(ConfigMgr.KEY_EXCLUDED_FOLDERS);
-            for (String folder : StringUtils.split(defaultExcludedFolders, ",")) {
-                String trimmedPattern = folder.trim();
-                if (!Objects.equals(trimmedPattern, "")) {
-                    excludePatterns.add("**/" + trimmedPattern.replace('\\', '/') + "/**/*");
-                }
-            }
-
-            String defaultExcludedFiles = ConfigMgr.getCfgMgr().getProperty(ConfigMgr.KEY_EXCLUDED_FILES);
-            for (String file : StringUtils.split(defaultExcludedFiles, ",")) {
-                String trimmedPattern = file.trim();
-                if (!Objects.equals(trimmedPattern, "")) {
-                    excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
-                }
-            }
-
-            if (params.getCliSastParameters().isHasExcludedFoldersParam()) {
-                for (String folder : params.getCliSastParameters().getExcludedFolders()) {
-                    String trimmedPattern = folder.trim();
-                    if (!Objects.equals(trimmedPattern, "")) {
-                        excludePatterns.add("**/" + trimmedPattern.replace('\\', '/') + "/**/*");
-                    }
-                }
-            }
-
-            if (params.getCliSastParameters().isHasExcludedFilesParam()) {
-                for (String file : params.getCliSastParameters().getExcludedFiles()) {
-                    String trimmedPattern = file.trim();
-                    if (!Objects.equals(trimmedPattern, "")) {
-                        excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error occurred creation of exclude patterns");
-        }
-
-        return excludePatterns.toArray(new String[]{});
     }
 }

@@ -1,4 +1,4 @@
-package com.checkmarx.cxconsole.clientsold.soap.utils;
+package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.clientsold.soap.exceptions.CxSoapClientValidatorException;
 import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
@@ -8,26 +8,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Created by nirli on 29/10/2017.
+ * Created by nirli on 01/03/2018.
  */
-public class SoapClientUtils {
+public class CommandUtils {
 
-    private static final String CX_CLI_WEB_SERVICE_URL = "/cxwebinterface/CLI/CxCLIWebServiceV1.asmx";
     private static final int TIMEOUT_FOR_CX_SERVER_AVAILABILITY = 250;
-
-    private SoapClientUtils() {
-        throw new IllegalStateException("Utility class");
-    }
-
-    public static void validateResponse(CxWSBasicRepsonse responseObject) throws CxSoapClientValidatorException {
-        if (responseObject == null || !responseObject.isIsSuccesfull()) {
-            if (responseObject != null && responseObject.getErrorMessage() != null) {
-                throw new CxSoapClientValidatorException("Error validate response: " + responseObject.getErrorMessage());
-            } else if (responseObject == null) {
-                throw new CxSoapClientValidatorException("Error validate response: no response was recieved from the server.");
-            }
-        }
-    }
+    private static final String CX_CLI_WEB_SERVICE_URL = "/cxwebinterface/CLI/CxCLIWebServiceV1.asmx";
 
     public static String resolveServerProtocol(String originalHost) throws CxSoapLoginClientException {
         if (!originalHost.startsWith("http") && !originalHost.startsWith("https")) {
@@ -47,10 +33,6 @@ public class SoapClientUtils {
         }
     }
 
-    public static String buildHostWithWSDL(String host) {
-        return host + CX_CLI_WEB_SERVICE_URL;
-    }
-
     private static boolean isCxWebServiceAvailable(String host) {
         int responseCode;
         try {
@@ -64,7 +46,20 @@ public class SoapClientUtils {
             return false;
         }
 
-        return (responseCode != 404);
+        return (responseCode == 404);
     }
 
+    public static void validateResponse(CxWSBasicRepsonse responseObject) throws CxSoapClientValidatorException {
+        if (responseObject == null || !responseObject.isIsSuccesfull()) {
+            if (responseObject != null && responseObject.getErrorMessage() != null) {
+                throw new CxSoapClientValidatorException("Error validate response: " + responseObject.getErrorMessage());
+            } else if (responseObject == null) {
+                throw new CxSoapClientValidatorException("Error validate response: no response was recieved from the server.");
+            }
+        }
+    }
+
+    public static String buildHostWithWSDL(String host) {
+        return host + CX_CLI_WEB_SERVICE_URL;
+    }
 }

@@ -59,34 +59,6 @@ public abstract class CLIScanJob implements Callable<Integer> {
         return new File(resultFilePath);
     }
 
-    boolean isProjectDirectoryValid() {
-        File projectDir = new File(params.getCliSharedParameters().getLocationPath());
-        if (!projectDir.exists()) {
-            //if there is a semicolon separator, take the first path
-            String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
-            if (paths.length > 0) {
-                projectDir = new File(paths[0]);
-            }
-            if (projectDir.exists()) {
-                params.getCliSharedParameters().setLocationPath(paths[0]);
-            } else {
-                log.error("Project directory [" + params.getCliSharedParameters().getLocationPath()
-                        + "] does not exist.");
-
-                return false;
-            }
-        }
-
-        if (!projectDir.isDirectory()) {
-            log.error("Project path [" + params.getCliSharedParameters().getLocationPath()
-                    + "] should point to a directory.");
-
-            return false;
-        }
-
-        return true;
-    }
-
     @Override
     public abstract Integer call() throws CLIJobException;
 
