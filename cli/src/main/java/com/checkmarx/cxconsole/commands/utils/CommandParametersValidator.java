@@ -2,6 +2,8 @@ package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
+import com.checkmarx.parameters.CLIScanParametersSingleton;
+import org.apache.commons.lang.math.NumberUtils;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
 
@@ -203,6 +205,7 @@ public class CommandParametersValidator {
             throw new CLICommandParameterValidatorException("For OSA Scan with EnableOsa parameter, provide  locationPath  or locationType ( values: folder/shared)");
         }
 
+        validateScanDepthIsNumber(parameters);
         validateOsaDisabledReportsParams(parameters);
     }
 
@@ -331,4 +334,12 @@ public class CommandParametersValidator {
             log.info("OsaReportHTML parameter is not supported in this CLI version");
         }
     }
+
+    public static void validateScanDepthIsNumber(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
+        if (!NumberUtils.isNumber(parameters.getCliOsaParameters().getOsaScanDepth())) {
+            throw new CLICommandParameterValidatorException("OSA scan depth value is not a number");
+        }
+
+    }
+
 }

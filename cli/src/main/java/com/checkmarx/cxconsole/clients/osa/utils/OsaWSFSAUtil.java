@@ -79,11 +79,15 @@ public class OsaWSFSAUtil {
         }
 
         if ((stringType.equals(StringType.OSA_EXCLUDE_FILES) || stringType.equals(StringType.OSA_EXTRACTABLE_FILES) || stringType.equals(StringType.OSA_INCLUDE_FILES)) && !Objects.equals(strArr[0], "")) {
+            if (Objects.equals(strArr[0], "**/**")) {
+                return "**/**";
+            }
+
             for (String s : strArr) {
                 if (s.startsWith("*.")) {
                     builder.append("**/").append(s.trim()).append(" ");
                 } else {
-                    builder.append("**/*.").append(s.trim()).append(" ");
+                    builder.append("**/*").append(s.trim()).append(" ");
                 }
             }
         }
