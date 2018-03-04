@@ -20,12 +20,14 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
      */
     private Options commandLineOptions;
 
+    private static final int UNASSIGNED_VALUE = Integer.MAX_VALUE;
+
     private CLIMandatoryParameters cliMandatoryParameters;
 
     private boolean isOsaThresholdEnabled = false;
-    private int osaLowThresholdValue = Integer.MAX_VALUE;
-    private int osaMediumThresholdValue = Integer.MAX_VALUE;
-    private int osaHighThresholdValue = Integer.MAX_VALUE;
+    private int osaLowThresholdValue = UNASSIGNED_VALUE;
+    private int osaMediumThresholdValue = UNASSIGNED_VALUE;
+    private int osaHighThresholdValue = UNASSIGNED_VALUE;
     private static final String SPLIT_REGEX = "\\s*,\\s*";
 
     private String[] osaLocationPath = new String[]{};
@@ -93,19 +95,22 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
         }
 
-        if (osaExcludedFiles == null) {
+        if (!hasOsaExcludedFilesParam) {
             osaExcludedFiles = (ConfigMgr.getCfgMgr().getProperty(KEY_OSA_EXCLUDED_FILES)).split(SPLIT_REGEX);
-            cleanExtensionList(osaExcludedFiles);
         }
-        if (osaIncludedFiles == null) {
+        cleanExtensionList(osaExcludedFiles);
+
+        if (!hasOsaIncludedFilesParam) {
             osaIncludedFiles = (ConfigMgr.getCfgMgr().getProperty(KEY_OSA_INCLUDED_FILES)).split(SPLIT_REGEX);
-            cleanExtensionList(osaIncludedFiles);
         }
-        if (osaExtractableIncludeFiles == null) {
+        cleanExtensionList(osaIncludedFiles);
+
+        if (!hasOsaExtractableIncludeFilesParam) {
             osaExtractableIncludeFiles = (ConfigMgr.getCfgMgr().getProperty(KEY_OSA_EXTRACTABLE_INCLUDE_FILES)).split(SPLIT_REGEX);
-            cleanExtensionList(osaExtractableIncludeFiles);
         }
-        if (hasOsaExcludedFoldersParam) {
+        cleanExtensionList(osaExtractableIncludeFiles);
+
+        if (!hasOsaExcludedFoldersParam) {
             osaExcludedFolders = parsedCommandLineArguments.getOptionValues(PARAM_OSA_EXCLUDE_FOLDERS.getOpt());
         }
 

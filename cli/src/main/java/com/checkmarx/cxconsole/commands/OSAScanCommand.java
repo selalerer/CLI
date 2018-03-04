@@ -59,6 +59,7 @@ class OSAScanCommand extends CLICommand {
         CommandParametersValidator.validateOSAExtractableFiles(params);
         CommandParametersValidator.validateServiceProviderFolder(params);
         CommandParametersValidator.validateOsaDisabledReportsParams(params);
+        CommandParametersValidator.validateScanDepthIsNumber(params);
         if (isAsyncScan) {
             CommandParametersValidator.validateOSAAsyncScanParams(params);
         }

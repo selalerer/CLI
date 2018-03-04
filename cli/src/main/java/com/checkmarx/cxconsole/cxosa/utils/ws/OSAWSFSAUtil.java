@@ -87,7 +87,7 @@ public class OSAWSFSAUtil {
                 if (s.startsWith("*.")) {
                     builder.append("**/").append(s.trim()).append(" ");
                 } else {
-                    builder.append("**/*.").append(s.trim()).append(" ");
+                    builder.append("**/*").append(s.trim()).append(" ");
                 }
             }
         }
