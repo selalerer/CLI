@@ -102,7 +102,7 @@ public class CxSoapSASTClient {
             case LOCAL:
                 localCodeContainer = new LocalCodeContainer();
                 localCodeContainer.setZippedFile(fileBytes);
-                localCodeContainer.setFileName(parameters.getCliSharedParameters().getLocationPath());
+//                localCodeContainer.setFileName(parameters.getCliSharedParameters().getLocationPath());
                 srcCodeSettings.setPackagedCode(localCodeContainer);
                 break;
             case SHARED:
@@ -152,14 +152,14 @@ public class CxSoapSASTClient {
         if (generateScanPaths && parameters.getCliSharedParameters().getLocationPath() != null) {
             ArrayOfScanPath paths = new ArrayOfScanPath();
 
-            for (String lpath : parameters.getCliSharedParameters().getLocationPath().split(";")) {
-                ScanPath lscanPath = new ScanPath();
-                lscanPath.setPath(lpath);
-                lscanPath.setIncludeSubTree(false);
-
-                paths.getScanPath().add(lscanPath);
-
-            }
+//            for (String lpath : parameters.getCliSharedParameters().getLocationPath().split(";")) {
+//                ScanPath lscanPath = new ScanPath();
+//                lscanPath.setPath(lpath);
+//                lscanPath.setIncludeSubTree(false);
+//
+//                paths.getScanPath().add(lscanPath);
+//
+//            }
             srcCodeSettings.setPathList(paths);
         }
 

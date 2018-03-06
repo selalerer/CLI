@@ -1,18 +1,19 @@
 package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.components.zipper.ZipListener;
-import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.parameters.CLISASTParameters;
-import com.checkmarx.cxconsole.parameters.CLISharedParameters;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Created by nirli on 01/03/2018.
@@ -26,57 +27,65 @@ public class FilesUtils {
     private static Logger log = Logger.getLogger(FilesUtils.class);
 
     private static byte[] zippedSourcesBytes;
+    private static int numOfZippedFiles;
 
-    public static boolean zipFolder(CLISharedParameters cliSharedParameters, CLISASTParameters cliSastParameters, long maxZipSize) {
-        if (!isProjectDirectoryValid(cliSharedParameters)) {
-            return false;
+    public static void zipFolder(String location, CLISASTParameters cliSastParameters, long maxZipSize, FileOutputStream fileOutputStream) {
+        zippedSourcesBytes = null;
+        numOfZippedFiles = 0;
+        if (!isProjectDirectoryValid(location)) {
+            return;
         }
         try {
-            Zipper zipper = new Zipper();
+            log.info("Zipping files from: " + location + " Please wait");
             String[] excludePatterns = createExcludePatternsArray(cliSastParameters);
             String[] includeAllPatterns = new String[]{"**/*"};//the default is to include all files
             ZipListener zipListener = new ZipListener() {
+
                 @Override
                 public void updateProgress(String fileName, long size) {
-                    log.debug("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
+                    numOfZippedFiles++;
+                    log.trace("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
                 }
             };
-            zippedSourcesBytes = zipper.zip(new File(cliSharedParameters.getLocationPath()), excludePatterns, includeAllPatterns, maxZipSize, zipListener);
-
+            if (ZipUtils.getZipOutputStream() == null) {
+                ZipUtils.setZipOutputStream(new org.apache.tools.zip.ZipOutputStream(fileOutputStream));
+            }
+            ZipUtils.zip(new File(location), excludePatterns, includeAllPatterns, maxZipSize, zipListener);
+            log.info("Zipping complete with " + numOfZippedFiles + " files.");
         } catch (Exception e) {
             log.trace(e);
             log.error("Error occurred during zipping source files. Error message: " + e.getMessage());
-
-            return false;
         }
-        return true;
     }
 
-    private static boolean isProjectDirectoryValid(CLISharedParameters cliSharedParameters) {
-        File projectDir = new File(cliSharedParameters.getLocationPath());
-        if (!projectDir.exists()) {
-            //if there is a semicolon separator, take the first path
-            String[] paths = cliSharedParameters.getLocationPath().split(";");
-            if (paths.length > 0) {
-                projectDir = new File(paths[0]);
-            }
-            if (projectDir.exists()) {
-                cliSharedParameters.setLocationPath(paths[0]);
-            } else {
-                log.error("Project directory [" + cliSharedParameters.getLocationPath()
-                        + "] does not exist.");
+    public static void validateZippedSources(long maxZipSize) throws CLIJobException {
 
-                return false;
-            }
+        // check packed sources size
+        if (zippedSourcesBytes == null || zippedSourcesBytes.length == 0) {
+            // if size is greater that restricted value, stop scan
+            log.error("Packing sources has failed: empty packed source ");
+            throw new CLIJobException("Packing sources has failed: empty packed source ");
+        }
+
+        if (zippedSourcesBytes.length > maxZipSize) {
+            // if size greater that restricted value, stop scan
+            log.error("Packed project size is greater than " + maxZipSize);
+            throw new CLIJobException("Packed project size is greater than " + maxZipSize);
+        }
+
+    }
+
+    private static boolean isProjectDirectoryValid(String location) {
+        File projectDir = new File(location);
+        if (!projectDir.exists()) {
+            log.error("Project directory [" + location + "] does not exist.");
+            return false;
         }
 
         if (!projectDir.isDirectory()) {
-            log.error("Project path [" + cliSharedParameters.getLocationPath()
-                    + "] should point to a directory.");
-
+            log.error("Project path [" + location + "] should point to a directory.");
             return false;
         }
-
         return true;
     }
 
@@ -121,23 +130,5 @@ public class FilesUtils {
         }
 
         return excludePatterns.toArray(new String[]{});
-    }
-
-
-    public static void validateZippedSources(long maxZipSize) throws CLIJobException {
-
-        // check packed sources size
-        if (zippedSourcesBytes == null || zippedSourcesBytes.length == 0) {
-            // if size is greater that restricted value, stop scan
-            log.error("Packing sources has failed: empty packed source ");
-            throw new CLIJobException("Packing sources has failed: empty packed source ");
-        }
-
-        if (zippedSourcesBytes.length > maxZipSize) {
-            // if size greater that restricted value, stop scan
-            log.error("Packed project size is greater than " + maxZipSize);
-            throw new CLIJobException("Packed project size is greater than " + maxZipSize);
-        }
-
     }
 }

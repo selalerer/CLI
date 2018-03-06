@@ -17,9 +17,17 @@ import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.*;
+import org.apache.commons.io.FileUtils;
 
-import java.util.concurrent.ExecutorService;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.checkmarx.cxconsole.commands.constants.LocationType.FOLDER;
 import static com.checkmarx.cxconsole.commands.constants.LocationType.getCorrespondingType;
@@ -73,11 +81,76 @@ public class CLISASTScanJob extends CLIScanJob {
         if (params.getCliSharedParameters().getLocationType() == FOLDER) {
             long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_MAX_ZIP_SIZE);
             maxZipSize *= (1024 * 1024);
-            if (!FilesUtils.zipFolder(params.getCliSharedParameters(), params.getCliSastParameters(), maxZipSize)) {
-                throw new CLIJobException("Error during packing sources.");
+            File userDirectory = new File(System.getProperty("user.dir"));
+            File tempFile = null;
+            Path tempDir = null;
+            FileOutputStream fileOutputStream;
+            try {
+                tempDir = Files.createTempDirectory(userDirectory.toPath(), "");
+                tempFile = File.createTempFile("temp", ".zip", tempDir.toFile());
+                for (String location : params.getCliSharedParameters().getLocationPath()) {
+                    fileOutputStream = new FileOutputStream(tempFile, true);
+                    FilesUtils.zipFolder(location, params.getCliSastParameters(), maxZipSize, fileOutputStream);
+                    fileOutputStream.flush();
+                    log.info("Compressed file size is: " + FileUtils.byteCountToDisplaySize(tempFile.length()));
+                    if (tempFile.length() == 0) {
+                        throw new CLIJobException("Error during packing sources.");
+                    }
+//                    FilesUtils.validateZippedSources(tempFile.length());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+//                tempFile.delete();
+//                tempDir.toFile().delete();
             }
-            FilesUtils.validateZippedSources(maxZipSize);
+            try {
+                cxRestSASTClient.uploadZipFileForSASTScan(cliMandatoryParameters.getProject().getId(), tempFile);
+            } catch (CxRestSASTClientException e) {
+                throw new CLIJobException(e.getMessage());
+            }
+//            tempFile.delete();
+//            tempDir.toFile().delete();
+
         }
+
+        log.info("Request SAST scan");
+        int scanId;
+        try {
+            scanId = cxRestSASTClient.createNewSastScan(cliMandatoryParameters.getProject().getId(), params.getCliSastParameters().isForceScan(),
+                    params.getCliSastParameters().isIncrementalScan(), params.getCliSharedParameters().isVisibleOthers());
+            log.info("SAST scan created successfully: Scan ID is " + scanId);
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e);
+        }
+
+        // wait for scan completion
+        if (isAsyncScan) {
+            log.info("Asynchronous scan initiated, Waiting for SAST scan to queue.");
+        } else {
+            log.info("Full scan initiated, Waiting for SAST scan to finish.");
+        }
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        WaitScanCompletionJob waiterJob = new WaitScanCompletionJob(cxRestSASTClient, scanId, isAsyncScan);
+        try {
+            Future<Boolean> future = executor.schedule(waiterJob, 500, TimeUnit.MILLISECONDS);
+            // wait for scan completion
+            future.get();
+            if (isAsyncScan) {
+                log.info("SAST scan queued. Job finished");
+            } else {
+                log.info("SAST scan finished. Retrieving scan results");
+                String comment = params.getCliSharedParameters().getScanComment();
+                if (comment != null) {
+                    cxRestSASTClient.updateScanComment(scanId, comment);
+                }
+            }
+        } catch (Exception e) {
+            log.trace("Error occurred during scan progress monitoring: " + e.getMessage());
+            throw new CLIJobException("Error occurred during scan progress monitoring: " + e.getMessage());
+        } finally {
+            executor.shutdownNow();
+        }
+
 
         /////////////////////////////////////////untouched/////////////////////////////////////////////////////////////
 
@@ -88,53 +161,6 @@ public class CLISASTScanJob extends CLIScanJob {
                 boolean isWorkspace = (this.projectConfig.getProjectConfig().getSourceCodeSettings().getSourceControlSetting().getPerforceBrowsingMode() == CxWSPerforceBrowsingMode.WORKSPACE);
                 params.getCliSastParameters().setPerforceWorkspaceMode(isWorkspace);
             }
-        }
-
-
-        // request scan
-        log.info("Request SAST scan");
-//        requestScan(sessionId);
-        log.info("SAST scan created successfully");
-
-        // wait for scan completion
-        if (isAsyncScan) {
-            log.info("Asynchronous scan initiated, Waiting for SAST scan to queue.");
-        } else {
-            log.info("Full scan initiated, Waiting for SAST scan to finish.");
-        }
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-//        WaitScanCompletionJob waiterJob = new WaitScanCompletionJob(cxSoapSASTClient, sessionId, runId, isAsyncScan);
-        long scanId;
-        try {
-//            Future<Boolean> furore = executor.submit(waiterJob);
-            // wait for scan completion
-//            furore.get();
-
-//            scanId = waiterJob.getScanId();
-            if (isAsyncScan) {
-                log.info("SAST scan queued. Job finished");
-            } else {
-                log.info("SAST scan finished. Retrieving scan results");
-            }
-
-        } catch (Exception e) {
-            log.trace("Error occurred during scan progress monitoring: " + e.getMessage());
-            throw new CLIJobException("Error occurred during scan progress monitoring: " + e.getMessage());
-        } finally {
-            executor.shutdownNow();
-        }
-
-        //update scan comment
-        String comment = params.getCliSharedParameters().getScanComment();
-        if (comment != null) {
-            CxWSBasicRepsonse result = null;
-//            try {
-//                result = cxSoapSASTClient.updateScanComment(sessionId, scanId, comment);
-//            } catch (CxSoapClientValidatorException e) {
-//                if (result != null && result.getErrorMessage() != null) {
-//                    log.warn("Cannot update the scan comment: " + result.getErrorMessage());
-//                }
-//            }
         }
 
         if (!isAsyncScan) {
@@ -178,6 +204,7 @@ public class CLISASTScanJob extends CLIScanJob {
 
         return SCAN_SUCCEEDED_EXIT_CODE;
     }
+
 
     private void updateExistingSastProject(ProjectDTO project) throws CxRestSASTClientException {
         ScanSettingDTO scanSetting = cxRestSASTClient.getProjectScanSetting(project.getId());

@@ -2,23 +2,26 @@ package com.checkmarx.cxconsole.clients.sast;
 
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
-import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.clients.sast.utils.SastHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.sast.utils.SastResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
-import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -34,7 +37,6 @@ public class CxRestSASTClientImpl implements CxRestSASTClient {
 
     private HttpClient apacheClient;
     private String hostName;
-    private static int waitForScanToFinishRetry = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.KEY_PROGRESS_INTERVAL);
 
     public CxRestSASTClientImpl(CxRestLoginClient restClient) {
         this.apacheClient = restClient.getApacheClient();
@@ -147,11 +149,116 @@ public class CxRestSASTClientImpl implements CxRestSASTClient {
         }
     }
 
-    public HttpClient getApacheClient() {
-        return apacheClient;
+    @Override
+    public int createNewSastScan(int projectId, boolean forceScan, boolean incrementalScan, boolean visibleOthers) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPost postRequest = null;
+
+        try {
+            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateNewSastScanURL(new URL(hostName))));
+            postRequest.setEntity(SastHttpEntityBuilder.createNewSastScanEntity(projectId, forceScan, incrementalScan, visibleOthers));
+
+            response = apacheClient.execute(postRequest);
+            RestClientUtils.validateClientResponse(response, 201, "Failed to create new SAST scan");
+
+            JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
+            return jsonResponse.getInt("id");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to create new SAST scan: " + e.getMessage());
+        } finally {
+            if (postRequest != null) {
+                postRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
     }
 
-    public String getHostName() {
-        return hostName;
+    @Override
+    public void updateScanComment(long scanId, String comment) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPatch patchRequest = null;
+
+        try {
+            patchRequest = new HttpPatch(String.valueOf(SastResourceURIBuilder.buildAddSastCommentURL(new URL(hostName), scanId)));
+            patchRequest.setEntity(SastHttpEntityBuilder.patchSastCommentEntity(comment));
+
+            response = apacheClient.execute(patchRequest);
+            RestClientUtils.validateClientResponse(response, 204, "Failed to add comment to SAST scan (id " + scanId + ")");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to add comment to SAST scan (id " + scanId + "): " + e.getMessage());
+        } finally {
+            if (patchRequest != null) {
+                patchRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public void uploadZipFileForSASTScan(int projectId, File zipFile) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPost postRequest = null;
+
+        try {
+            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildUploadZipFileURL(new URL(hostName), projectId)));
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addBinaryBody("zippedSource", zipFile, ContentType.APPLICATION_OCTET_STREAM, null);
+            HttpEntity multipart = builder.build();
+            postRequest.setEntity(multipart);
+
+            log.info("Uploading zipped source files to server, please wait.");
+            response = apacheClient.execute(postRequest);
+            RestClientUtils.validateClientResponse(response, 204, "Failed to upload zip file for SAST scan");
+            log.info("Zipped source files were uploaded successfully");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to upload zip file for SAST scan: " + e.getMessage());
+        } finally {
+            if (postRequest != null) {
+                postRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public ScanQueueDTO getScanQueueResponse(long scanId) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpGet getRequest = null;
+
+        try {
+            getRequest = new HttpGet(String.valueOf(SastResourceURIBuilder.buildGetSASTScanQueueResponseURL(new URL(hostName), scanId)));
+            response = apacheClient.execute(getRequest);
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan queue response");
+
+            return RestClientUtils.parseJsonFromResponse(response, ScanQueueDTO.class);
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to get SAST scan queue response: " + e.getMessage());
+        } finally {
+            if (getRequest != null) {
+                getRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public ScanStatusDTO getScanStatus(long scanId) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpGet getRequest = null;
+
+        try {
+            getRequest = new HttpGet(String.valueOf(SastResourceURIBuilder.buildGetSASTScanStatusURL(new URL(hostName), scanId)));
+            response = apacheClient.execute(getRequest);
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan status");
+
+            return RestClientUtils.parseJsonFromResponse(response, ScanStatusDTO.class);
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to get SAST scan status: " + e.getMessage());
+        } finally {
+            if (getRequest != null) {
+                getRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
     }
 }

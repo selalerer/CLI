@@ -2,9 +2,8 @@ package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
-import org.apache.commons.lang.math.NumberUtils;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;

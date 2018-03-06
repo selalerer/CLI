@@ -27,7 +27,7 @@ public class GeneralHttpEntityBuilder {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("name", projectToCreate.getName()));
         urlParameters.add(new BasicNameValuePair("owningTeam", projectToCreate.getTeamId()));
-        urlParameters.add(new BasicNameValuePair("isPublic", String.valueOf(projectToCreate.isPublic())));
+        urlParameters.add(new BasicNameValuePair("isPublic", "true"));
 
         try {
             return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
