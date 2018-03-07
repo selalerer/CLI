@@ -21,9 +21,9 @@ repositories {
 
 group = 'com.checkmarx'
 //For development purpose
-version = '8.70.0' + "-" + getDate()
+//version = '8.70.0' + "-" + getDate()
 //For release purpose
-//version = '8.70.0'
+version = '8.70.0'
 compileJava.options.encoding = 'UTF-8'
 compileJava.sourceCompatibility = 7
 compileJava.targetCompatibility = 7
@@ -61,7 +61,7 @@ dependencies {
             'org.apache.cxf:cxf-rt-transports-http-jetty:3.2.1',
             'org.apache.httpcomponents:httpmime:4.5.4',
             'javax.ws.rs:javax.ws.rs-api:2.1',
-            'com.fasterxml.jackson.core:jackson-databind:2.9.3',
+            'com.fasterxml.jackson.core:jackson-databind:2.9.4',
             'commons-io:commons-io:2.5',
             'commons-cli:commons-cli:1.4',
             'org.apache.ant:ant:1.10.1',
