@@ -26,7 +26,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
     private boolean isVisibleOthers = true;
 
     private LocationType locationType;
-    private String[] locationPath = new String[]{};
+    private String locationPath;
     private String spFolderName;
 
     private static final Option PARAM_VERBOSE = Option.builder("v").desc("Turns on verbose mode. All messages and events will be sent to the console/log file.  Optional.")
@@ -39,8 +39,8 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_CONFIG_FILE_PATH = Option.builder("config").hasArg().argName("file").desc("Config file path. Optional.").build();
     private static final Option PARAM_LOCATION_TYPE = Option.builder("locationtype").argName(LocationType.stringOfValues()).hasArg()
             .desc("Source location type: folder, shared, SVN, TFS, GIT, Perforce").build();
-    private static final Option PARAM_LOCATION_PATH = Option.builder("locationpath").argName("path").hasArgs()
-            .desc("Local or shared path to sources or source repository branch. Required if -LocationType is folder/shared.").valueSeparator(';').build();
+    private static final Option PARAM_LOCATION_PATH = Option.builder("locationpath").argName("path").hasArg()
+            .desc("Local or shared path to sources or source repository branch. Required if -LocationType is folder/shared.").build();
 
 
     CLISharedParameters() throws CLIParameterParsingException {
@@ -58,14 +58,12 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
             locationType = LocationType.byName(parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_TYPE.getOpt()));
         }
 
-        locationPath = parsedCommandLineArguments.getOptionValues(PARAM_LOCATION_PATH.getOpt());
+        locationPath = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_PATH.getOpt());
         if (locationType == LocationType.FOLDER && locationPath != null) {
-            for (int i = 0; i < locationPath.length; i++) {
-                File resultFile = new File(locationPath[i]);
-                if (!resultFile.isAbsolute()) {
-                    String path = System.getProperty("user.dir");
-                    locationPath[i] = path + File.separator + locationPath[i];
-                }
+            File resultFile = new File(locationPath);
+            if (!resultFile.isAbsolute()) {
+                String path = System.getProperty("user.dir");
+                locationPath = path + File.separator + locationPath;
             }
         }
     }
@@ -98,7 +96,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
         return locationType;
     }
 
-    public String[] getLocationPath() {
+    public String getLocationPath() {
         return locationPath;
     }
 
@@ -110,7 +108,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
         this.locationType = locationType;
     }
 
-    public void setLocationPath(String[] locationPath) {
+    public void setLocationPath(String locationPath) {
         this.locationPath = locationPath;
     }
 

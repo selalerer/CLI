@@ -25,10 +25,11 @@ public interface CxRestSASTClient {
 
     void updateScanComment(long scanId, String comment) throws CxRestSASTClientException;
 
-    void uploadZipFileForSASTScan(int projectId, File zipFile) throws CxRestSASTClientException;
+    void uploadZipFileForSASTScan(int projectId, byte[] zipFile) throws CxRestSASTClientException;
 
     ScanQueueDTO getScanQueueResponse(long scanId) throws CxRestSASTClientException;
 
     ScanStatusDTO getScanStatus(long scanId) throws CxRestSASTClientException;
 
+    void createSharedSourceProject(int projectId, String[] paths, String locationUser, String locationPass) throws CxRestSASTClientException;
 }

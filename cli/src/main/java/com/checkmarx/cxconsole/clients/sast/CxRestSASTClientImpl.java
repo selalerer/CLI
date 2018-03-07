@@ -195,7 +195,7 @@ public class CxRestSASTClientImpl implements CxRestSASTClient {
     }
 
     @Override
-    public void uploadZipFileForSASTScan(int projectId, File zipFile) throws CxRestSASTClientException {
+    public void uploadZipFileForSASTScan(int projectId, byte[] zipFile) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpPost postRequest = null;
 
@@ -257,6 +257,30 @@ public class CxRestSASTClientImpl implements CxRestSASTClient {
         } finally {
             if (getRequest != null) {
                 getRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public void createSharedSourceProject(int projectId, String[] paths, String locationUser, String locationPass) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPost postRequest = null;
+
+        try {
+            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateSharedProjectURL(new URL(hostName), projectId)));
+            postRequest.setEntity(SastHttpEntityBuilder.createSharedProjectEntity(projectId, paths, locationUser, locationPass));
+
+            response = apacheClient.execute(postRequest);
+            RestClientUtils.validateClientResponse(response, 204, "Failed to create shared source project scan");
+
+            JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
+            return jsonResponse.getInt("id");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to create shared source project scan: " + e.getMessage());
+        } finally {
+            if (postRequest != null) {
+                postRequest.releaseConnection();
             }
             HttpClientUtils.closeQuietly(response);
         }

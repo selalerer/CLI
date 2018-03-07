@@ -61,7 +61,7 @@ public class CLIOSAScanJob extends CLIScanJob {
             //Request osa Scan
             log.info("Request OSA scan");
 
-            String[] osaLocationPath = cliosaParameters.getOsaLocationPath() != null ? cliosaParameters.getOsaLocationPath() : params.getCliSharedParameters().getLocationPath();
+            String[] osaLocationPath = cliosaParameters.getOsaLocationPath() != null ? cliosaParameters.getOsaLocationPath() : new String[]{params.getCliSharedParameters().getLocationPath()};
             log.info("Setting up OSA analysis request");
             log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
             CreateOSAScanRequest osaScanRequest;

@@ -19,18 +19,13 @@ import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxviewer.ws.generated.*;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.ByteArrayOutputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.checkmarx.cxconsole.commands.constants.LocationType.FOLDER;
-import static com.checkmarx.cxconsole.commands.constants.LocationType.getCorrespondingType;
+import static com.checkmarx.cxconsole.commands.constants.LocationType.*;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
 
 /**
@@ -77,41 +72,31 @@ public class CLISASTScanJob extends CLIScanJob {
             throw new CLIJobException(e);
         }
 
-        //If location is local folder -> zipping the sources taking into consideration excluded folders\files
+        //If location is local folder -> zipping the source path
         if (params.getCliSharedParameters().getLocationType() == FOLDER) {
             long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_MAX_ZIP_SIZE);
             maxZipSize *= (1024 * 1024);
-            File userDirectory = new File(System.getProperty("user.dir"));
-            File tempFile = null;
-            Path tempDir = null;
-            FileOutputStream fileOutputStream;
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            FilesUtils.zipFolder(params.getCliSharedParameters().getLocationPath(), params.getCliSastParameters(), maxZipSize, byteArrayOutputStream);
+            log.info("Compressed file size is: " + FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
+            FilesUtils.validateZippedSources(maxZipSize, byteArrayOutputStream);
             try {
-                tempDir = Files.createTempDirectory(userDirectory.toPath(), "");
-                tempFile = File.createTempFile("temp", ".zip", tempDir.toFile());
-                for (String location : params.getCliSharedParameters().getLocationPath()) {
-                    fileOutputStream = new FileOutputStream(tempFile, true);
-                    FilesUtils.zipFolder(location, params.getCliSastParameters(), maxZipSize, fileOutputStream);
-                    fileOutputStream.flush();
-                    log.info("Compressed file size is: " + FileUtils.byteCountToDisplaySize(tempFile.length()));
-                    if (tempFile.length() == 0) {
-                        throw new CLIJobException("Error during packing sources.");
-                    }
-//                    FilesUtils.validateZippedSources(tempFile.length());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-//                tempFile.delete();
-//                tempDir.toFile().delete();
-            }
-            try {
-                cxRestSASTClient.uploadZipFileForSASTScan(cliMandatoryParameters.getProject().getId(), tempFile);
+                cxRestSASTClient.uploadZipFileForSASTScan(cliMandatoryParameters.getProject().getId(), byteArrayOutputStream.toByteArray());
             } catch (CxRestSASTClientException e) {
                 throw new CLIJobException(e.getMessage());
             }
-//            tempFile.delete();
-//            tempDir.toFile().delete();
+        }
+
+        if (params.getCliSharedParameters().getLocationType() == SHARED) {
+            String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
+            try {
+                cxRestSASTClient.createSharedSourceProject(cliMandatoryParameters.getProject().getId(), paths, params.getCliSastParameters().getLocationUser(), params.getCliSastParameters().getLocationPass());
+            } catch (CxRestSASTClientException e) {
+                throw new CLIJobException(e.getMessage());
+            }
 
         }
+
 
         log.info("Request SAST scan");
         int scanId;
@@ -132,7 +117,7 @@ public class CLISASTScanJob extends CLIScanJob {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         WaitScanCompletionJob waiterJob = new WaitScanCompletionJob(cxRestSASTClient, scanId, isAsyncScan);
         try {
-            Future<Boolean> future = executor.schedule(waiterJob, 500, TimeUnit.MILLISECONDS);
+            Future<Boolean> future = executor.schedule(waiterJob, 250, TimeUnit.MILLISECONDS);
             // wait for scan completion
             future.get();
             if (isAsyncScan) {
