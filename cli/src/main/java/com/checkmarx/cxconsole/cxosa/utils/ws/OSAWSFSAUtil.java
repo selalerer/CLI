@@ -68,7 +68,7 @@ public class OSAWSFSAUtil {
         StringBuilder builder = new StringBuilder();
         if (stringType.equals(StringType.BASE_DIRECTORIES)) {
             for (String s : strArr) {
-                builder.append(s.trim()).append(" ");
+                builder.append(s.trim()).append(",");
             }
         }
 
