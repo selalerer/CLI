@@ -104,6 +104,7 @@ public class OSAWSFSAUtil {
         String osaDependenciesJson = componentScan.scan();
         ObjectMapper mapper = new ObjectMapper();
         try {
+            log.trace("Scanner properties: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(scannerProperties));
             log.trace("List of files sent to WhiteSource: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaDependenciesJson));
         } catch (JsonProcessingException e) {
             log.error("Can't write list of files sent to WS " + e.getMessage());
