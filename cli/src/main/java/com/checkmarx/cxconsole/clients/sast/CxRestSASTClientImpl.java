@@ -2,6 +2,7 @@ package com.checkmarx.cxconsole.clients.sast;
 
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.clients.sast.utils.SastHttpEntityBuilder;
@@ -21,7 +22,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -31,7 +31,7 @@ import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonLis
 /**
  * Created by nirli on 21/02/2018.
  */
-public class CxRestSASTClientImpl implements CxRestSASTClient {
+public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implements CxRestSASTClient<T> {
 
     private static Logger log = Logger.getLogger(CxRestSASTClientImpl.class);
 
@@ -262,22 +262,18 @@ public class CxRestSASTClientImpl implements CxRestSASTClient {
         }
     }
 
-    @Override
-    public void createSharedSourceProject(int projectId, String[] paths, String locationUser, String locationPass) throws CxRestSASTClientException {
+    public void createRemoteSourceScan(int projectId, T remoteSourceScanSettingDTO, RemoteSourceType remoteSourceType) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpPost postRequest = null;
 
         try {
-            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateSharedProjectURL(new URL(hostName), projectId)));
-            postRequest.setEntity(SastHttpEntityBuilder.createSharedProjectEntity(projectId, paths, locationUser, locationPass));
+            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType)));
+            postRequest.setEntity(SastHttpEntityBuilder.createRemoteSourceEntity(remoteSourceScanSettingDTO));
 
             response = apacheClient.execute(postRequest);
-            RestClientUtils.validateClientResponse(response, 204, "Failed to create shared source project scan");
-
-            JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
-            return jsonResponse.getInt("id");
+            RestClientUtils.validateClientResponse(response, 204, "Failed to create remote source scan setting");
         } catch (IOException | CxValidateResponseException e) {
-            throw new CxRestSASTClientException("Failed to create shared source project scan: " + e.getMessage());
+            throw new CxRestSASTClientException("Failed to create remote source scan setting: " + e.getMessage());
         } finally {
             if (postRequest != null) {
                 postRequest.releaseConnection();

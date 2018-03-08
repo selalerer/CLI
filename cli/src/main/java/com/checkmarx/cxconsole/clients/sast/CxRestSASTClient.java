@@ -1,15 +1,15 @@
 package com.checkmarx.cxconsole.clients.sast;
 
+import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 
-import java.io.File;
 import java.util.List;
 
 /**
  * Created by nirli on 01/03/2018.
  */
-public interface CxRestSASTClient {
+public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
 
     List<PresetDTO> getSastPresets() throws CxRestSASTClientException;
 
@@ -31,5 +31,5 @@ public interface CxRestSASTClient {
 
     ScanStatusDTO getScanStatus(long scanId) throws CxRestSASTClientException;
 
-    void createSharedSourceProject(int projectId, String[] paths, String locationUser, String locationPass) throws CxRestSASTClientException;
+    void createRemoteSourceScan(int projectId, T remoteSourceScanSettingDTO, RemoteSourceType remoteSourceType) throws CxRestSASTClientException;
 }

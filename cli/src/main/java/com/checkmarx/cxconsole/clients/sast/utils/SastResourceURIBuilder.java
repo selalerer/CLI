@@ -1,5 +1,7 @@
 package com.checkmarx.cxconsole.clients.sast.utils;
 
+import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -24,6 +26,8 @@ public class SastResourceURIBuilder {
     private static final String SAST_SCAN_RESOURCE = "/sast/scans";
     private static final String SAST_ADD_COMMENT_RESOURCE = "/comment";
     private static final String SAST_SCAN_QUEUE_RESOURCE = "/sast/scansQueue";
+    private static final String SAST_REMOTE_SOURCE_CODE_RESOURCE = "/sourceCode/remoteSettings";
+    private static final String SHARED_RESOURCE = "/shared";
 
 
     private static final String SYSTEM_CONFIGURATION_RESOURCE = "/Configurations/systemSettings";
@@ -99,5 +103,14 @@ public class SastResourceURIBuilder {
         } catch (MalformedURLException e) {
             return serverUrl;
         }
+    }
+
+    public static URL buildCreateRemoteSourceScanURL(URL serverUrl, int projectId, RemoteSourceType remoteSourceType) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + PROJECTS_RESOURCE + "/" + projectId + SAST_REMOTE_SOURCE_CODE_RESOURCE + "/" + remoteSourceType.getUrlValue());
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+
     }
 }

@@ -1,28 +1,34 @@
 package com.checkmarx.cxconsole.clients.sast.utils;
 
+import com.checkmarx.cxconsole.clients.sast.dto.RemoteSourceScanSettingDTO;
 import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.bouncycastle.util.Arrays;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Created by nirli on 25/02/2018.
  */
-public class SastHttpEntityBuilder {
+public class SastHttpEntityBuilder<T extends RemoteSourceScanSettingDTO> {
 
     private SastHttpEntityBuilder() {
         throw new IllegalStateException("Utility class");
@@ -67,5 +73,17 @@ public class SastHttpEntityBuilder {
         JSONObject jsonObject = new JSONObject(content);
 
         return new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON);
+    }
+
+    public static<T extends RemoteSourceScanSettingDTO> HttpEntity createRemoteSourceEntity(T remoteSourceScanSettingDTO) throws CxRestSASTClientException {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString;
+        try {
+            jsonInString = mapper.writeValueAsString(remoteSourceScanSettingDTO);
+        } catch (JsonProcessingException e) {
+            throw new CxRestSASTClientException("Error creating JSON string from remote source scan settings" + e.getMessage());
+        }
+
+        return new StringEntity(jsonInString, ContentType.APPLICATION_JSON);
     }
 }

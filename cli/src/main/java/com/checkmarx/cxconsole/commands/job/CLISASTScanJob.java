@@ -5,9 +5,8 @@ import com.checkmarx.cxconsole.clients.general.exception.CxRestGeneralClientExce
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
-import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
+import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
@@ -72,29 +71,12 @@ public class CLISASTScanJob extends CLIScanJob {
             throw new CLIJobException(e);
         }
 
-        //If location is local folder -> zipping the source path
         if (params.getCliSharedParameters().getLocationType() == FOLDER) {
-            long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_MAX_ZIP_SIZE);
-            maxZipSize *= (1024 * 1024);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            FilesUtils.zipFolder(params.getCliSharedParameters().getLocationPath(), params.getCliSastParameters(), maxZipSize, byteArrayOutputStream);
-            log.info("Compressed file size is: " + FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
-            FilesUtils.validateZippedSources(maxZipSize, byteArrayOutputStream);
-            try {
-                cxRestSASTClient.uploadZipFileForSASTScan(cliMandatoryParameters.getProject().getId(), byteArrayOutputStream.toByteArray());
-            } catch (CxRestSASTClientException e) {
-                throw new CLIJobException(e.getMessage());
-            }
-        }
-
-        if (params.getCliSharedParameters().getLocationType() == SHARED) {
-            String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
-            try {
-                cxRestSASTClient.createSharedSourceProject(cliMandatoryParameters.getProject().getId(), paths, params.getCliSastParameters().getLocationUser(), params.getCliSastParameters().getLocationPass());
-            } catch (CxRestSASTClientException e) {
-                throw new CLIJobException(e.getMessage());
-            }
-
+            handleLocalFolderSource(cliMandatoryParameters.getProject().getId());
+        } else if (params.getCliSharedParameters().getLocationType() == SHARED) {
+            handleSharedFolderSource(cliMandatoryParameters.getProject().getId());
+        } else if (params.getCliSharedParameters().getLocationType() == SVN) {
+            handleSVNSource(cliMandatoryParameters.getProject().getId());
         }
 
 
@@ -188,6 +170,43 @@ public class CLISASTScanJob extends CLIScanJob {
         }
 
         return SCAN_SUCCEEDED_EXIT_CODE;
+    }
+
+    private void handleSVNSource(int projectId) throws CLIJobException {
+        String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
+        try {
+            SVNScanSettingDTO svnScanSettingDTO = new SVNScanSettingDTO(params.getCliSastParameters().getLocationUser(),
+                    params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
+                    params.getCliSastParameters().getPrivateKey());
+            cxRestSASTClient.createRemoteSourceScan(projectId, svnScanSettingDTO, RemoteSourceType.SVN);
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e.getMessage());
+        }
+    }
+
+    private void handleSharedFolderSource(int projectId) throws CLIJobException {
+        String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
+        try {
+            RemoteSourceScanSettingDTO remoteSourceScanSettingDTO = new RemoteSourceScanSettingDTO(params.getCliSastParameters().getLocationUser(),
+                    params.getCliSastParameters().getLocationPass(), paths);
+            cxRestSASTClient.createRemoteSourceScan(projectId, remoteSourceScanSettingDTO, RemoteSourceType.SHARED);
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e.getMessage());
+        }
+    }
+
+    private void handleLocalFolderSource(int projectId) throws CLIJobException {
+        long maxZipSize = ConfigMgr.getCfgMgr().getLongProperty(ConfigMgr.KEY_MAX_ZIP_SIZE);
+        maxZipSize *= (1024 * 1024);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        FilesUtils.zipFolder(params.getCliSharedParameters().getLocationPath(), params.getCliSastParameters(), maxZipSize, byteArrayOutputStream);
+        log.info("Compressed file size is: " + FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
+        FilesUtils.validateZippedSources(maxZipSize, byteArrayOutputStream);
+        try {
+            cxRestSASTClient.uploadZipFileForSASTScan(projectId, byteArrayOutputStream.toByteArray());
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e.getMessage());
+        }
     }
 
 

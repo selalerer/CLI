@@ -49,6 +49,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
     private String locationURL;
     private String locationBranch;
+    private String absoluteUrlIncludeBranch;
     private String locationUser;
     private String locationPass;
     private String locationPrivateKey;
@@ -138,6 +139,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
         locationURL = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_URL.getOpt());
         locationBranch = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_BRANCH.getOpt());
+        absoluteUrlIncludeBranch = locationURL + "/" + locationBranch;
         locationPrivateKey = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_PRIVATE_KEY.getOpt());
         if (locationPrivateKey != null) {
             File resultFile = new File(locationPrivateKey);
