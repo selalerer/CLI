@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.parameters;
 
+import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
 import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
 import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
@@ -35,7 +36,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     private EngineConfigurationDTO configuration;
     private boolean isIncrementalScan = false;
     private boolean forceScan = true;
-    private List<String> reportType = new ArrayList<>();
+    private List<ReportType> reportType = new ArrayList<>();
     private List<String> reportFile = new ArrayList<>();
     private String xmlFile;
     private boolean isOsaEnabled = false;
@@ -200,17 +201,20 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     }
 
     private void initReportFilesParams(CommandLine parsedCommandLineArguments) {
-        xmlFile = parsedCommandLineArguments.getOptionValue(PARAM_XML_FILE.getOpt());
+        if (parsedCommandLineArguments.hasOption(PARAM_XML_FILE.getOpt())) {
+            reportType.add(ReportType.XML);
+            reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_XML_FILE.getOpt()));
+        }
         if (parsedCommandLineArguments.hasOption(PARAM_PDF_FILE.getOpt())) {
-            reportType.add("PDF");
+            reportType.add(ReportType.PDF);
             reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_PDF_FILE.getOpt()));
         }
         if (parsedCommandLineArguments.hasOption(PARAM_CSV_FILE.getOpt())) {
-            reportType.add("CSV");
+            reportType.add(ReportType.CSV);
             reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_CSV_FILE.getOpt()));
         }
         if (parsedCommandLineArguments.hasOption(PARAM_RTF_FILE.getOpt())) {
-            reportType.add("RTF");
+            reportType.add(ReportType.RTF);
             reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_RTF_FILE.getOpt()));
         }
     }
@@ -255,7 +259,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         isOsaEnabled = osaEnabled;
     }
 
-    public List<String> getReportType() {
+    public List<ReportType> getReportType() {
         return reportType;
     }
 
@@ -346,9 +350,9 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_SAST_MEDIUM_THRESHOLD);
         commandLineOptions.addOption(PARAM_SAST_HIGH_THRESHOLD);
 
-        commandLineOptions.addOption(PARAM_XML_FILE);
         OptionGroup reportGroup = new OptionGroup();
         reportGroup.setRequired(false);
+        reportGroup.addOption(PARAM_XML_FILE);
         reportGroup.addOption(PARAM_PDF_FILE);
         reportGroup.addOption(PARAM_CSV_FILE);
         reportGroup.addOption(PARAM_RTF_FILE);

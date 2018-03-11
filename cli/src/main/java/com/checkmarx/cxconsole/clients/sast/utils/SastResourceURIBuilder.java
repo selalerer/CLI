@@ -26,11 +26,10 @@ public class SastResourceURIBuilder {
     private static final String SAST_SCAN_RESOURCE = "/sast/scans";
     private static final String SAST_ADD_COMMENT_RESOURCE = "/comment";
     private static final String SAST_SCAN_QUEUE_RESOURCE = "/sast/scansQueue";
+    private static final String SAST_SOURCE_CODE_RESOURCE = "/sourceCode";
     private static final String SAST_REMOTE_SOURCE_CODE_RESOURCE = "/sourceCode/remoteSettings";
-    private static final String SHARED_RESOURCE = "/shared";
-
-
-    private static final String SYSTEM_CONFIGURATION_RESOURCE = "/Configurations/systemSettings";
+    private static final String EXCLUSION_SETTING_RESOURCE = "excludeSettings";
+    private static final String REPORTS_RESOURCE = "/reports/sastScan";
 
     public static URL buildGetSastPresetsURL(URL serverUrl) {
         try {
@@ -111,6 +110,37 @@ public class SastResourceURIBuilder {
         } catch (MalformedURLException e) {
             return serverUrl;
         }
+    }
 
+    public static URL buildSASTScanExclusionSettingURL(URL serverUrl, int projectId) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + PROJECTS_RESOURCE + "/" + projectId + SAST_SOURCE_CODE_RESOURCE + "/" + EXCLUSION_SETTING_RESOURCE);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildCreateReportURL(URL serverUrl) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + REPORTS_RESOURCE);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildGetReportStatusURL(URL serverUrl, int reportId) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + REPORTS_RESOURCE + "/" + reportId + "/status");
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildGetReportFileURL(URL serverUrl, int reportId) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + REPORTS_RESOURCE + "/" + reportId);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
     }
 }

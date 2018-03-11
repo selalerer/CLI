@@ -3,11 +3,14 @@ package com.checkmarx.cxconsole.clients.sast;
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
+import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
+import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
 import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.clients.sast.utils.SastHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.sast.utils.SastResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
+import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,8 +25,10 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
@@ -174,6 +179,27 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
     }
 
     @Override
+    public void updateScanExclusions(int projectId, String[] excludeFoldersPattern, String[] excludeFilesPattern) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPut putRequest = null;
+
+        try {
+            putRequest = new HttpPut(String.valueOf(SastResourceURIBuilder.buildSASTScanExclusionSettingURL(new URL(hostName), projectId)));
+            putRequest.setEntity(SastHttpEntityBuilder.createScanExclusionSettingEntity(Arrays.toString(excludeFoldersPattern), Arrays.toString(excludeFilesPattern)));
+
+            response = apacheClient.execute(putRequest);
+            RestClientUtils.validateClientResponse(response, 200, "Failed to update scan exclusions settings");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to update scan exclusions settings: " + e.getMessage());
+        } finally {
+            if (putRequest != null) {
+                putRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
     public void updateScanComment(long scanId, String comment) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpPatch patchRequest = null;
@@ -298,6 +324,74 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         } finally {
             if (postRequest != null) {
                 postRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public int createReport(long scanId, ReportType reportType) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPost postRequest = null;
+
+        try {
+            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateReportURL(new URL(hostName))));
+            postRequest.setEntity(SastHttpEntityBuilder.createReportEntity(scanId, reportType));
+
+            response = apacheClient.execute(postRequest);
+            RestClientUtils.validateClientResponse(response, 202, "Failed to create " + reportType.getValue() + " report");
+
+            JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
+            return jsonResponse.getInt("reportId");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to create " + reportType.getValue() + " report: " + e.getMessage());
+        } finally {
+            if (postRequest != null) {
+                postRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public ReportStatusValue getReportStatus(int reportId) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpGet getRequest = null;
+
+        try {
+            getRequest = new HttpGet(String.valueOf(SastResourceURIBuilder.buildGetReportStatusURL(new URL(hostName), reportId)));
+            response = apacheClient.execute(getRequest);
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get report status");
+
+            JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
+            return ReportStatusValue.valueOf(jsonResponse.getJSONObject("status").getString("value"));
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to get report status: " + e.getMessage());
+        } finally {
+            if (getRequest != null) {
+                getRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public void createReportFile(int reportId, String reportFilePath) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpGet getRequest = null;
+
+        try {
+            getRequest = new HttpGet(String.valueOf(SastResourceURIBuilder.buildGetReportFileURL(new URL(hostName), reportId)));
+            response = apacheClient.execute(getRequest);
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get report file");
+
+            RestClientUtils.parseJsonObjectFromResponse(response);
+            FilesUtils.createReportFile(response, reportFilePath);
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to get report file: " + e.getMessage());
+        } finally {
+            if (getRequest != null) {
+                getRequest.releaseConnection();
             }
             HttpClientUtils.closeQuietly(response);
         }

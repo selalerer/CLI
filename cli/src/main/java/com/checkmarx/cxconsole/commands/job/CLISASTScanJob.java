@@ -6,16 +6,18 @@ import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesVali
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
-import com.checkmarx.cxconsole.clients.sast.dto.*;
+import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
+import com.checkmarx.cxconsole.clients.sast.dto.PerforceScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.RemoteSourceScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.SVNAndTFSScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
-import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
-import com.checkmarx.cxviewer.ws.generated.*;
 import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -41,7 +43,7 @@ public class CLISASTScanJob extends CLIScanJob {
     @Override
     public Integer call() throws CLIJobException {
         CLIMandatoryParameters cliMandatoryParameters = params.getCliMandatoryParameters();
-        log.info("Project name is \"" + params.getCliMandatoryParameters().getProject().getName() + "\"");
+        log.info("Project name is \"" + cliMandatoryParameters.getProject().getName() + "\"");
         if (!cxRestLoginClient.isLoggedIn()) {
             super.login();
         }
@@ -56,9 +58,12 @@ public class CLISASTScanJob extends CLIScanJob {
 
         try {
             if (!scanPrerequisitesValidator.isProjectExists()) {
-                createNewSastProject(params.getCliMandatoryParameters().getProject());
+                createNewSastProject(cliMandatoryParameters.getProject());
             } else {
-                updateExistingSastProject(params.getCliMandatoryParameters().getProject());
+                updateExistingSastProject(cliMandatoryParameters.getProject());
+            }
+            if (params.getCliSastParameters().isHasExcludedFilesParam() || params.getCliSastParameters().isHasExcludedFoldersParam()) {
+                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(), FilesUtils.getExcludeFoldersPatterns(), FilesUtils.getExcludeFilesPatterns());
             }
         } catch (CxRestGeneralClientException | CxRestSASTClientException e) {
             throw new CLIJobException(e);
@@ -72,12 +77,11 @@ public class CLISASTScanJob extends CLIScanJob {
             handleSVNSource(cliMandatoryParameters.getProject().getId());
         } else if (params.getCliSharedParameters().getLocationType() == TFS) {
             handleTFSSource(cliMandatoryParameters.getProject().getId());
-        }else if (params.getCliSharedParameters().getLocationType() == PERFORCE) {
+        } else if (params.getCliSharedParameters().getLocationType() == PERFORCE) {
             handlePerforceSource(cliMandatoryParameters.getProject().getId());
-        }else if (params.getCliSharedParameters().getLocationType() == GIT) {
+        } else if (params.getCliSharedParameters().getLocationType() == GIT) {
             handleGITSource(cliMandatoryParameters.getProject().getId());
         }
-
 
         log.info("Request SAST scan");
         int scanId;
@@ -118,22 +122,10 @@ public class CLISASTScanJob extends CLIScanJob {
         }
 
 
-        /////////////////////////////////////////untouched/////////////////////////////////////////////////////////////
-
-
         if (!isAsyncScan) {
-            String resultsFileName = params.getCliSastParameters().getXmlFile();
-            if (resultsFileName == null) {
-                resultsFileName = PathHandler.normalizePathString(params.getCliMandatoryParameters().getProject().getName()) + ".xml";
-            }
-            String scanSummary;
-//            try {
-//                scanSummary = cxSoapSASTClient.getScanSummary(params.getCliMandatoryParameters().getOriginalHost(), sessionId, scanId);
-//                storeXMLResults(resultsFileName, cxSoapSASTClient.getScanReport(sessionId, scanId, "XML"));
-//            } catch (CxSoapSASTClientException e) {
-//                log.error("Error retrieving scan summary report: " + e.getMessage());
-//                throw new CLIJobException("Error retrieving scan summary report: " + e.getMessage());
-//            }
+            //Get JSON scan summary
+//            String scanSummary;
+//                scanSummary = cxSoapSASTClient.getScanSummary(cliMandatoryParameters.getOriginalHost(), sessionId, scanId);
 
             //SAST print results
 //            SASTResultsDTO scanResults = JobUtils.parseScanSummary(scanSummary);
@@ -143,12 +135,26 @@ public class CLISASTScanJob extends CLIScanJob {
             if (!params.getCliSastParameters().getReportType().isEmpty()) {
                 for (int i = 0; i < params.getCliSastParameters().getReportType().size(); i++) {
                     log.info("Report type: " + params.getCliSastParameters().getReportType().get(i));
-                    String resultsPath = params.getCliSastParameters().getReportFile().get(i);
-                    if (resultsPath == null) {
-//                        resultsPath = PathHandler.normalizePathString(params.getCliMandatoryParameters().getProjectName()) + "." + params.getCliSastParameters().getReportType().get(i).toLowerCase();
+                    String reportFilePath = params.getCliSastParameters().getReportFile().get(i);
+                    if (reportFilePath == null) {
+                        reportFilePath = PathHandler.normalizePathString(cliMandatoryParameters.getProject().getName()) + "." + params.getCliSastParameters().getReportType().get(i).getValue();
                     }
-//                    StoreReportUtils.downloadAndStoreReport(params.getCliMandatoryParameters().getProjectName(), resultsPath, params.getCliSastParameters().getReportType().get(i),
-//                            scanId, cxSoapSASTClient, sessionId, params.getCliMandatoryParameters().getSrcPath());
+                    try {
+                        int reportId = cxRestSASTClient.createReport(scanId, params.getCliSastParameters().getReportType().get(i));
+                        ReportStatusValue reportStatus;
+                        do {
+                            //TODO: change sleep to something smarter
+                            Thread.sleep(350);
+                            reportStatus = cxRestSASTClient.getReportStatus(reportId);
+                        } while (reportStatus == ReportStatusValue.IN_PROCESS);
+                        if (reportStatus == ReportStatusValue.CREATED) {
+                            cxRestSASTClient.createReportFile(reportId, reportFilePath);
+                        } else {
+                            log.error("Error creating " + params.getCliSastParameters().getReportType().get(i) + " report file");
+                        }
+                    } catch (CxRestSASTClientException | InterruptedException e) {
+                        log.error("Error creating report: " + reportFilePath + " :" + e.getMessage());
+                    }
                 }
             }
 

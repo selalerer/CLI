@@ -6,11 +6,12 @@ import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.parameters.CLISASTParameters;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -26,6 +27,8 @@ public class FilesUtils {
     private static Logger log = Logger.getLogger(FilesUtils.class);
 
     private static int numOfZippedFiles;
+    private static String[] excludeFilesPatterns;
+    private static String[] excludeFoldersPatterns;
 
     public static void zipFolder(String location, CLISASTParameters cliSastParameters, long maxZipSize, ByteArrayOutputStream byteArrayOutputStream) {
         numOfZippedFiles = 0;
@@ -34,7 +37,8 @@ public class FilesUtils {
         }
         try {
             log.info("Zipping files from: " + location + " Please wait");
-            String[] excludePatterns = createExcludePatternsArray(cliSastParameters);
+            excludeFilesPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FILES, cliSastParameters);
+            excludeFoldersPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FOLDERS, cliSastParameters);
             String[] includeAllPatterns = new String[]{"**/*"};//the default is to include all files
             ZipListener zipListener = new ZipListener() {
 
@@ -45,7 +49,7 @@ public class FilesUtils {
                 }
             };
             Zipper zipper = new Zipper();
-            zipper.zip(new File(location), excludePatterns, includeAllPatterns, byteArrayOutputStream, maxZipSize, zipListener);
+            zipper.zip(new File(location), ArrayUtils.addAll(excludeFilesPatterns, excludeFoldersPatterns), includeAllPatterns, byteArrayOutputStream, maxZipSize, zipListener);
             log.info("Zipping complete with " + numOfZippedFiles + " files.");
         } catch (Exception e) {
             log.trace(e);
@@ -54,7 +58,6 @@ public class FilesUtils {
     }
 
     public static void validateZippedSources(long maxZipSize, ByteArrayOutputStream byteArrayOutputStream) throws CLIJobException {
-
         // check packed sources size
         if (byteArrayOutputStream == null || byteArrayOutputStream.size() == 0) {
             // if size is greater that restricted value, stop scan
@@ -83,31 +86,14 @@ public class FilesUtils {
         return true;
     }
 
-    private static String[] createExcludePatternsArray(CLISASTParameters cliSastParameters) {
+    private static String[] createExclusionPatternsArray(String defaultKey, CLISASTParameters cliSastParameters) {
         LinkedList<String> excludePatterns = new LinkedList<>();
         try {
-            String defaultExcludedFolders = ConfigMgr.getCfgMgr().getProperty(ConfigMgr.KEY_EXCLUDED_FOLDERS);
-            for (String folder : StringUtils.split(defaultExcludedFolders, ",")) {
-                String trimmedPattern = folder.trim();
-                if (!Objects.equals(trimmedPattern, "")) {
-                    excludePatterns.add("**/" + trimmedPattern.replace('\\', '/') + "/**/*");
-                }
-            }
-
-            String defaultExcludedFiles = ConfigMgr.getCfgMgr().getProperty(ConfigMgr.KEY_EXCLUDED_FILES);
+            String defaultExcludedFiles = ConfigMgr.getCfgMgr().getProperty(defaultKey);
             for (String file : StringUtils.split(defaultExcludedFiles, ",")) {
                 String trimmedPattern = file.trim();
                 if (!Objects.equals(trimmedPattern, "")) {
                     excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
-                }
-            }
-
-            if (cliSastParameters.isHasExcludedFoldersParam()) {
-                for (String folder : cliSastParameters.getExcludedFolders()) {
-                    String trimmedPattern = folder.trim();
-                    if (!Objects.equals(trimmedPattern, "")) {
-                        excludePatterns.add("**/" + trimmedPattern.replace('\\', '/') + "/**/*");
-                    }
                 }
             }
 
@@ -124,5 +110,30 @@ public class FilesUtils {
         }
 
         return excludePatterns.toArray(new String[]{});
+    }
+
+    public static void createReportFile(HttpResponse response, String filePath) {
+        try (FileOutputStream fos = new FileOutputStream(new File(filePath))) {
+            InputStream is = response.getEntity().getContent();
+            int read;
+            byte[] buffer = new byte[32768];
+
+            while ((read = is.read(buffer)) > 0) {
+                fos.write(buffer, 0, read);
+            }
+
+            fos.close();
+            is.close();
+        } catch (IOException e) {
+            log.error("Failed to create report file: " + filePath + " : " + e.getMessage());
+        }
+    }
+
+    public static String[] getExcludeFilesPatterns() {
+        return excludeFilesPatterns;
+    }
+
+    public static String[] getExcludeFoldersPatterns() {
+        return excludeFoldersPatterns;
     }
 }

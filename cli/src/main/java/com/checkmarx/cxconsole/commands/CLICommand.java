@@ -1,10 +1,10 @@
 package com.checkmarx.cxconsole.commands;
 
-import com.checkmarx.cxconsole.clientsold.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
-import com.checkmarx.cxconsole.utils.LoggerUtils;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.utils.LoggerUtils;
 import com.google.common.base.Strings;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -74,7 +74,7 @@ public abstract class CLICommand {
             String hostWithProtocol = resolveServerProtocol(params.getCliMandatoryParameters().getOriginalHost());
             params.getCliMandatoryParameters().setOriginalHost(hostWithProtocol);
             log.info("Server connectivity test succeeded to: " + params.getCliMandatoryParameters().getOriginalHost());
-        } catch (CxSoapLoginClientException e) {
+        } catch (CxRestClientException e) {
             throw new CLICommandException(SERVER_CONNECTIVITY_VALIDATION_ERROR + e.getMessage());
         }
 

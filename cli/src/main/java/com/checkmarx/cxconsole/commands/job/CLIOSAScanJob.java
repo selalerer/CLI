@@ -10,7 +10,6 @@ import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
 import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaWSFSAUtil;
-import com.checkmarx.cxconsole.clientsold.soap.sast.CxSoapSASTClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;

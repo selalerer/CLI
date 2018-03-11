@@ -1,7 +1,6 @@
 package com.checkmarx.cxconsole.utils;
 
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
-import com.checkmarx.cxconsole.clientsold.soap.login.CxSoapLoginClient;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
 
@@ -48,7 +47,6 @@ public class ConfigMgr {
 
     private String defaultPath = userDir + separator + configDirRelativePath + separator + configFile;
     private Properties applicationProperties;
-    private static CxSoapLoginClient cxSoapLoginClient;
     private static CxRestLoginClient cxRestLoginClient;
 
     private static ConfigMgr mgr;
@@ -167,14 +165,6 @@ public class ConfigMgr {
 
     public static void initCfgMgr(String defConfig) {
         mgr = new ConfigMgr(defConfig);
-    }
-
-    public static CxSoapLoginClient getWSMgr() {
-        if (cxSoapLoginClient == null) {
-            cxSoapLoginClient = new CxSoapLoginClient();
-        }
-
-        return cxSoapLoginClient;
     }
 
     public static CxRestLoginClient getRestWSMgr(CLIScanParametersSingleton parameters) {
