@@ -32,4 +32,6 @@ public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
     ScanStatusDTO getScanStatus(long scanId) throws CxRestSASTClientException;
 
     void createRemoteSourceScan(int projectId, T remoteSourceScanSettingDTO, RemoteSourceType remoteSourceType) throws CxRestSASTClientException;
+
+    void createGITScan(int projectId, String locationURL, String locationBranch, String privateKey) throws CxRestSASTClientException;
 }

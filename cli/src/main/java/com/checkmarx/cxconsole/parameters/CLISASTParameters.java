@@ -31,9 +31,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     private CLIMandatoryParameters cliMandatoryParameters;
     private CLISharedParameters cliSharedParameters;
 
-    private String presetName;
     private PresetDTO presetDTO;
-    private String configurationName;
     private EngineConfigurationDTO configuration;
     private boolean isIncrementalScan = false;
     private boolean forceScan = true;
@@ -49,14 +47,13 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
     private String locationURL;
     private String locationBranch;
-    private String absoluteUrlIncludeBranch;
     private String locationUser;
     private String locationPass;
     private String locationPrivateKey;
     private String privateKey;
     private Integer locationPort;
     private LocationType locationType;
-    private boolean isPerforceWorkspaceMode = false;
+    private String perforceWorkspaceMode;
 
     private boolean isSastThresholdEnabled = false;
     private int sastLowThresholdValue = Integer.MAX_VALUE;
@@ -86,7 +83,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
             .desc("If configuration is not set, \"Default Configuration\" will be used for a new project. Possible values: [ \"Default Configuration\" | \"Japanese (Shift-JIS)\" ] Optional.").build();
     private static final Option PARAM_INCREMENTAL = Option.builder("incremental").hasArg(false).desc("Run incremental scan instead of full scan. Optional.").build();
     private static final Option PARAM_FORCE_SCAN = Option.builder("forcescan").hasArg(false).desc("Force scan on source code, which has not been changed since the last scan of the same project. Optional.").build();
-    private static final Option PARAM_WORKSPACE = Option.builder("workspacemode").desc("Use location path to specify Perforce workspace name. Optional.").build();
+    private static final Option PARAM_WORKSPACE = Option.builder("workspacemode").hasArg(true).desc("Use location path to specify Perforce workspace name. Optional.").build();
     private static final Option PARAM_ENABLE_OSA = Option.builder("enableosa").hasArg(false).desc("Enable Open Source Analysis (OSA). It requires the -LocationType to be folder/shared.  Optional.)").build();
 
     private static final Option PARAM_EXCLUDE_FOLDERS = Option.builder("locationpathexclude").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns to exclude from scan. Example: '-LocationPathExclude test*' excludes all folders which start with 'test' prefix. Optional.")
@@ -107,14 +104,14 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     }
 
     void initSastParams(CommandLine parsedCommandLineArguments, LocationType locationType) throws CLIParameterParsingException {
-        presetName = parsedCommandLineArguments.getOptionValue(PARAM_PRESET.getOpt());
+        String presetName = parsedCommandLineArguments.getOptionValue(PARAM_PRESET.getOpt());
         if (Strings.isNullOrEmpty(presetName)) {
             presetDTO = new PresetDTO(DEFAULT_PRESET_NAME);
         } else {
             presetDTO = new PresetDTO(presetName);
         }
 
-        configurationName = parsedCommandLineArguments.getOptionValue(PARAM_CONFIGURATION.getOpt());
+        String configurationName = parsedCommandLineArguments.getOptionValue(PARAM_CONFIGURATION.getOpt());
         if (Strings.isNullOrEmpty(configurationName)) {
             configuration = new EngineConfigurationDTO(DEFAULT_ENGINE_CONFIGURATION_NAME);
         } else {
@@ -139,7 +136,6 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
         locationURL = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_URL.getOpt());
         locationBranch = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_BRANCH.getOpt());
-        absoluteUrlIncludeBranch = locationURL + "/" + locationBranch;
         locationPrivateKey = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_PRIVATE_KEY.getOpt());
         if (locationPrivateKey != null) {
             File resultFile = new File(locationPrivateKey);
@@ -151,8 +147,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         }
 
         initLocationPort(parsedCommandLineArguments);
-        isPerforceWorkspaceMode = parsedCommandLineArguments.hasOption(PARAM_WORKSPACE.getOpt());
-
+        perforceWorkspaceMode = parsedCommandLineArguments.getOptionValue(PARAM_WORKSPACE.getOpt());
 
         String sastLowThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_SAST_LOW_THRESHOLD.getOpt());
         String sastMediumThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_SAST_MEDIUM_THRESHOLD.getOpt());
@@ -219,7 +214,6 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
             reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_RTF_FILE.getOpt()));
         }
     }
-
 
     public boolean isSastThresholdEnabled() {
         return isSastThresholdEnabled;
@@ -305,8 +299,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         return locationPort;
     }
 
-    public boolean isPerforceWorkspaceMode() {
-        return isPerforceWorkspaceMode;
+    public String getPerforceWorkspaceMode() {
+        return perforceWorkspaceMode;
     }
 
     public String[] getExcludedFolders() {
@@ -325,8 +319,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         return hasExcludedFilesParam;
     }
 
-    public void setPerforceWorkspaceMode(boolean perforceWorkspaceMode) {
-        isPerforceWorkspaceMode = perforceWorkspaceMode;
+    public void setPerforceWorkspaceMode(String perforceWorkspaceMode) {
+        this.perforceWorkspaceMode = perforceWorkspaceMode;
     }
 
     public void setPrivateKey(String privateKey) {

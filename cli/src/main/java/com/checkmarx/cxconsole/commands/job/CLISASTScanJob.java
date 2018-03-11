@@ -32,14 +32,7 @@ import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEED
  */
 public class CLISASTScanJob extends CLIScanJob {
 
-    private CxWSResponseProjectConfig projectConfig;
-    private PresetDTO selectedPreset;
-    private EngineConfigurationDTO selectedConfiguration;
     private CxRestSASTClientImpl cxRestSASTClient;
-
-    private String runId;
-    private SourceLocationType sourceLocationType;
-    private RepositoryType repoType;
 
     public CLISASTScanJob(CLIScanParametersSingleton params, boolean isAsyncScan) {
         super(params, isAsyncScan);
@@ -77,6 +70,12 @@ public class CLISASTScanJob extends CLIScanJob {
             handleSharedFolderSource(cliMandatoryParameters.getProject().getId());
         } else if (params.getCliSharedParameters().getLocationType() == SVN) {
             handleSVNSource(cliMandatoryParameters.getProject().getId());
+        } else if (params.getCliSharedParameters().getLocationType() == TFS) {
+            handleTFSSource(cliMandatoryParameters.getProject().getId());
+        }else if (params.getCliSharedParameters().getLocationType() == PERFORCE) {
+            handlePerforceSource(cliMandatoryParameters.getProject().getId());
+        }else if (params.getCliSharedParameters().getLocationType() == GIT) {
+            handleGITSource(cliMandatoryParameters.getProject().getId());
         }
 
 
@@ -122,14 +121,6 @@ public class CLISASTScanJob extends CLIScanJob {
         /////////////////////////////////////////untouched/////////////////////////////////////////////////////////////
 
 
-        if (projectConfig != null && !projectConfig.getProjectConfig().getSourceCodeSettings().getSourceOrigin().equals(SourceLocationType.LOCAL)) {
-            params.getCliSharedParameters().setLocationType(getLocationType(projectConfig.getProjectConfig().getSourceCodeSettings()));
-            if (params.getCliSharedParameters().getLocationType() == LocationType.PERFORCE) {
-                boolean isWorkspace = (this.projectConfig.getProjectConfig().getSourceCodeSettings().getSourceControlSetting().getPerforceBrowsingMode() == CxWSPerforceBrowsingMode.WORKSPACE);
-                params.getCliSastParameters().setPerforceWorkspaceMode(isWorkspace);
-            }
-        }
-
         if (!isAsyncScan) {
             String resultsFileName = params.getCliSastParameters().getXmlFile();
             if (resultsFileName == null) {
@@ -172,10 +163,43 @@ public class CLISASTScanJob extends CLIScanJob {
         return SCAN_SUCCEEDED_EXIT_CODE;
     }
 
+    private void handleGITSource(int projectId) throws CLIJobException {
+        try {
+            cxRestSASTClient.createGITScan(projectId, params.getCliSastParameters().getLocationURL(),
+                    params.getCliSastParameters().getLocationBranch(), params.getCliSastParameters().getPrivateKey());
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e.getMessage());
+        }
+    }
+
+    private void handlePerforceSource(int projectId) throws CLIJobException {
+        String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
+        try {
+            PerforceScanSettingDTO perforceScanSettingDTO = new PerforceScanSettingDTO(params.getCliSastParameters().getLocationUser(),
+                    params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
+                    params.getCliSastParameters().getPrivateKey(), params.getCliSastParameters().getPerforceWorkspaceMode());
+            cxRestSASTClient.createRemoteSourceScan(projectId, perforceScanSettingDTO, RemoteSourceType.PERFORCE);
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e.getMessage());
+        }
+    }
+
+    private void handleTFSSource(int projectId) throws CLIJobException {
+        String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
+        try {
+            SVNAndTFSScanSettingDTO svnScanSettingDTO = new SVNAndTFSScanSettingDTO(params.getCliSastParameters().getLocationUser(),
+                    params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
+                    params.getCliSastParameters().getPrivateKey());
+            cxRestSASTClient.createRemoteSourceScan(projectId, svnScanSettingDTO, RemoteSourceType.TFS);
+        } catch (CxRestSASTClientException e) {
+            throw new CLIJobException(e.getMessage());
+        }
+    }
+
     private void handleSVNSource(int projectId) throws CLIJobException {
         String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
         try {
-            SVNScanSettingDTO svnScanSettingDTO = new SVNScanSettingDTO(params.getCliSastParameters().getLocationUser(),
+            SVNAndTFSScanSettingDTO svnScanSettingDTO = new SVNAndTFSScanSettingDTO(params.getCliSastParameters().getLocationUser(),
                     params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
                     params.getCliSastParameters().getPrivateKey());
             cxRestSASTClient.createRemoteSourceScan(projectId, svnScanSettingDTO, RemoteSourceType.SVN);
@@ -209,7 +233,6 @@ public class CLISASTScanJob extends CLIScanJob {
         }
     }
 
-
     private void updateExistingSastProject(ProjectDTO project) throws CxRestSASTClientException {
         ScanSettingDTO scanSetting = cxRestSASTClient.getProjectScanSetting(project.getId());
         scanSetting.setPresetId(params.getCliSastParameters().getPreset().getId());
@@ -226,88 +249,5 @@ public class CLISASTScanJob extends CLIScanJob {
         scanSetting.setPresetId(params.getCliSastParameters().getPreset().getId());
         scanSetting.setEngineConfigurationId(params.getCliSastParameters().getConfiguration().getId());
         cxRestSASTClient.createProjectScanSetting(scanSetting);
-    }
-
-    private void requestScan(String sessionId) throws CLIJobException {
-        int retriesNum = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.KEY_RETIRES);
-        CxWSResponseRunID runScanResult = null;
-        int count = 0;
-        String errMsg = "";
-
-        sourceLocationTypeResolver();
-
-        // Start scan
-        long getStatusInterval = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.KEY_PROGRESS_INTERVAL);
-        while ((runScanResult == null || !runScanResult.isIsSuccesfull()) && count < retriesNum) {
-//            try {
-//                runScanResult = cxSoapSASTClient.cliScan(sessionId, selectedPreset.getId(), selectedConfiguration.getId(), sourceLocationType, zippedSourcesBytes, repoType, params);
-//            } catch (CxSoapSASTClientException e) {
-//                errMsg = e.getMessage();
-//                count++;
-//                log.trace("Error during quering existing project scan run.", e);
-//                log.info("Error occurred during existing project scan request: " + errMsg + ". Operation retry " + count);
-//            }
-
-            if ((runScanResult != null) && !runScanResult.isIsSuccesfull()) {
-                errMsg = runScanResult.getErrorMessage();
-                log.error("Existing project scan request was unsuccessful.");
-                count++;
-                log.info("Existing project scan run request unsuccessful: " + runScanResult.getErrorMessage() + ". Operation retry " + count);
-            }
-
-            if ((runScanResult == null || !runScanResult.isIsSuccesfull()) && count < retriesNum) {
-                try {
-                    Thread.sleep(getStatusInterval * 1000);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-
-        if ((runScanResult != null) && !runScanResult.isIsSuccesfull()) {
-            throw new CLIJobException("Existing project scan request was unsuccessful. " + (errMsg == null ? "" : errMsg));
-        } else if (runScanResult == null) {
-            throw new CLIJobException("Error occurred during existing project scan. " + errMsg);
-        }
-
-        log.trace("Existing project scan request response: runId:" + runScanResult.getRunId());
-        runId = runScanResult.getRunId();
-    }
-
-    private void sourceLocationTypeResolver() throws CLIJobException {
-        if (params.getCliSharedParameters().getLocationType() != null) {
-            sourceLocationType = getCorrespondingType(params.getCliSharedParameters().getLocationType());
-            if (params.getCliSharedParameters().getLocationType() != LocationType.FOLDER && params.getCliSharedParameters().getLocationType() != LocationType.SHARED) {
-                repoType = RepositoryType.fromValue(params.getCliSharedParameters().getLocationType().getLocationTypeStringValue());
-            }
-        } else {
-            sourceLocationType = projectConfig.getProjectConfig().getSourceCodeSettings().getSourceOrigin();
-            if (sourceLocationType == SourceLocationType.LOCAL) {
-                log.error("Scan command failed since no source location was provided.");
-                throw new CLIJobException("Scan command failed since no source location was provided.");
-            }
-        }
-    }
-
-    private LocationType getLocationType(SourceCodeSettings scSettings) {
-        SourceLocationType slType = scSettings.getSourceOrigin();
-        if (slType.equals(SourceLocationType.LOCAL)) {
-            return FOLDER;
-        } else if (slType.equals(SourceLocationType.SHARED)) {
-            return LocationType.SHARED;
-        } else if (slType.equals(SourceLocationType.SOURCE_CONTROL)) {
-            RepositoryType rType = scSettings.getSourceControlSetting().getRepository();
-            if (rType.equals(RepositoryType.TFS)) {
-                return LocationType.TFS;
-            } else if (rType.equals(RepositoryType.GIT)) {
-                return LocationType.GIT;
-            } else if (rType.equals(RepositoryType.SVN)) {
-                return LocationType.SVN;
-            } else if (rType.equals(RepositoryType.PERFORCE)) {
-                return LocationType.PERFORCE;
-            }
-        }
-
-        return null;
     }
 }

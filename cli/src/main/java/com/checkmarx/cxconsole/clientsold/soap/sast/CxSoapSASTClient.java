@@ -125,15 +125,15 @@ public class CxSoapSASTClient {
                         }
                         break;
                     case TFS:
-                    case PERFORCE:
-                        sourceControlSetting.setUserCredentials(creds);
-                        generateScanPaths = true;
-                        if (parameters.getCliSastParameters().isPerforceWorkspaceMode()) {
-                            sourceControlSetting.setPerforceBrowsingMode(CxWSPerforceBrowsingMode.WORKSPACE);
-                        } else {
-                            sourceControlSetting.setPerforceBrowsingMode(CxWSPerforceBrowsingMode.DEPOT);
-                        }
-                        break;
+//                    case PERFORCE:
+//                        sourceControlSetting.setUserCredentials(creds);
+//                        generateScanPaths = true;
+//                        if (parameters.getCliSastParameters().getPerforceWorkspaceMode()) {
+//                            sourceControlSetting.setPerforceBrowsingMode(CxWSPerforceBrowsingMode.WORKSPACE);
+//                        } else {
+//                            sourceControlSetting.setPerforceBrowsingMode(CxWSPerforceBrowsingMode.DEPOT);
+//                        }
+//                        break;
                     case GIT:
                         sourceControlSetting.setGITBranch(parameters.getCliSastParameters().getLocationBranch());
                         if (parameters.getCliSastParameters().getPrivateKey() != null) {

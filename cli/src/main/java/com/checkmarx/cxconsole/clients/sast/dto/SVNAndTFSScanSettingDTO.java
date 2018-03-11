@@ -3,7 +3,7 @@ package com.checkmarx.cxconsole.clients.sast.dto;
 /**
  * Created by nirli on 08/03/2018.
  */
-public class SVNScanSettingDTO extends RemoteSourceScanSettingDTO {
+public class SVNAndTFSScanSettingDTO extends RemoteSourceScanSettingDTO {
 
     class Uri {
         private String absoluteUrl;
@@ -37,7 +37,7 @@ public class SVNScanSettingDTO extends RemoteSourceScanSettingDTO {
     private String privateKey;
 
 
-    public SVNScanSettingDTO(String userName, String password, String[] paths, String absoluteUrl, int port, String privateKey) {
+    public SVNAndTFSScanSettingDTO(String userName, String password, String[] paths, String absoluteUrl, int port, String privateKey) {
         super(userName, password, paths);
         this.uri = new Uri(absoluteUrl, port);
         this.privateKey = privateKey;

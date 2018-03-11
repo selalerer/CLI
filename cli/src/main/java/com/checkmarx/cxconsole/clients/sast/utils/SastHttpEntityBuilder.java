@@ -75,7 +75,7 @@ public class SastHttpEntityBuilder<T extends RemoteSourceScanSettingDTO> {
         return new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON);
     }
 
-    public static<T extends RemoteSourceScanSettingDTO> HttpEntity createRemoteSourceEntity(T remoteSourceScanSettingDTO) throws CxRestSASTClientException {
+    public static<T extends RemoteSourceScanSettingDTO> HttpEntity createGITSourceEntity(T remoteSourceScanSettingDTO) throws CxRestSASTClientException {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString;
         try {
@@ -85,5 +85,15 @@ public class SastHttpEntityBuilder<T extends RemoteSourceScanSettingDTO> {
         }
 
         return new StringEntity(jsonInString, ContentType.APPLICATION_JSON);
+    }
+
+    public static HttpEntity createGITSourceEntity(String locationURL, String locationBranch, String privateKey) {
+        Map<String, String> content = new HashMap<>();
+        content.put("url", locationURL);
+        content.put("branch", locationBranch);
+        content.put("privateKey", privateKey);
+        JSONObject jsonObject = new JSONObject(content);
+
+        return new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON);
     }
 }

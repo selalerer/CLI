@@ -313,7 +313,7 @@ public class CommandParametersValidator {
 
     private static void validateWorkspaceParameterOnlyInPerforce(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
         if (parameters.getCliSharedParameters().getLocationType() != null &&
-                parameters.getCliSharedParameters().getLocationType() != LocationType.PERFORCE && parameters.getCliSastParameters().isPerforceWorkspaceMode()) {
+                parameters.getCliSharedParameters().getLocationType() != LocationType.PERFORCE && parameters.getCliSastParameters().getPerforceWorkspaceMode() != null) {
             throw new CLICommandParameterValidatorException("WorkspaceMode parameter should be specified only when locationType is Perforce");
         }
     }

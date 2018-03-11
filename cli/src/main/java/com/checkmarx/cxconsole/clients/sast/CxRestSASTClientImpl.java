@@ -268,12 +268,33 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
         try {
             postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType)));
-            postRequest.setEntity(SastHttpEntityBuilder.createRemoteSourceEntity(remoteSourceScanSettingDTO));
+            postRequest.setEntity(SastHttpEntityBuilder.createGITSourceEntity(remoteSourceScanSettingDTO));
 
             response = apacheClient.execute(postRequest);
-            RestClientUtils.validateClientResponse(response, 204, "Failed to create remote source scan setting");
+            RestClientUtils.validateClientResponse(response, 204, "Failed to create " + remoteSourceType.getUrlValue() + " remote source scan setting");
         } catch (IOException | CxValidateResponseException e) {
-            throw new CxRestSASTClientException("Failed to create remote source scan setting: " + e.getMessage());
+            throw new CxRestSASTClientException("Failed to create " + remoteSourceType.getUrlValue() + " remote source scan setting: " + e.getMessage());
+        } finally {
+            if (postRequest != null) {
+                postRequest.releaseConnection();
+            }
+            HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    @Override
+    public void createGITScan(int projectId, String locationURL, String locationBranch, String privateKey) throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpPost postRequest = null;
+
+        try {
+            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, RemoteSourceType.GIT)));
+            postRequest.setEntity(SastHttpEntityBuilder.createGITSourceEntity(locationURL, locationBranch, privateKey));
+
+            response = apacheClient.execute(postRequest);
+            RestClientUtils.validateClientResponse(response, 204, "Failed to create " + RemoteSourceType.GIT.getUrlValue() + " remote source scan setting");
+        } catch (IOException | CxValidateResponseException e) {
+            throw new CxRestSASTClientException("Failed to create " + RemoteSourceType.GIT.getUrlValue() + " remote source scan setting: " + e.getMessage());
         } finally {
             if (postRequest != null) {
                 postRequest.releaseConnection();
