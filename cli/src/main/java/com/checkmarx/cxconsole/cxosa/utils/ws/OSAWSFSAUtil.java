@@ -34,12 +34,12 @@ public class OSAWSFSAUtil {
         String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
         ret.put("d", osaDirectoriesToAnalyze);
 
-        String osaFolderExcludeString = null;
+        String osaFolderExcludeString = "";
         if (cliosaParameters.isHasOsaExcludedFoldersParam()) {
             osaFolderExcludeString = stringArrayToString(cliosaParameters.getOsaExcludedFolders(), OSA_FOLDER_EXCLUDE);
         }
 
-        String osaFilesExcludesString = null;
+        String osaFilesExcludesString = "";
         if (cliosaParameters.isHasOsaExcludedFilesParam()) {
             osaFilesExcludesString = stringArrayToString(cliosaParameters.getOsaExcludedFiles(), OSA_EXCLUDE_FILES);
         }
@@ -51,9 +51,16 @@ public class OSAWSFSAUtil {
         ret.put("archiveIncludes", osaExtractableIncludesString);
 
 
-        String osaExcludes = osaFolderExcludeString + " " + osaFilesExcludesString;
-        if (!Objects.equals(osaExcludes, "null null")) {
-            ret.put("excludes", osaExcludes.trim());
+        StringBuilder osaExcludes = new StringBuilder();
+        if (!osaFolderExcludeString.isEmpty()) {
+            osaExcludes.append(osaFolderExcludeString).append(" ");
+        }
+        if (!osaFilesExcludesString.isEmpty()) {
+            osaExcludes.append(osaFilesExcludesString);
+        }
+
+        if (!osaExcludes.toString().isEmpty()) {
+            ret.put("excludes", osaExcludes.toString().trim());
         }
         ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
         if (cliosaParameters.isExecuteNpmAndBower()) {
@@ -67,8 +74,12 @@ public class OSAWSFSAUtil {
     private static String stringArrayToString(String[] strArr, StringType stringType) {
         StringBuilder builder = new StringBuilder();
         if (stringType.equals(StringType.BASE_DIRECTORIES)) {
-            for (String s : strArr) {
-                builder.append(s.trim()).append(",");
+            if (strArr.length > 1) {
+                for (String s : strArr) {
+                    builder.append(s.trim()).append(",");
+                }
+            } else {
+                builder.append(strArr[0].trim());
             }
         }
 

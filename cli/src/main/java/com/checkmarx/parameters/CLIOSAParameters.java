@@ -76,6 +76,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         osaLocationPath = parsedCommandLineArguments.getOptionValues(PARAM_OSA_LOCATION_PATH.getOpt());
 
         hasOsaExcludedFoldersParam = parsedCommandLineArguments.hasOption(PARAM_OSA_EXCLUDE_FOLDERS.getOpt());
+        osaExcludedFolders = parsedCommandLineArguments.getOptionValues(PARAM_OSA_EXCLUDE_FOLDERS.getOpt());
         hasOsaExcludedFilesParam = parsedCommandLineArguments.hasOption(PARAM_OSA_EXCLUDE_FILES.getOpt());
         osaExcludedFiles = parsedCommandLineArguments.getOptionValues(PARAM_OSA_EXCLUDE_FILES.getOpt());
         hasOsaIncludedFilesParam = parsedCommandLineArguments.hasOption(PARAM_OSA_INCLUDE_FILES.getOpt());
