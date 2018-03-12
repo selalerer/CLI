@@ -6,6 +6,7 @@ import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import com.checkmarx.cxconsole.parameters.utils.ParametersUtils;
+import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.google.common.base.Strings;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;

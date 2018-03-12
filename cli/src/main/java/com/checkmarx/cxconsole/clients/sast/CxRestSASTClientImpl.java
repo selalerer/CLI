@@ -12,6 +12,7 @@ import com.checkmarx.cxconsole.clients.sast.utils.SastResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -25,10 +26,8 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
@@ -185,7 +184,8 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
         try {
             putRequest = new HttpPut(String.valueOf(SastResourceURIBuilder.buildSASTScanExclusionSettingURL(new URL(hostName), projectId)));
-            putRequest.setEntity(SastHttpEntityBuilder.createScanExclusionSettingEntity(Arrays.toString(excludeFoldersPattern), Arrays.toString(excludeFilesPattern)));
+            putRequest.setEntity(SastHttpEntityBuilder.createScanExclusionSettingEntity(StringUtils.join(excludeFoldersPattern, ","),
+                    StringUtils.join(excludeFilesPattern, ",")));
 
             response = apacheClient.execute(putRequest);
             RestClientUtils.validateClientResponse(response, 200, "Failed to update scan exclusions settings");
@@ -364,7 +364,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
             RestClientUtils.validateClientResponse(response, 200, "Failed to get report status");
 
             JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
-            return ReportStatusValue.valueOf(jsonResponse.getJSONObject("status").getString("value"));
+            return ReportStatusValue.getServerValue(jsonResponse.getJSONObject("status").getString("value"));
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestSASTClientException("Failed to get report status: " + e.getMessage());
         } finally {
@@ -385,7 +385,6 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
             response = apacheClient.execute(getRequest);
             RestClientUtils.validateClientResponse(response, 200, "Failed to get report file");
 
-            RestClientUtils.parseJsonObjectFromResponse(response);
             FilesUtils.createReportFile(response, reportFilePath);
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestSASTClientException("Failed to get report file: " + e.getMessage());

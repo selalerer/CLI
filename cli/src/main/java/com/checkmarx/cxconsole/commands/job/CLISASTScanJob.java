@@ -63,7 +63,8 @@ public class CLISASTScanJob extends CLIScanJob {
                 updateExistingSastProject(cliMandatoryParameters.getProject());
             }
             if (params.getCliSastParameters().isHasExcludedFilesParam() || params.getCliSastParameters().isHasExcludedFoldersParam()) {
-                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(), FilesUtils.getExcludeFoldersPatterns(), FilesUtils.getExcludeFilesPatterns());
+                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(),
+                        params.getCliSastParameters().getExcludedFolders(), params.getCliSastParameters().getExcludedFiles());
             }
         } catch (CxRestGeneralClientException | CxRestSASTClientException e) {
             throw new CLIJobException(e);
@@ -95,7 +96,7 @@ public class CLISASTScanJob extends CLIScanJob {
 
         // wait for scan completion
         if (isAsyncScan) {
-            log.info("Asynchronous scan initiated, Waiting for SAST scan to queue.");
+            log.info("Asynchronous scan initiated, Waiting for SAST scan to enter the queue.");
         } else {
             log.info("Full scan initiated, Waiting for SAST scan to finish.");
         }
@@ -134,18 +135,15 @@ public class CLISASTScanJob extends CLIScanJob {
             //SAST reports
             if (!params.getCliSastParameters().getReportType().isEmpty()) {
                 for (int i = 0; i < params.getCliSastParameters().getReportType().size(); i++) {
-                    log.info("Report type: " + params.getCliSastParameters().getReportType().get(i));
                     String reportFilePath = params.getCliSastParameters().getReportFile().get(i);
-                    if (reportFilePath == null) {
-                        reportFilePath = PathHandler.normalizePathString(cliMandatoryParameters.getProject().getName()) + "." + params.getCliSastParameters().getReportType().get(i).getValue();
-                    }
+                    log.info("Creating report file: " + reportFilePath);
                     try {
                         int reportId = cxRestSASTClient.createReport(scanId, params.getCliSastParameters().getReportType().get(i));
                         ReportStatusValue reportStatus;
                         do {
                             //TODO: change sleep to something smarter
-                            Thread.sleep(350);
                             reportStatus = cxRestSASTClient.getReportStatus(reportId);
+                            Thread.sleep(350);
                         } while (reportStatus == ReportStatusValue.IN_PROCESS);
                         if (reportStatus == ReportStatusValue.CREATED) {
                             cxRestSASTClient.createReportFile(reportId, reportFilePath);

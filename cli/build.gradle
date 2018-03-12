@@ -1,7 +1,6 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 
 plugins {
-    id "no.nils.wsdl2java" version "0.8"
     id "com.jfrog.artifactory" version "3.1.2"
     id "org.sonarqube" version "2.5"
 }
@@ -77,27 +76,6 @@ dependencies {
                 exclude group: 'org.slf4j', module: 'slf4j-log4j12'
                 exclude group: 'ch.qos.logback', module: 'logback-classic'
             }
-}
-
-wsdl2java {
-    generatedWsdlDir = file("build/generated-sources")  // target directory for generated source code
-    wsdlDir = file("src/main/config/com/checkmarx/cxcviewer/ws") // define to support incremental build
-    wsdlsToGenerate = [
-            [
-                    '-mark-generated',
-                    '-p',
-                    'com.checkmarx.cxviewer.ws.resolver',
-                    '-client',
-                    'src/main/config/com/checkmarx/cxcviewer/ws/cxwsresolver.wsdl'
-            ],
-            [
-                    '-mark-generated',
-                    '-p',
-                    'com.checkmarx.cxviewer.ws.generated',
-                    '-client',
-                    'src/main/config/com/checkmarx/cxcviewer/ws/CxCLIWebServiceV1.wsdl']
-    ]
-    cxfVersion = "3.1.1"
 }
 
 distributions {

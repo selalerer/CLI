@@ -95,7 +95,7 @@ public class SastHttpEntityBuilder<T extends RemoteSourceScanSettingDTO> {
 
     public static HttpEntity createScanExclusionSettingEntity(String excludeFoldersPattern, String excludeFilesPattern) {
         Map<String, String> content = new HashMap<>();
-        content.put("excludeFoldersPattern", excludeFilesPattern);
+        content.put("excludeFoldersPattern", excludeFoldersPattern);
         content.put("excludeFilesPattern", excludeFilesPattern);
         JSONObject jsonObject = new JSONObject(content);
 

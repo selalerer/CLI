@@ -107,7 +107,9 @@ public abstract class CLICommand {
                     log.debug("Option: " + StringUtils.capitalize(opt.getOpt()) + "   Value: True");
                 } else if (Objects.equals(option, "osalocationpath")
                         || Objects.equals(option, "osafilesexclude")
-                        || Objects.equals(option, "osaarchivetoextract")) {
+                        || Objects.equals(option, "osaarchivetoextract")
+                        || Objects.equals(option, "locationpathexclude")
+                        || Objects.equals(option, "locationfilesexclude")) {
                     log.debug("Option: " + StringUtils.capitalize(opt.getOpt()) + "   Value: " + StringUtils.join(opt.getValues(), ", "));
                 } else {
                     log.debug("Option: " + StringUtils.capitalize(opt.getOpt()) + "   Value: " + opt.getValue());

@@ -89,16 +89,23 @@ public class FilesUtils {
     private static String[] createExclusionPatternsArray(String defaultKey, CLISASTParameters cliSastParameters) {
         LinkedList<String> excludePatterns = new LinkedList<>();
         try {
-            String defaultExcludedFiles = ConfigMgr.getCfgMgr().getProperty(defaultKey);
-            for (String file : StringUtils.split(defaultExcludedFiles, ",")) {
+            String defaultExcluded = ConfigMgr.getCfgMgr().getProperty(defaultKey);
+            for (String file : StringUtils.split(defaultExcluded, ",")) {
                 String trimmedPattern = file.trim();
                 if (!Objects.equals(trimmedPattern, "")) {
                     excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
                 }
             }
 
-            if (cliSastParameters.isHasExcludedFilesParam()) {
+            if (defaultKey.contains("files") && cliSastParameters.isHasExcludedFilesParam()) {
                 for (String file : cliSastParameters.getExcludedFiles()) {
+                    String trimmedPattern = file.trim();
+                    if (!Objects.equals(trimmedPattern, "")) {
+                        excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
+                    }
+                }
+            } else if (defaultKey.contains("folders") && cliSastParameters.isHasExcludedFoldersParam()) {
+                for (String file : cliSastParameters.getExcludedFolders()) {
                     String trimmedPattern = file.trim();
                     if (!Objects.equals(trimmedPattern, "")) {
                         excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));

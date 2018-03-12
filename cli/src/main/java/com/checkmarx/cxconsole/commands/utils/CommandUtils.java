@@ -1,7 +1,6 @@
 package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
-import com.checkmarx.cxviewer.ws.generated.CxWSBasicRepsonse;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -48,14 +47,7 @@ public class CommandUtils {
         return (responseCode == 404);
     }
 
-    public static void validateResponse(CxWSBasicRepsonse responseObject) throws CxRestClientException {
-        if (responseObject == null || !responseObject.isIsSuccesfull()) {
-            if (responseObject != null && responseObject.getErrorMessage() != null) {
-                throw new CxRestClientException("Error validate response: " + responseObject.getErrorMessage());
-            } else if (responseObject == null) {
-                throw new CxRestClientException("Error validate response: no response was recieved from the server.");
-            }
-        }
+    public static void validateResponse() throws CxRestClientException {
     }
 
     public static String buildHostWithWSDL(String host) {
