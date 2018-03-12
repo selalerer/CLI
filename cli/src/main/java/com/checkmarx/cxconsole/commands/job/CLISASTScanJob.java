@@ -181,7 +181,12 @@ public class CLISASTScanJob extends CLIScanJob {
         try {
             PerforceScanSettingDTO perforceScanSettingDTO = new PerforceScanSettingDTO(params.getCliSastParameters().getLocationUser(),
                     params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
-                    params.getCliSastParameters().getPrivateKey(), params.getCliSastParameters().getPerforceWorkspaceMode());
+                    params.getCliSastParameters().getPrivateKey(), null);
+            if (params.getCliSastParameters().getPerforceWorkspaceMode() != null) {
+                perforceScanSettingDTO.setBrowseMode("Workspace");
+            } else {
+                perforceScanSettingDTO.setBrowseMode("Depot");
+            }
             cxRestSASTClient.createRemoteSourceScan(projectId, perforceScanSettingDTO, RemoteSourceType.PERFORCE);
         } catch (CxRestSASTClientException e) {
             throw new CLIJobException(e.getMessage());
