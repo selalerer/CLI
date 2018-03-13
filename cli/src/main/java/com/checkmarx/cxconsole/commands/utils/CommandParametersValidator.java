@@ -122,17 +122,17 @@ public class CommandParametersValidator {
     }
 
     public static void validatePrivateKeyLocationGITSVN(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
-        if (parameters.getCliSastParameters().getLocationPrivateKey() != null
+        if (parameters.getCliSastParameters().getLocationPrivateKeyFilePath() != null
                 && parameters.getCliSharedParameters().getLocationType() != null
                 && (parameters.getCliSharedParameters().getLocationType() == LocationType.GIT || parameters.getCliSharedParameters().getLocationType() == LocationType.SVN)) {
-            File keyFile = new File(parameters.getCliSastParameters().getLocationPrivateKey().trim());
+            File keyFile = new File(parameters.getCliSastParameters().getLocationPrivateKeyFilePath().trim());
             if (!keyFile.exists()) {
                 throw new CLICommandParameterValidatorException("Private key file is not found in: " +
-                        parameters.getCliSastParameters().getLocationPrivateKey());
+                        parameters.getCliSastParameters().getLocationPrivateKeyFilePath());
             }
             if (keyFile.isDirectory()) {
                 throw new CLICommandParameterValidatorException("Private key file is a folder: " +
-                        parameters.getCliSastParameters().getLocationPrivateKey());
+                        parameters.getCliSastParameters().getLocationPrivateKeyFilePath());
             }
         }
     }

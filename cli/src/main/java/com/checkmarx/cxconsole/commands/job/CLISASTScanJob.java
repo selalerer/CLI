@@ -13,14 +13,17 @@ import com.checkmarx.cxconsole.clients.sast.dto.SVNAndTFSScanSettingDTO;
 import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
-import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -169,10 +172,16 @@ public class CLISASTScanJob extends CLIScanJob {
 
     private void handleGITSource(int projectId) throws CLIJobException {
         try {
+            byte[] keyFile = new byte[0];
+            if (params.getCliSastParameters().getLocationPrivateKeyFilePath() != null) {
+                keyFile = filePathToByteArray(params.getCliSastParameters().getLocationPrivateKeyFilePath());
+            }
             cxRestSASTClient.createGITScan(projectId, params.getCliSastParameters().getLocationURL(),
-                    params.getCliSastParameters().getLocationBranch(), params.getCliSastParameters().getPrivateKey());
+                    params.getCliSastParameters().getLocationBranch(), keyFile);
         } catch (CxRestSASTClientException e) {
             throw new CLIJobException(e.getMessage());
+        } catch (IOException e) {
+            throw new CLIJobException("Error reading from key file: " + e.getMessage());
         }
     }
 
@@ -181,7 +190,7 @@ public class CLISASTScanJob extends CLIScanJob {
         try {
             PerforceScanSettingDTO perforceScanSettingDTO = new PerforceScanSettingDTO(params.getCliSastParameters().getLocationUser(),
                     params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
-                    params.getCliSastParameters().getPrivateKey(), null);
+                    null, null);
             if (params.getCliSastParameters().getPerforceWorkspaceMode() != null) {
                 perforceScanSettingDTO.setBrowseMode("Workspace");
             } else {
@@ -198,7 +207,7 @@ public class CLISASTScanJob extends CLIScanJob {
         try {
             SVNAndTFSScanSettingDTO svnScanSettingDTO = new SVNAndTFSScanSettingDTO(params.getCliSastParameters().getLocationUser(),
                     params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
-                    params.getCliSastParameters().getPrivateKey());
+                    null);
             cxRestSASTClient.createRemoteSourceScan(projectId, svnScanSettingDTO, RemoteSourceType.TFS);
         } catch (CxRestSASTClientException e) {
             throw new CLIJobException(e.getMessage());
@@ -208,13 +217,29 @@ public class CLISASTScanJob extends CLIScanJob {
     private void handleSVNSource(int projectId) throws CLIJobException {
         String[] paths = params.getCliSharedParameters().getLocationPath().split(";");
         try {
+            byte[] keyFile = new byte[0];
+            if (params.getCliSastParameters().getLocationPrivateKeyFilePath() != null) {
+                keyFile = filePathToByteArray(params.getCliSastParameters().getLocationPrivateKeyFilePath());
+            }
             SVNAndTFSScanSettingDTO svnScanSettingDTO = new SVNAndTFSScanSettingDTO(params.getCliSastParameters().getLocationUser(),
                     params.getCliSastParameters().getLocationPass(), paths, params.getCliSastParameters().getLocationURL(), params.getCliSastParameters().getLocationPort(),
-                    params.getCliSastParameters().getPrivateKey());
+                    keyFile);
             cxRestSASTClient.createRemoteSourceScan(projectId, svnScanSettingDTO, RemoteSourceType.SVN);
         } catch (CxRestSASTClientException e) {
             throw new CLIJobException(e.getMessage());
+        } catch (IOException e) {
+            throw new CLIJobException("Error reading from key file: " + e.getMessage());
         }
+    }
+
+    private byte[] filePathToByteArray(String fileLocation) throws IOException {
+        File resultFile = new File(fileLocation);
+        if (!resultFile.isAbsolute()) {
+            String path = System.getProperty("user.dir");
+            fileLocation = path + File.separator + fileLocation;
+        }
+        FileInputStream fis = new FileInputStream(new File(fileLocation));
+        return IOUtils.toByteArray(fis);
     }
 
     private void handleSharedFolderSource(int projectId) throws CLIJobException {

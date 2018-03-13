@@ -34,21 +34,21 @@ public class ParametersUtils {
         }
     }
 
-    public static String setPrivateKeyFromLocation(String privateKeyLocation) throws CLIParameterParsingException {
-        File keyFile = new File(privateKeyLocation);
-        try (FileReader fileReader = new FileReader(keyFile);
-             BufferedReader in = new BufferedReader(fileReader)) {
-            String line;
-            StringBuilder keyData = new StringBuilder();
-            while ((line = in.readLine()) != null) {
-                keyData.append(line);
-                keyData.append("\n");
-            }
-            return keyData.toString();
-        } catch (IOException ex) {
-            throw new CLIParameterParsingException("Error set private key from private key location: " + ex.getMessage());
-        }
-    }
+//    public static String setPrivateKeyFromLocation(String privateKeyLocation) throws CLIParameterParsingException {
+//        File keyFile = new File(privateKeyLocation);
+//        try (FileReader fileReader = new FileReader(keyFile);
+//             BufferedReader in = new BufferedReader(fileReader)) {
+//            String line;
+//            StringBuilder keyData = new StringBuilder();
+//            while ((line = in.readLine()) != null) {
+//                keyData.append(line);
+//                keyData.append("\n");
+//            }
+//            return keyData.toString();
+//        } catch (IOException ex) {
+//            throw new CLIParameterParsingException("Error set private key from private key location: " + ex.getMessage());
+//        }
+//    }
 
 
 }

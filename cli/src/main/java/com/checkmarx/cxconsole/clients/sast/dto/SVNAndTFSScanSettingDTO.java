@@ -5,12 +5,12 @@ package com.checkmarx.cxconsole.clients.sast.dto;
  */
 public class SVNAndTFSScanSettingDTO extends RemoteSourceScanSettingDTO {
 
-    class Uri {
-        private String absoluteUrl;
+    public class Uri {
+        String absoluteUrl;
 
-        private int port;
+        int port;
 
-        public Uri(String absoluteUrl, int port) {
+        Uri(String absoluteUrl, int port) {
             this.absoluteUrl = absoluteUrl;
             this.port = port;
         }
@@ -34,10 +34,10 @@ public class SVNAndTFSScanSettingDTO extends RemoteSourceScanSettingDTO {
 
     private Uri uri;
 
-    private String privateKey;
+    private byte[] privateKey;
 
 
-    public SVNAndTFSScanSettingDTO(String userName, String password, String[] paths, String absoluteUrl, int port, String privateKey) {
+    public SVNAndTFSScanSettingDTO(String userName, String password, String[] paths, String absoluteUrl, int port, byte[] privateKey) {
         super(userName, password, paths);
         this.uri = new Uri(absoluteUrl, port);
         this.privateKey = privateKey;
@@ -51,11 +51,11 @@ public class SVNAndTFSScanSettingDTO extends RemoteSourceScanSettingDTO {
         this.uri = uri;
     }
 
-    public String getPrivateKey() {
+    public byte[] getPrivateKey() {
         return privateKey;
     }
 
-    public void setPrivateKey(String privateKey) {
+    public void setPrivateKey(byte[] privateKey) {
         this.privateKey = privateKey;
     }
 }

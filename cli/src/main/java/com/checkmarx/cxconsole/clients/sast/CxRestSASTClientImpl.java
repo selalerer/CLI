@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
@@ -293,8 +294,19 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         HttpPost postRequest = null;
 
         try {
-            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType)));
-            postRequest.setEntity(SastHttpEntityBuilder.createGITSourceEntity(remoteSourceScanSettingDTO));
+            if (remoteSourceScanSettingDTO instanceof SVNAndTFSScanSettingDTO && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey().length > 1) {
+                postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType, true)));
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                builder.addBinaryBody("privateKey", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey());
+                builder.addTextBody("absoluteUrl", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getAbsoluteUrl());
+                builder.addTextBody("port", String.valueOf(((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getPort()));
+                builder.addTextBody("path", (Arrays.toString(remoteSourceScanSettingDTO.getPaths())));
+                HttpEntity multipart = builder.build();
+                postRequest.setEntity(multipart);
+            } else {
+                postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType, false)));
+                postRequest.setEntity(SastHttpEntityBuilder.createRemoteSourceEntity(remoteSourceScanSettingDTO));
+            }
 
             response = apacheClient.execute(postRequest);
             RestClientUtils.validateClientResponse(response, 204, "Failed to create " + remoteSourceType.getUrlValue() + " remote source scan setting");
@@ -309,13 +321,23 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
     }
 
     @Override
-    public void createGITScan(int projectId, String locationURL, String locationBranch, String privateKey) throws CxRestSASTClientException {
+    public void createGITScan(int projectId, String locationURL, String locationBranch, byte[] privateKey) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpPost postRequest = null;
 
         try {
-            postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, RemoteSourceType.GIT)));
-            postRequest.setEntity(SastHttpEntityBuilder.createGITSourceEntity(locationURL, locationBranch, privateKey));
+            if (privateKey.length < 1) {
+                postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, RemoteSourceType.GIT, false)));
+                postRequest.setEntity(SastHttpEntityBuilder.createGITSourceEntity(locationURL, locationBranch));
+            } else {
+                postRequest = new HttpPost(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, RemoteSourceType.GIT, true)));
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                builder.addBinaryBody("privateKey", privateKey);
+                builder.addTextBody("url", locationURL);
+                builder.addTextBody("branch", locationBranch);
+                HttpEntity multipart = builder.build();
+                postRequest.setEntity(multipart);
+            }
 
             response = apacheClient.execute(postRequest);
             RestClientUtils.validateClientResponse(response, 204, "Failed to create " + RemoteSourceType.GIT.getUrlValue() + " remote source scan setting");

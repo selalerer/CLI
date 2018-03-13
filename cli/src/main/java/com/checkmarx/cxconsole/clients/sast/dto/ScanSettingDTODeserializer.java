@@ -18,7 +18,7 @@ public class ScanSettingDTODeserializer extends StdDeserializer<ScanSettingDTO> 
         this(null);
     }
 
-    public ScanSettingDTODeserializer(Class<?> vc) {
+    private ScanSettingDTODeserializer(Class<?> vc) {
         super(vc);
     }
 

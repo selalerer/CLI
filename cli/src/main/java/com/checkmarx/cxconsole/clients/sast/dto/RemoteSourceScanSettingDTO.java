@@ -5,13 +5,13 @@ package com.checkmarx.cxconsole.clients.sast.dto;
  */
 public class RemoteSourceScanSettingDTO {
 
-    class Credentials {
+    private class Credentials {
 
         private String userName;
 
         private String password;
 
-        public Credentials(String userName, String password) {
+        Credentials(String userName, String password) {
             this.userName = userName;
             this.password = password;
         }

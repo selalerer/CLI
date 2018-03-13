@@ -43,22 +43,6 @@ public abstract class CLIScanJob implements Callable<Integer> {
         cxRestGeneralClient = new CxRestGeneralClientImpl(cxRestLoginClient);
     }
 
-    void storeXMLResults(String fileName, byte[] resultBytes) throws CLIJobException {
-        File resFile = initFile(fileName);
-        try (FileOutputStream fOut = new FileOutputStream(resFile.getAbsolutePath())) {
-            fOut.write(resultBytes);
-        } catch (IOException e) {
-            log.error("Saving xml results to file [" + resFile.getAbsolutePath() + "] failed");
-            log.trace("", e);
-        }
-    }
-
-    private File initFile(String fileName) throws CLIJobException {
-        String folderPath = JobUtils.gerWorkDirectory(params);
-        String resultFilePath = PathHandler.initFilePath(params.getCliMandatoryParameters().getProject().getName(), fileName, ".xml", folderPath);
-        return new File(resultFilePath);
-    }
-
     @Override
     public abstract Integer call() throws CLIJobException;
 

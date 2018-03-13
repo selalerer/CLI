@@ -89,7 +89,7 @@ public class ScanSettingDTO {
         return postScanActionId;
     }
 
-    public void setPostScanActionId(Integer postScanActionId) {
+    void setPostScanActionId(Integer postScanActionId) {
         this.postScanActionId = postScanActionId;
     }
 
@@ -97,7 +97,7 @@ public class ScanSettingDTO {
         return emailNotifications;
     }
 
-    public void setEmailNotifications(EmailNotificationsDTO emailNotifications) {
+    void setEmailNotifications(EmailNotificationsDTO emailNotifications) {
         this.emailNotifications = emailNotifications;
     }
 }

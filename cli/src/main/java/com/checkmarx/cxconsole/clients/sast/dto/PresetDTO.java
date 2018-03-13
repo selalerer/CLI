@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class PresetDTO {
 
-    class presetLink {
+    private class PresetLink {
 
         private String rel;
 
         private String uri;
 
-        public presetLink() {
+        public PresetLink() {
         }
 
         public String getRel() {
@@ -40,7 +40,7 @@ public class PresetDTO {
     private String ownerName;
 
     @JsonProperty("link")
-    private presetLink link;
+    private PresetLink link;
 
     public PresetDTO() {
     }
@@ -73,11 +73,11 @@ public class PresetDTO {
         this.ownerName = ownerName;
     }
 
-    public presetLink getLink() {
+    public PresetLink getLink() {
         return link;
     }
 
-    public void setLink(presetLink link) {
+    public void setLink(PresetLink link) {
         this.link = link;
     }
 }

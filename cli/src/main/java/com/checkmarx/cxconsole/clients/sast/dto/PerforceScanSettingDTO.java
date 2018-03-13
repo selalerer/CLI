@@ -8,7 +8,7 @@ public class PerforceScanSettingDTO extends SVNAndTFSScanSettingDTO {
     private String browseMode;
 
     public PerforceScanSettingDTO(String userName, String password, String[] paths, String absoluteUrl, int port,
-                                  String privateKey, String browseMode) {
+                                  byte[] privateKey, String browseMode) {
         super(userName, password, paths, absoluteUrl, port, privateKey);
         this.browseMode = browseMode;
     }

@@ -11,7 +11,7 @@ import java.net.URL;
 public class CommandUtils {
 
     private static final int TIMEOUT_FOR_CX_SERVER_AVAILABILITY = 250;
-    private static final String CX_CLI_WEB_SERVICE_URL = "/cxwebinterface/CLI/CxCLIWebServiceV1.asmx";
+    private static final String CX_SWAGGER = "/restapi/help/swagger";
 
     public static String resolveServerProtocol(String originalHost) throws CxRestClientException {
         if (!originalHost.startsWith("http") && !originalHost.startsWith("https")) {
@@ -37,20 +37,16 @@ public class CommandUtils {
             URL urlAddress = new URL(buildHostWithWSDL(host));
             HttpURLConnection httpConnection = (HttpURLConnection) urlAddress.openConnection();
             httpConnection.setRequestMethod("GET");
-            httpConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
             httpConnection.setConnectTimeout(TIMEOUT_FOR_CX_SERVER_AVAILABILITY);
             responseCode = httpConnection.getResponseCode();
         } catch (Exception e) {
             return false;
         }
 
-        return (responseCode == 404);
+        return (responseCode == 200);
     }
 
-    public static void validateResponse() throws CxRestClientException {
-    }
-
-    public static String buildHostWithWSDL(String host) {
-        return host + CX_CLI_WEB_SERVICE_URL;
+    private static String buildHostWithWSDL(String host) {
+        return host + CX_SWAGGER;
     }
 }

@@ -104,9 +104,13 @@ public class SastResourceURIBuilder {
         }
     }
 
-    public static URL buildCreateRemoteSourceScanURL(URL serverUrl, int projectId, RemoteSourceType remoteSourceType) {
+    public static URL buildCreateRemoteSourceScanURL(URL serverUrl, int projectId, RemoteSourceType remoteSourceType, boolean isSSH) {
         try {
-            return new URL(serverUrl, APPLICATION_NAME + PROJECTS_RESOURCE + "/" + projectId + SAST_REMOTE_SOURCE_CODE_RESOURCE + "/" + remoteSourceType.getUrlValue());
+            if (!isSSH) {
+                return new URL(serverUrl, APPLICATION_NAME + PROJECTS_RESOURCE + "/" + projectId + SAST_REMOTE_SOURCE_CODE_RESOURCE + "/" + remoteSourceType.getUrlValue());
+            } else {
+                return new URL(serverUrl, APPLICATION_NAME + PROJECTS_RESOURCE + "/" + projectId + SAST_REMOTE_SOURCE_CODE_RESOURCE + "/" + remoteSourceType.getUrlValue() + "/ssh");
+            }
         } catch (MalformedURLException e) {
             return serverUrl;
         }

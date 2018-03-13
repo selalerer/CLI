@@ -6,14 +6,15 @@ import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import com.checkmarx.cxconsole.parameters.utils.ParametersUtils;
-import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.google.common.base.Strings;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +52,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     private String locationBranch;
     private String locationUser;
     private String locationPass;
-    private String locationPrivateKey;
-    private String privateKey;
+    private String locationPrivateKeyFilePath;
     private Integer locationPort;
     private LocationType locationType;
     private String perforceWorkspaceMode;
@@ -138,15 +138,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
         locationURL = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_URL.getOpt());
         locationBranch = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_BRANCH.getOpt());
-        locationPrivateKey = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_PRIVATE_KEY.getOpt());
-        if (locationPrivateKey != null) {
-            File resultFile = new File(locationPrivateKey);
-            if (!resultFile.isAbsolute()) {
-                String path = System.getProperty("user.dir");
-                locationPrivateKey = path + File.separator + locationPrivateKey;
-            }
-            privateKey = ParametersUtils.setPrivateKeyFromLocation(locationPrivateKey);
-        }
+        locationPrivateKeyFilePath = parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_PRIVATE_KEY.getOpt());
 
         initLocationPort(parsedCommandLineArguments);
         perforceWorkspaceMode = parsedCommandLineArguments.getOptionValue(PARAM_WORKSPACE.getOpt());
@@ -292,12 +284,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         return locationPass;
     }
 
-    public String getLocationPrivateKey() {
-        return locationPrivateKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
+    public String getLocationPrivateKeyFilePath() {
+        return locationPrivateKeyFilePath;
     }
 
     public Integer getLocationPort() {
@@ -326,10 +314,6 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
     public void setPerforceWorkspaceMode(String perforceWorkspaceMode) {
         this.perforceWorkspaceMode = perforceWorkspaceMode;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
     }
 
     @Override
