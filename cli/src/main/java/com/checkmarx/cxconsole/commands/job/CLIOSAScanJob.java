@@ -31,7 +31,6 @@ import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresh
  */
 public class CLIOSAScanJob extends CLIScanJob {
 
-    private static final String OSA_REPORT_NAME = "CxOSAReport";
     private CxRestOSAClient cxRestOSAClient;
 
     public CLIOSAScanJob(CLIScanParametersSingleton params, boolean isAsyncScan) {
@@ -46,7 +45,7 @@ public class CLIOSAScanJob extends CLIScanJob {
             log.info("Project name is \"" + params.getCliMandatoryParameters().getProject().getName() + "\"");
 
             // Connect to Checkmarx service, if not already connected.
-            if (!cxRestLoginClient.isLoggedIn()) {
+            if (!cxRestLoginClient.isLoggedIn() || !cxRestGeneralClient.isLoggedIn()) {
                 super.login();
             }
             cxRestOSAClient = new CxRestOSAClientImpl(cxRestLoginClient);

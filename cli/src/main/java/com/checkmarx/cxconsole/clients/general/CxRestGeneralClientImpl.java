@@ -35,7 +35,9 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
 
     private HttpClient apacheClient;
     private String hostName;
-    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON + ";v=1.0");
+    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
+    private static final Header CLI_ACCEPT_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
+
 
     public CxRestGeneralClientImpl(CxRestLoginClient restClient) {
         this.apacheClient = restClient.getClient();
@@ -50,7 +52,7 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(GeneralResourceURIBuilder.buildGetTeamsURL(new URL(hostName))))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -71,7 +73,7 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(GeneralResourceURIBuilder.buildProjectsURL(new URL(hostName))))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -109,5 +111,10 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
         } finally {
             HttpClientUtils.closeQuietly(response);
         }
+    }
+
+    @Override
+    public boolean isLoggedIn() {
+        return (apacheClient != null);
     }
 }

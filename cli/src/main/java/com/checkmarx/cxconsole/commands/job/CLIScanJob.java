@@ -19,8 +19,8 @@ public abstract class CLIScanJob implements Callable<Integer> {
 
     protected static Logger log = Logger.getLogger(CLIScanJob.class);
 
-    CxRestLoginClient cxRestLoginClient;
-    CxRestGeneralClient cxRestGeneralClient;
+    static CxRestLoginClient cxRestLoginClient;
+    static CxRestGeneralClient cxRestGeneralClient;
     boolean isAsyncScan;
 
     private String errorMsg;

@@ -17,5 +17,5 @@ public interface CxRestGeneralClient {
 
     void createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException;
 
-
+    boolean isLoggedIn();
 }

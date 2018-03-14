@@ -91,7 +91,6 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
-                    .setHeader(CLI_ACCEPT_HEADER)
                     .build();
 
             response = apacheClient.execute(getRequest);
@@ -149,7 +148,7 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
         try {
             getRequest = RequestBuilder.get()
                     .setUri((String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanLibrariesResultsURL(new URL(hostName), scanId))))
-                    .setHeader(CLI_ACCEPT_HEADER)
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -170,7 +169,7 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanVulnerabilitiesResultsURL(new URL(hostName), scanId)))
-                    .setHeader(CLI_ACCEPT_HEADER)
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
