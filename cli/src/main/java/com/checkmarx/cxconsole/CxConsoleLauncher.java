@@ -94,7 +94,7 @@ public class CxConsoleLauncher {
             log.fatal(INVALID_COMMAND_PARAMETERS_MSG + e.getMessage() + "\n");
             return errorCodeResolver(e.getMessage());
         } catch (ExceptionInInitializerError | CLICommandFactoryException e) {
-            log.fatal(e.getMessage());
+            log.fatal(e);
             return errorCodeResolver(e.getMessage());
         }
 

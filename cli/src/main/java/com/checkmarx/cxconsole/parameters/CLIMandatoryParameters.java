@@ -58,10 +58,13 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         hasPasswordParam = parsedCommandLineArguments.hasOption(PARAM_PASSWORD.getOpt());
         hasTokenParam = parsedCommandLineArguments.hasOption(PARAM_TOKEN.getOpt());
 
-        projectNameWithTeamPath = parsedCommandLineArguments.getOptionValue(PARAM_PROJECT_NAME.getOpt()).replaceAll("/", "\\\\");
-        projectName = extractProjectName(projectNameWithTeamPath);
-        team = extractTeamPath(projectNameWithTeamPath);
-        project = new ProjectDTO(projectName);
+        projectNameWithTeamPath = parsedCommandLineArguments.getOptionValue(PARAM_PROJECT_NAME.getOpt());
+        if (projectNameWithTeamPath != null) {
+            projectNameWithTeamPath = projectNameWithTeamPath.replaceAll("/", "\\\\");
+            projectName = extractProjectName(projectNameWithTeamPath);
+            team = extractTeamPath(projectNameWithTeamPath);
+            project = new ProjectDTO(projectName);
+        }
     }
 
     private String extractProjectName(String projectNameWithFullPath) {
