@@ -40,7 +40,7 @@ public class CxConsoleLauncher {
      * @param args
      */
     public static void main(String[] args) {
-        int exitCode = -1;
+        int exitCode;
         DOMConfigurator.configure("./log4j.xml");
 
         exitCode = runCli(args);

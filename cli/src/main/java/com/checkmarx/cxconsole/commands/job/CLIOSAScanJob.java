@@ -3,6 +3,7 @@ package com.checkmarx.cxconsole.commands.job;
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
 import com.checkmarx.cxconsole.clients.osa.CxRestOSAClient;
+import com.checkmarx.cxconsole.clients.osa.CxRestOSAClientImpl;
 import com.checkmarx.cxconsole.clients.osa.OSAConsoleScanWaitHandler;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanResponse;
@@ -48,12 +49,11 @@ public class CLIOSAScanJob extends CLIScanJob {
             if (!cxRestLoginClient.isLoggedIn()) {
                 super.login();
             }
-            cxRestOSAClient = new CxRestOSAClient(cxRestLoginClient);
+            cxRestOSAClient = new CxRestOSAClientImpl(cxRestLoginClient);
             try {
                 ScanPrerequisitesValidator scanPrerequisitesValidator = new ScanPrerequisitesValidator(cxRestGeneralClient,
                         params.getCliMandatoryParameters().getTeam(), params.getCliMandatoryParameters().getProject());
             } catch (CxScanPrerequisitesValidatorException e) {
-//                log.error("Failed to initialize OSA scan prerequisites: " + e.getMessage());
                 throw new CLIJobException("Failed to initialize OSA scan prerequisites: " + e.getMessage());
             }
 

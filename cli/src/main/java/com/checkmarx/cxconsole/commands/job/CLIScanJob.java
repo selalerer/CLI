@@ -6,15 +6,10 @@ import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableOperation;
 import com.checkmarx.cxconsole.commands.job.retriableoperation.RetryableRESTLogin;
-import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
-import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**

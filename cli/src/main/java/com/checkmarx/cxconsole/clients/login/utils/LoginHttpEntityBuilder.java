@@ -1,14 +1,13 @@
 package com.checkmarx.cxconsole.clients.login.utils;
 
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by nirli on 21/02/2018.
@@ -23,15 +22,12 @@ public class LoginHttpEntityBuilder {
     private static final String USERNAME_KEY = "username";
     private static final String ERROR_MESSAGE_PREFIX = "Failed to create body entity, due to: ";
 
-    public static UrlEncodedFormEntity createLoginParamsEntity(String userName, String password) throws CxRestLoginClientException {
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
-        urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
+    public static HttpEntity createLoginParamsEntity(String userName, String password) throws CxRestLoginClientException {
+        Map<String, String> content = new HashMap<>();
+        content.put(USERNAME_KEY, userName);
+        content.put(PASS_KEY, password);
+        JSONObject jsonObject = new JSONObject(content);
 
-        try {
-            return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new CxRestLoginClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
-        }
+        return new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON);
     }
 }

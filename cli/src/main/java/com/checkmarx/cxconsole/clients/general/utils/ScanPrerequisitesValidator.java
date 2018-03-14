@@ -5,7 +5,7 @@ import com.checkmarx.cxconsole.clients.general.dto.ProjectDTO;
 import com.checkmarx.cxconsole.clients.general.dto.TeamDTO;
 import com.checkmarx.cxconsole.clients.general.exception.CxRestGeneralClientException;
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
-import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
+import com.checkmarx.cxconsole.clients.sast.CxRestSASTClient;
 import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
 import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
@@ -29,10 +29,10 @@ public class ScanPrerequisitesValidator {
     private final PresetDTO presetInput;
     private final ProjectDTO projectInput;
     private final CxRestGeneralClient cxRestGeneralClient;
-    private final CxRestSASTClientImpl cxRestSASTClient;
+    private final CxRestSASTClient cxRestSASTClient;
     private boolean isProjectExists = false;
 
-    public ScanPrerequisitesValidator(CxRestGeneralClient cxRestGeneralClient, CxRestSASTClientImpl cxRestSASTClient, TeamDTO teamInput, EngineConfigurationDTO engineConfigurationInput,
+    public ScanPrerequisitesValidator(CxRestGeneralClient cxRestGeneralClient, CxRestSASTClient cxRestSASTClient, TeamDTO teamInput, EngineConfigurationDTO engineConfigurationInput,
                                       PresetDTO presetInput, ProjectDTO project) throws CxScanPrerequisitesValidatorException {
         this.cxRestGeneralClient = cxRestGeneralClient;
         this.cxRestSASTClient = cxRestSASTClient;

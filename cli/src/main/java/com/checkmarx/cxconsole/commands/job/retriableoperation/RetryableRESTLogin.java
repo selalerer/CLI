@@ -33,7 +33,7 @@ public class RetryableRESTLogin extends RetryableOperation {
                 cxRestLoginClient.tokenLogin();
             }
 
-            if (cxRestLoginClient.getApacheClient() == null) {
+            if (cxRestLoginClient.getClient() == null || !cxRestLoginClient.isLoggedIn()) {
                 throw new CLIJobException("Unsuccessful login.");
             }
         } catch (CxRestLoginClientException e) {

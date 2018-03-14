@@ -1,6 +1,7 @@
 package com.checkmarx.cxconsole.utils;
 
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClientImpl;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
 
@@ -170,9 +171,9 @@ public class ConfigMgr {
     public static CxRestLoginClient getRestWSMgr(CLIScanParametersSingleton parameters) {
         if (cxRestLoginClient == null) {
             if (parameters.getCliMandatoryParameters().isHasUserParam() && parameters.getCliMandatoryParameters().isHasPasswordParam()) {
-                cxRestLoginClient = new CxRestLoginClient(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getUsername(), parameters.getCliMandatoryParameters().getPassword());
+                cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getUsername(), parameters.getCliMandatoryParameters().getPassword());
             } else if (parameters.getCliMandatoryParameters().isHasTokenParam()) {
-                cxRestLoginClient = new CxRestLoginClient(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getToken());
+                cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getToken());
             }
         }
 

@@ -9,11 +9,15 @@ import com.checkmarx.cxconsole.clients.general.utils.GeneralResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -31,29 +35,30 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
 
     private HttpClient apacheClient;
     private String hostName;
+    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON + ";v=1.0");
 
     public CxRestGeneralClientImpl(CxRestLoginClient restClient) {
-        this.apacheClient = restClient.getApacheClient();
+        this.apacheClient = restClient.getClient();
         this.hostName = restClient.getHostName();
     }
 
     @Override
     public List<TeamDTO> getTeams() throws CxRestGeneralClientException {
         HttpResponse response = null;
-        HttpGet getRequest = null;
+        HttpUriRequest getRequest;
 
         try {
-            getRequest = new HttpGet(String.valueOf(GeneralResourceURIBuilder.buildGetTeamsURL(new URL(hostName))));
+            getRequest = RequestBuilder.get()
+                    .setUri(String.valueOf(GeneralResourceURIBuilder.buildGetTeamsURL(new URL(hostName))))
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .build();
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateClientResponse(response, 200, "Failed to get teams");
 
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get teams");
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, TeamDTO.class));
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestGeneralClientException("Failed to get teams: " + e.getMessage());
         } finally {
-            if (getRequest != null) {
-                getRequest.releaseConnection();
-            }
             HttpClientUtils.closeQuietly(response);
         }
     }
@@ -61,20 +66,20 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
     @Override
     public List<ProjectDTO> getProjects() throws CxRestGeneralClientException {
         HttpResponse response = null;
-        HttpGet getRequest = null;
+        HttpUriRequest getRequest;
 
         try {
-            getRequest = new HttpGet(String.valueOf(GeneralResourceURIBuilder.buildProjectsURL(new URL(hostName))));
+            getRequest = RequestBuilder.get()
+                    .setUri(String.valueOf(GeneralResourceURIBuilder.buildProjectsURL(new URL(hostName))))
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .build();
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateClientResponse(response, 200, "Failed to get projects");
 
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get projects");
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, ProjectDTO.class));
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestGeneralClientException("Failed to get projects: " + e.getMessage());
         } finally {
-            if (getRequest != null) {
-                getRequest.releaseConnection();
-            }
             HttpClientUtils.closeQuietly(response);
         }
     }
@@ -82,11 +87,14 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
     @Override
     public void createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException {
         HttpResponse response = null;
-        HttpPost postRequest = null;
+        HttpUriRequest postRequest;
 
         try {
-            postRequest = new HttpPost(String.valueOf(GeneralResourceURIBuilder.buildProjectsURL(new URL(hostName))));
-            postRequest.setEntity(GeneralHttpEntityBuilder.createProjectEntity(projectToCreate));
+            postRequest = RequestBuilder.post()
+                    .setUri(String.valueOf(GeneralResourceURIBuilder.buildProjectsURL(new URL(hostName))))
+                    .setEntity(GeneralHttpEntityBuilder.createProjectEntity(projectToCreate))
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .build();
 
             response = apacheClient.execute(postRequest);
             RestClientUtils.validateClientResponse(response, 201, "Failed to create new project");
@@ -99,9 +107,6 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestGeneralClientException("Failed to create project: " + e.getMessage());
         } finally {
-            if (postRequest != null) {
-                postRequest.releaseConnection();
-            }
             HttpClientUtils.closeQuietly(response);
         }
     }

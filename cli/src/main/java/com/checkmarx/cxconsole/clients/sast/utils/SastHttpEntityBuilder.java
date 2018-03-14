@@ -7,30 +7,21 @@ import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by nirli on 25/02/2018.
  */
-public class SastHttpEntityBuilder<T extends RemoteSourceScanSettingDTO> {
+public class SastHttpEntityBuilder {
 
     private SastHttpEntityBuilder() {
         throw new IllegalStateException("Utility class");
     }
-
-    private static final String ERROR_MESSAGE_PREFIX = "Failed to create body entity, due to: ";
 
     public static StringEntity createScanSettingEntity(ScanSettingDTO scanSetting) throws CxRestSASTClientException {
         ObjectMapper mapper = new ObjectMapper();
@@ -49,23 +40,20 @@ public class SastHttpEntityBuilder<T extends RemoteSourceScanSettingDTO> {
     }
 
 
-    public static HttpEntity createNewSastScanEntity(int projectId, boolean forceScan, boolean incrementalScan, boolean visibleOthers) throws CxRestSASTClientException {
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("projectId", String.valueOf(projectId)));
-        urlParameters.add(new BasicNameValuePair("isIncremental", String.valueOf(incrementalScan)));
-        urlParameters.add(new BasicNameValuePair("isPublic", String.valueOf(visibleOthers)));
-        urlParameters.add(new BasicNameValuePair("forceScan", String.valueOf(forceScan)));
+    public static HttpEntity createNewSastScanEntity(int projectId, boolean forceScan, boolean incrementalScan, boolean visibleOthers) {
+        Map<String, String> content = new HashMap<>();
+        content.put("projectId", String.valueOf(projectId));
+        content.put("isIncremental", String.valueOf(incrementalScan));
+        content.put("isPublic", String.valueOf(visibleOthers));
+        content.put("forceScan", String.valueOf(forceScan));
 
-        try {
-            return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new CxRestSASTClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
-        }
+        JSONObject jsonObject = new JSONObject(content);
+        return new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON);
     }
 
-    public static HttpEntity patchSastCommentEntity(String comment) throws CxRestSASTClientException {
+    public static HttpEntity patchSastCommentEntity(String comment) {
         Map<String, String> content = new HashMap<>();
-        content.put("content", comment);
+        content.put("comment", comment);
         JSONObject jsonObject = new JSONObject(content);
 
         return new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON);

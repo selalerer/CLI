@@ -4,6 +4,7 @@ import com.checkmarx.cxconsole.clients.general.dto.ProjectDTO;
 import com.checkmarx.cxconsole.clients.general.exception.CxRestGeneralClientException;
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
+import com.checkmarx.cxconsole.clients.sast.CxRestSASTClient;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
@@ -37,7 +38,7 @@ import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEED
  */
 public class CLISASTScanJob extends CLIScanJob {
 
-    private CxRestSASTClientImpl cxRestSASTClient;
+    private CxRestSASTClient cxRestSASTClient;
 
     public CLISASTScanJob(CLIScanParametersSingleton params, boolean isAsyncScan) {
         super(params, isAsyncScan);
@@ -109,15 +110,6 @@ public class CLISASTScanJob extends CLIScanJob {
             Future<Boolean> future = executor.schedule(waiterJob, 250, TimeUnit.MILLISECONDS);
             // wait for scan completion
             future.get();
-            if (isAsyncScan) {
-                log.info("SAST scan queued. Job finished");
-            } else {
-                log.info("SAST scan finished. Retrieving scan results");
-                String comment = params.getCliSharedParameters().getScanComment();
-                if (comment != null) {
-                    cxRestSASTClient.updateScanComment(scanId, comment);
-                }
-            }
         } catch (Exception e) {
             log.trace("Error occurred during scan progress monitoring: " + e.getMessage());
             throw new CLIJobException("Error occurred during scan progress monitoring: " + e.getMessage());
@@ -125,15 +117,19 @@ public class CLISASTScanJob extends CLIScanJob {
             executor.shutdownNow();
         }
 
-
-        if (!isAsyncScan) {
-            //Get JSON scan summary
-//            String scanSummary;
-//                scanSummary = cxSoapSASTClient.getScanSummary(cliMandatoryParameters.getOriginalHost(), sessionId, scanId);
-
-            //SAST print results
-//            SASTResultsDTO scanResults = JobUtils.parseScanSummary(scanSummary);
-//            PrintResultsUtils.printSASTResultsToConsole(scanResults);
+        if (isAsyncScan) {
+            log.info("SAST scan queued. Job finished");
+            return SCAN_SUCCEEDED_EXIT_CODE;
+        } else {
+            log.info("SAST scan finished. Retrieving scan results");
+            String comment = params.getCliSharedParameters().getScanComment();
+            if (comment != null) {
+                try {
+                    cxRestSASTClient.updateScanComment(scanId, comment);
+                } catch (CxRestSASTClientException e) {
+                    throw new CLIJobException(e);
+                }
+            }
 
             //SAST reports
             if (!params.getCliSastParameters().getReportType().isEmpty()) {
@@ -158,16 +154,26 @@ public class CLISASTScanJob extends CLIScanJob {
                     }
                 }
             }
+            return SCAN_SUCCEEDED_EXIT_CODE;
+        }
 
-            //SAST threshold calculation
+//        if (!isAsyncScan) {
+        //Get JSON scan summary
+//            String scanSummary;
+//                scanSummary = cxSoapSASTClient.getScanSummary(cliMandatoryParameters.getOriginalHost(), sessionId, scanId);
+
+        //SAST print results
+//            SASTResultsDTO scanResults = JobUtils.parseScanSummary(scanSummary);
+//            PrintResultsUtils.printSASTResultsToConsole(scanResults);
+
+        //SAST threshold calculation
 //            if (params.getCliSastParameters().isSastThresholdEnabled()) {
 //                ThresholdDto thresholdDto = new ThresholdDto(params.getCliSastParameters().getSastHighThresholdValue(), params.getCliSastParameters().getSastMediumThresholdValue(),
 //                        params.getCliSastParameters().getSastLowThresholdValue(), scanResults);
 //                return resolveThresholdExitCode(thresholdDto);
 //            }
-        }
+//        }
 
-        return SCAN_SUCCEEDED_EXIT_CODE;
     }
 
     private void handleGITSource(int projectId) throws CLIJobException {

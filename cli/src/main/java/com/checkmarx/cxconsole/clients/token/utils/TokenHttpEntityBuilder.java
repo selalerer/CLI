@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.clients.token.utils;
 
-import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
+import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.StringEntity;
@@ -20,7 +20,6 @@ public class TokenHttpEntityBuilder {
     private TokenHttpEntityBuilder() {
         throw new IllegalStateException("Utility class");
     }
-
 
     private static final String CLIENT_ID_KEY = "client_id";
     private static final String CLI_CLIENT = "cli_client";

@@ -74,7 +74,7 @@ public class SastResourceURIBuilder {
 
     public static URL buildAddSastCommentURL(URL serverUrl, long scanId) {
         try {
-            return new URL(serverUrl, APPLICATION_NAME + SAST_SCAN_RESOURCE + "/" + scanId + SAST_ADD_COMMENT_RESOURCE);
+            return new URL(serverUrl, APPLICATION_NAME + SAST_SCAN_RESOURCE + "/" + scanId);
         } catch (MalformedURLException e) {
             return serverUrl;
         }
