@@ -42,8 +42,8 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
     private HttpClient apacheClient;
     private String hostName;
-    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON + ";v=1.0");
-    private static final Header CLI_ACCEPT_HEADER_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON + ";v=1.0");
+    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
+    private static final Header CLI_ACCEPT_HEADER_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
 
     public CxRestSASTClientImpl(CxRestLoginClient restClient) {
         this.apacheClient = restClient.getClient();

@@ -53,8 +53,8 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
 
     private HttpClient apacheClient;
     private String hostName;
-    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON + ";v=1.0");
-    private static final Header CLI_ACCEPT_HEADER = new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON + ";v=1.0");
+    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+    private static final Header CLI_ACCEPT_HEADER = new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
 
     private static int waitForScanToFinishRetry = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.KEY_OSA_PROGRESS_INTERVAL);
 
@@ -80,7 +80,6 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
                     .setEntity(OsaHttpEntityBuilder.createOsaFSAEntity(osaScanRequest))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
-
             response = apacheClient.execute(post);
 
             RestClientUtils.validateClientResponse(response, 201, "Fail to create OSA scan");
@@ -101,12 +100,11 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanSummaryResultsURL(new URL(hostName), scanId)))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_HEADER)
                     .build();
-
             response = apacheClient.execute(getRequest);
-            RestClientUtils.validateClientResponse(response, 200, "fail get OSA scan summary results");
 
+            RestClientUtils.validateClientResponse(response, 200, "fail get OSA scan summary results");
             return parseJsonFromResponse(response, OSASummaryResults.class);
         } catch (IOException | CxValidateResponseException e) {
             log.error("Failed to get OSA scan summary results: " + e.getMessage());
