@@ -135,7 +135,7 @@ public abstract class CLICommand {
             ((RollingFileAppender) faAppender).setWriter(writer);
             log.info("Log file location: " + logPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error initialize the log: " + e.getMessage());
         }
     }
 

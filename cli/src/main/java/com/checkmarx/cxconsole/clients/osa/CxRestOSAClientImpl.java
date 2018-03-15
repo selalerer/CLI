@@ -38,6 +38,17 @@ import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonLis
  */
 public class CxRestOSAClientImpl implements CxRestOSAClient {
 
+    private enum DetailsType {
+        VULNERABILITIES("vulnerabilities"),
+        LIBRARIES("libraries");
+
+        private String value;
+
+        DetailsType(String value) {
+            this.value = value;
+        }
+    }
+
     private static Logger log = Logger.getLogger(CxRestOSAClientImpl.class);
 
     private HttpClient apacheClient;
@@ -84,7 +95,7 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
 
     @Override
     public OSASummaryResults getOSAScanSummaryResults(String scanId) throws CxRestOSAClientException {
-        HttpUriRequest getRequest = null;
+        HttpUriRequest getRequest;
         HttpResponse response = null;
 
         try {
@@ -147,7 +158,7 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
 
         try {
             getRequest = RequestBuilder.get()
-                    .setUri((String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanLibrariesResultsURL(new URL(hostName), scanId))))
+                    .setUri((String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanSpecificDetailsResultsURL(new URL(hostName), scanId, DetailsType.LIBRARIES.value))))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
@@ -168,7 +179,7 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
 
         try {
             getRequest = RequestBuilder.get()
-                    .setUri(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanVulnerabilitiesResultsURL(new URL(hostName), scanId)))
+                    .setUri(String.valueOf(OsaResourcesURIBuilder.buildGetOSAScanSpecificDetailsResultsURL(new URL(hostName), scanId, DetailsType.VULNERABILITIES.value)))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);

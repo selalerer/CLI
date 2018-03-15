@@ -1,6 +1,5 @@
 package com.checkmarx.cxconsole.clients.login.utils;
 
-import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -20,9 +19,8 @@ public class LoginHttpEntityBuilder {
 
     private static final String PASS_KEY = "password";
     private static final String USERNAME_KEY = "username";
-    private static final String ERROR_MESSAGE_PREFIX = "Failed to create body entity, due to: ";
 
-    public static HttpEntity createLoginParamsEntity(String userName, String password) throws CxRestLoginClientException {
+    public static HttpEntity createLoginParamsEntity(String userName, String password) {
         Map<String, String> content = new HashMap<>();
         content.put(USERNAME_KEY, userName);
         content.put(PASS_KEY, password);

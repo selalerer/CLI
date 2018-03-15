@@ -1,10 +1,8 @@
 package com.checkmarx.cxconsole.clients.login.jwt.utils;
 
 import com.checkmarx.cxconsole.clients.login.jwt.exceptions.JWTException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 /**

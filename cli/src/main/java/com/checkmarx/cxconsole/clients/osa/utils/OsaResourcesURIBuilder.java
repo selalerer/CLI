@@ -16,8 +16,6 @@ public class OsaResourcesURIBuilder {
 
     private static final String OSA_SCAN_STATUS_RESOURCE = "scans/{scanId}";
     private static final String OSA_SCAN_SUMMARY_RESOURCE = "osa/reports";
-    private static final String OSA_SCAN_LIBRARIES_PATH = "/osa/libraries";
-    private static final String OSA_SCAN_VULNERABILITIES_PATH = "/osa/vulnerabilities";
     private static final String OSA_CREATE_SCAN_WITH_FS = "osa/inventory";
     private static final String SCAN_ID_QUERY_PARAM = "?scanId=";
 
@@ -50,17 +48,9 @@ public class OsaResourcesURIBuilder {
         }
     }
 
-    public static URL buildGetOSAScanLibrariesResultsURL(URL serverUrl, String scanId) {
+    public static URL buildGetOSAScanSpecificDetailsResultsURL(URL serverUrl, String scanId, String detailsType) {
         try {
-            return new URL(serverUrl, APPLICATION_NAME + "/" + OSA_SCAN_LIBRARIES_PATH + SCAN_ID_QUERY_PARAM + scanId + ITEM_PER_PAGE_QUERY_PARAM + MAX_ITEMS);
-        } catch (MalformedURLException e) {
-            return serverUrl;
-        }
-    }
-
-    public static URL buildGetOSAScanVulnerabilitiesResultsURL(URL serverUrl, String scanId) {
-        try {
-            return new URL(serverUrl, APPLICATION_NAME + "/" + OSA_SCAN_VULNERABILITIES_PATH + SCAN_ID_QUERY_PARAM + scanId + ITEM_PER_PAGE_QUERY_PARAM + MAX_ITEMS);
+            return new URL(serverUrl, APPLICATION_NAME + "/" + "osa/" + detailsType + SCAN_ID_QUERY_PARAM + scanId + ITEM_PER_PAGE_QUERY_PARAM + MAX_ITEMS);
         } catch (MalformedURLException e) {
             return serverUrl;
         }

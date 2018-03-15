@@ -21,7 +21,4 @@ public enum RemoteSourceType {
         return urlValue;
     }
 
-    public void setUrlValue(String urlValue) {
-        this.urlValue = urlValue;
-    }
 }
