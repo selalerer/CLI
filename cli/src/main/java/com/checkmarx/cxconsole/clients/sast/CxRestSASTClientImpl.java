@@ -29,7 +29,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
@@ -295,14 +294,14 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         try {
             if (remoteSourceScanSettingDTO instanceof SVNAndTFSScanSettingDTO && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey().length > 1) {
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                builder.addBinaryBody("privateKey", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey());
-                builder.addTextBody("absoluteUrl", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getAbsoluteUrl());
-                builder.addTextBody("port", String.valueOf(((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getPort()));
-                builder.addTextBody("path", (Arrays.toString(remoteSourceScanSettingDTO.getPaths())));
+                builder.addBinaryBody("privateKey", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey(), ContentType.APPLICATION_JSON, null);
+                builder.addTextBody("absoluteUrl", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getAbsoluteUrl(), ContentType.APPLICATION_JSON);
+                builder.addTextBody("port", String.valueOf(((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getPort()), ContentType.APPLICATION_JSON);
+                builder.addTextBody("paths", StringUtils.join(remoteSourceScanSettingDTO.getPaths(), ";"), ContentType.APPLICATION_JSON);
                 HttpEntity multipart = builder.build();
                 postRequest = RequestBuilder.post()
                         .setUri(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType, true)))
-                        .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                        .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                         .setEntity(multipart)
                         .build();
             } else {

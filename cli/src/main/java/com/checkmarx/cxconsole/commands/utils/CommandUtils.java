@@ -1,28 +1,31 @@
 package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Created by nirli on 01/03/2018.
  */
 public class CommandUtils {
 
-    private static final int TIMEOUT_FOR_CX_SERVER_AVAILABILITY = 250;
-    private static final String CX_SWAGGER = "/restapi/help/swagger";
+    private static final String CX_SWAGGER = "/cxrestapi/help/swagger";
 
     public static String resolveServerProtocol(String originalHost) throws CxRestClientException {
         if (!originalHost.startsWith("http") && !originalHost.startsWith("https")) {
-            String httpsProtocol = "https://" + originalHost;
-            if (isCxWebServiceAvailable(httpsProtocol)) {
-                return httpsProtocol;
+            String httpsUrl = "https://" + originalHost + CX_SWAGGER;
+            if (isCxWebServiceAvailable(httpsUrl)) {
+                return "https://" + originalHost;
             }
 
-            String httpProtocol = "http://" + originalHost;
-            if (isCxWebServiceAvailable(httpProtocol)) {
-                return httpProtocol;
+            String httpUrl = "http://" + originalHost + CX_SWAGGER;
+            if (isCxWebServiceAvailable(httpUrl)) {
+                return  "http://" + originalHost;
             }
 
             throw new CxRestClientException("Cx web service is not available in server: " + originalHost);
@@ -31,22 +34,21 @@ public class CommandUtils {
         }
     }
 
-    private static boolean isCxWebServiceAvailable(String host) {
+    private static boolean isCxWebServiceAvailable(String url) {
         int responseCode;
+        HttpClient client = null;
         try {
-            URL urlAddress = new URL(buildHostWithWSDL(host));
-            HttpURLConnection httpConnection = (HttpURLConnection) urlAddress.openConnection();
-            httpConnection.setRequestMethod("GET");
-            httpConnection.setConnectTimeout(TIMEOUT_FOR_CX_SERVER_AVAILABILITY);
-            responseCode = httpConnection.getResponseCode();
+            client = new DefaultHttpClient();
+            HttpGet getMethod = new HttpGet(url);
+            HttpResponse response = client.execute(getMethod);
+            responseCode = response.getStatusLine().getStatusCode();
         } catch (Exception e) {
             return false;
+        } finally {
+            HttpClientUtils.closeQuietly(client);
         }
 
         return (responseCode == 200);
     }
 
-    private static String buildHostWithWSDL(String host) {
-        return host + CX_SWAGGER;
-    }
 }
