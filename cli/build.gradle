@@ -13,7 +13,7 @@ apply plugin: 'project-report'
 apply plugin: 'java-library-distribution'
 
 repositories {
-    maven { url 'http://10.31.1.105:8081/artifactory/libs-release' }
+    maven { url 'http://cx-artifactory:8081/artifactory/libs-release' }
 }
 
 group = 'com.checkmarx'
@@ -55,7 +55,7 @@ dependencies {
             'org.apache.cxf:cxf-rt-transports-http-jetty:3.1.9',
             'org.apache.httpcomponents:httpmime:4.4.1',
             'javax.ws.rs:javax.ws.rs-api:2.0.1',
-            'com.fasterxml.jackson.core:jackson-databind:2.8.7',
+            'com.fasterxml.jackson.core:jackson-databind:2.9.4',
             'commons-io:commons-io:2.5'
 }
 
