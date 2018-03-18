@@ -110,6 +110,14 @@ distributions {
                 filter(FixCrLfFilter.class,
                         eol: FixCrLfFilter.CrLf.newInstance("lf"))
             }
+            from('src/main/scripts/V870') {
+                filter {
+                    it.replaceAll('cx_console\\.jar', jar.archiveName)
+                }
+                filter(FixCrLfFilter.class,
+                        eol: FixCrLfFilter.CrLf.newInstance("lf"))
+                into 'Examples\\V870'
+            }
             from('src/main') {
                 include 'config/krb5.conf'
             }
