@@ -66,7 +66,7 @@ public class CxConsoleLauncher {
             return GENERAL_ERROR_EXIT_CODE;
         }
 
-        validateVerboseCommand(args);
+        validateVerboseParameter(args);
 
         log.info("CxConsole version " + ConsoleUtils.getBuildVersion());
         log.info("CxConsole scan session started");
@@ -127,7 +127,7 @@ public class CxConsoleLauncher {
     }
 
 
-    private static void validateVerboseCommand(String[] args) {
+    private static void validateVerboseParameter(String[] args) {
         ArrayList<String> customArgs = new CustomStringList(Arrays.asList(args));
         if (!customArgs.contains("-v".trim()) && !customArgs.contains("-verbose")) {
             Appender caAppender = Logger.getRootLogger().getAppender("CA");
