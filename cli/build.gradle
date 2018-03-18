@@ -17,7 +17,6 @@ repositories {
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release' }
 }
 
-
 group = 'com.checkmarx'
 //For development purpose
 version = '8.70.0' + "-" + getDate()
@@ -88,6 +87,14 @@ distributions {
                 }
                 filter(FixCrLfFilter.class,
                         eol: FixCrLfFilter.CrLf.newInstance("lf"))
+            }
+            from('src/main/scripts/V870') {
+                filter {
+                    it.replaceAll('cx_console\\.jar', jar.archiveName)
+                }
+                filter(FixCrLfFilter.class,
+                        eol: FixCrLfFilter.CrLf.newInstance("lf"))
+                into 'Examples\\V870'
             }
             from('src/main') {
                 include 'config/krb5.conf'
