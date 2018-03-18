@@ -18,7 +18,6 @@ repositories {
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release' }
 }
 
-
 group = 'com.checkmarx'
 //For development purpose
 //version = '8.70.0' + "-" + getDate()
