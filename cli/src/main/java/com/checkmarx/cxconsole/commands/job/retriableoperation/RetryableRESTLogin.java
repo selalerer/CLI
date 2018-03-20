@@ -31,6 +31,8 @@ public class RetryableRESTLogin extends RetryableOperation {
                 cxRestLoginClient.credentialsLogin();
             } else if (params.getCliMandatoryParameters().isHasTokenParam()) {
                 cxRestLoginClient.tokenLogin();
+            } else if (params.getCliSharedParameters().isSsoLoginUsed()) {
+                cxRestLoginClient.ssoLogin();
             }
 
             if (cxRestLoginClient.getClient() == null || !cxRestLoginClient.isLoggedIn()) {

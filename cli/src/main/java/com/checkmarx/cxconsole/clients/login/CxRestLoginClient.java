@@ -1,6 +1,7 @@
 package com.checkmarx.cxconsole.clients.login;
 
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
+import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import org.apache.http.client.HttpClient;
 
 /**
@@ -11,6 +12,8 @@ public interface CxRestLoginClient {
     void credentialsLogin() throws CxRestLoginClientException;
 
     void tokenLogin() throws CxRestLoginClientException;
+
+    void ssoLogin() throws CxRestLoginClientException;
 
     HttpClient getClient();
 

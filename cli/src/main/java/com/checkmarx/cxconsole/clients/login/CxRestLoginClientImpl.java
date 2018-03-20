@@ -8,14 +8,27 @@ import com.checkmarx.cxconsole.clients.login.utils.LoginResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import org.apache.http.*;
+import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.BasicSchemeFactory;
+import org.apache.http.impl.auth.DigestSchemeFactory;
+import org.apache.http.impl.auth.win.WindowsCredentialsProvider;
+import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
+import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
@@ -87,6 +100,31 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         client = HttpClientBuilder.create().addInterceptorLast(responseFilter).setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
     }
 
+    public CxRestLoginClientImpl(String hostname) {
+        this.hostName = hostname;
+        this.username = null;
+        this.password = null;
+        this.token = null;
+
+        //create http client
+        headers.add(cxCsrfTokenHeader);
+        headers.add(CLI_ORIGIN_HEADER);
+        final Registry<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
+                .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+                .register(AuthSchemes.DIGEST, new DigestSchemeFactory())
+                .register(AuthSchemes.NTLM, new WindowsNTLMSchemeFactory(null))
+                .register(AuthSchemes.SPNEGO, new WindowsNegotiateSchemeFactory(null))
+                .build();
+        final CredentialsProvider credsProvider = new WindowsCredentialsProvider(new SystemDefaultCredentialsProvider());
+        client = HttpClientBuilder.create()
+                .setDefaultCredentialsProvider(credsProvider)
+                .setDefaultAuthSchemeRegistry(authSchemeRegistry)
+                .addInterceptorLast(responseFilter)
+                .setDefaultHeaders(headers)
+                .setDefaultCookieStore(cookieStore)
+                .build();
+    }
+
     private final HttpResponseInterceptor responseFilter = new HttpResponseInterceptor() {
         public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
             for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
@@ -143,10 +181,34 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         isLoggedIn = true;
     }
 
+    @Override
+    public void ssoLogin() throws CxRestLoginClientException {
+        HttpUriRequest request;
+        HttpResponse loginResponse = null;
+        try {
+            request = RequestBuilder.post()
+                    .setUri(String.valueOf(LoginResourceURIBuilder.buildWindowsAuthenticationLoginURL(new URL(hostName))))
+                    .setConfig(RequestConfig.DEFAULT)
+                    .setEntity(new StringEntity(""))
+                    .build();
+            loginResponse = client.execute(request);
+
+            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
+        } catch (IOException | CxValidateResponseException e) {
+            log.error("Fail to login with windows authentication: " + e.getMessage());
+            throw new CxRestLoginClientException("Fail to login with windows authentication: " + e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(loginResponse);
+        }
+
+        client = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
+        isLoggedIn = true;
+    }
+
     private void getAccessTokenFromRefreshToken(String refreshToken) throws CxRestLoginClientException {
         HttpResponse getAccessTokenResponse = null;
         String accessToken;
-        HttpUriRequest postRequest = null;
+        HttpUriRequest postRequest;
 
         try {
             postRequest = RequestBuilder.post()

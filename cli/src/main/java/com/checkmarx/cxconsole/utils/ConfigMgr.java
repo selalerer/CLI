@@ -174,6 +174,8 @@ public class ConfigMgr {
                 cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getUsername(), parameters.getCliMandatoryParameters().getPassword());
             } else if (parameters.getCliMandatoryParameters().isHasTokenParam()) {
                 cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getToken());
+            } else if (parameters.getCliSharedParameters().isSsoLoginUsed()) {
+                cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getHost());
             }
         }
 
