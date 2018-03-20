@@ -21,6 +21,12 @@ public class OsaWSFSAUtil {
         throw new IllegalStateException("Utility class");
     }
 
+    private static final String[] ACCEPT_EXTENSIONS_LISTS = {"jar", "war", "ear", "aar", "dll", "exe", "msi", "nupkg", "egg", "whl",
+            "tar.gz", "gem", "deb", "udeb", "dmg", "drpm", "rpm", "pkg.tar.xz", "swf", "swc", "air", "apk", "zip", "gzip", "tar.bz2",
+            "tgz", "c", "cc", "cp", "cpp", "css", "c++", "h", "hh", "hpp", "hxx", "h++", "m", "mm", "pch", "c#", "cs", "csharp", "java",
+            "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp", "6pl",
+            "6pm", "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
+
     enum StringType {BASE_DIRECTORIES, OSA_FOLDER_EXCLUDE, OSA_INCLUDE_FILES, OSA_EXCLUDE_FILES, OSA_EXTRACTABLE_FILES}
 
     private static Logger log = Logger.getLogger(OsaWSFSAUtil.class);
@@ -67,6 +73,7 @@ public class OsaWSFSAUtil {
             ret.put("npm.runPreStep", "true");
             ret.put("bower.runPreStep", "true");
         }
+        ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
 
         return ret;
     }
@@ -107,18 +114,19 @@ public class OsaWSFSAUtil {
     }
 
     public static CreateOSAScanRequest createOsaScanRequest(long projectId, String[] osaLocationPath, CLIOSAParameters cliosaParametersr) {
-        Properties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
-        log.info("Generated FSA properties for analysis");
-
-        ComponentScan componentScan = new ComponentScan(scannerProperties);
-        log.info("Starting FSA component scan");
-        String osaDependenciesJson = componentScan.scan();
-        ObjectMapper mapper = new ObjectMapper();
+        String osaDependenciesJson = null;
         try {
-            log.trace("Scanner properties: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(scannerProperties));
+            ObjectMapper mapper = new ObjectMapper();
+            Properties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
+            log.trace("Scanner properties: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(scannerProperties.toString()));
+            log.info("Generated FSA properties for analysis");
+
+            ComponentScan componentScan = new ComponentScan(scannerProperties);
+            log.info("Starting FSA component scan");
+            osaDependenciesJson = componentScan.scan();
             log.trace("List of files sent to WhiteSource: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaDependenciesJson));
         } catch (JsonProcessingException e) {
-            log.error("Can't write list of files sent to WS " + e.getMessage());
+            log.error("Can't write properties and list of files sent to WS " + e.getMessage());
         }
 
         return new CreateOSAScanRequest(projectId, osaDependenciesJson);
