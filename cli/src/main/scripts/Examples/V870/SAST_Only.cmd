@@ -4,7 +4,7 @@ pushd "%~dp0"
 set JAVA_HOME=
 set PATH=%JAVA_HOME%/bin;%PATH%
 
-java -Xmx1024m -jar cx_console.jar Scan -ProjectName "CxServer\CLI_SAST_SCAN" -CxServer "http://10.31.1.158" -cxUser "admin@cx" -cxPassword "XXXXX" -locationType shared -locationUser "user" -locationPassword "XXX" -locationPath "\\storage\qa\Auto_Tests\Projects\MixedSASTAndOSATest" -preset Default -v -comment "test comment" -SASTHigh 1 -SASTMedium 2 -SASTLow 3
+java -Xmx1024m -jar cx_console.jar Scan -ProjectName "CxServer\CLI_SAST_SCAN" -CxServer "http://server" -cxUser "user" -cxPassword "password" -locationType shared -locationUser "user" -locationPassword "XXX" -locationPath "path" -preset Default -v -comment "comment" -SASTHigh 1 -SASTMedium 2 -SASTLow 3
 set exitCode=%errorlevel%
 
 popd
