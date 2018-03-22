@@ -119,10 +119,8 @@ public class CLIOSAScanJob extends CLIScanJob {
                         String workDirectory = JobUtils.gerWorkDirectory(params);
 
                         //OSA json reports
-                        if (jsonFile != null) {
-                            String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProject().getName(), "JSON", jsonFile, "", workDirectory);
-                            cxRestOSAClient.createOsaJson(osaScan.getScanId(), resultFilePath, osaSummaryResults);
-                        }
+                        String resultFilePath = PathHandler.resolveReportPath(params.getCliMandatoryParameters().getProject().getName(), "JSON", jsonFile, "", workDirectory);
+                        cxRestOSAClient.createOsaJson(osaScan.getScanId(), resultFilePath, osaSummaryResults);
                     }
                 } catch (CxRestOSAClientException e) {
                     log.error("Error occurred during CxOSA reports. Error message: " + e.getMessage());
