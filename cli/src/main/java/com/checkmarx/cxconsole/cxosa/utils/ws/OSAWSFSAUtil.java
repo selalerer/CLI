@@ -41,12 +41,12 @@ public class OSAWSFSAUtil {
         ret.put("d", osaDirectoriesToAnalyze);
 
         String osaFolderExcludeString = "";
-        if (cliosaParameters.isHasOsaExcludedFoldersParam()) {
+        if (cliosaParameters.isHasOsaExcludedFoldersParam() || cliosaParameters.getOsaExcludedFolders() != null) {
             osaFolderExcludeString = stringArrayToString(cliosaParameters.getOsaExcludedFolders(), OSA_FOLDER_EXCLUDE);
         }
 
         String osaFilesExcludesString = "";
-        if (cliosaParameters.isHasOsaExcludedFilesParam()) {
+        if (cliosaParameters.isHasOsaExcludedFilesParam() || cliosaParameters.getOsaExcludedFiles() != null) {
             osaFilesExcludesString = stringArrayToString(cliosaParameters.getOsaExcludedFiles(), OSA_EXCLUDE_FILES);
         }
 
