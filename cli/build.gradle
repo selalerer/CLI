@@ -1,7 +1,6 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 
 plugins {
-    id "no.nils.wsdl2java" version "0.8"
     id "com.jfrog.artifactory" version "3.1.2"
     id "org.sonarqube" version "2.5"
 }
@@ -22,7 +21,7 @@ group = 'com.checkmarx'
 //For development purpose
 version = '8.80.0' + "-" + getDate()
 //For release purpose
-version = '8.70.0'
+//version = '8.80.0'
 compileJava.options.encoding = 'UTF-8'
 compileJava.sourceCompatibility = 7
 compileJava.targetCompatibility = 7

@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.commands.job.utils;
 
-import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
+import com.checkmarx.cxconsole.clients.sast.dto.ScanDTO;
 import org.apache.log4j.Logger;
 
 /**
@@ -42,15 +42,15 @@ public class PrintResultsUtils {
         log.info(RESULT_FOOTER);
     }
 
-    public static void printSASTResultsToConsole(SASTResultsDTO scanResults) {
+    public static void printSASTResultsToConsole(ScanDTO scanDTO) {
         log.info("----------------------------Checkmarx Scan Results(CxSAST):-------------------------------");
         log.info("");
         log.info(LINE_SPACER);
         log.info("SAST vulnerabilities Summary:");
         log.info(LINE_SPACER);
-        log.info("SAST high severity results: " + scanResults.getHighVulnerabilityResult());
-        log.info("SAST medium severity results: " + scanResults.getMediumVulnerabilityResult());
-        log.info("SAST low severity results: " + scanResults.getLowVulnerabilityResult());
+        log.info("SAST high severity results: " + scanDTO.getResultsStatistics().getHighSeverity());
+        log.info("SAST medium severity results: " + scanDTO.getResultsStatistics().getMediumSeverity());
+        log.info("SAST low severity results: " + scanDTO.getResultsStatistics().getLowSeverity());
         log.info("");
         log.info(RESULT_FOOTER);
     }

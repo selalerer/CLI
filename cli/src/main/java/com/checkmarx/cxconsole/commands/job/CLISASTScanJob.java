@@ -8,12 +8,10 @@ import com.checkmarx.cxconsole.clients.sast.CxRestSASTClient;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
-import com.checkmarx.cxconsole.clients.sast.dto.PerforceScanSettingDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.RemoteSourceScanSettingDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.SVNAndTFSScanSettingDTO;
-import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
+import com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils;
 import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
@@ -154,19 +152,21 @@ public class CLISASTScanJob extends CLIScanJob {
                     }
                 }
             }
+
+            try {
+                ScanDTO sastScan = cxRestSASTClient.getScanResults(scanId);
+                PrintResultsUtils.printSASTResultsToConsole(sastScan);
+            } catch (CxRestSASTClientException e) {
+                e.printStackTrace();
+            }
+
             return SCAN_SUCCEEDED_EXIT_CODE;
         }
+    }
 
 //        if (!isAsyncScan) {
-        //Get JSON scan summary
-//            String scanSummary;
-//                scanSummary = cxSoapSASTClient.getScanSummary(cliMandatoryParameters.getOriginalHost(), sessionId, scanId);
-
-        //SAST print results
-//            SASTResultsDTO scanResults = JobUtils.parseScanSummary(scanSummary);
-//            PrintResultsUtils.printSASTResultsToConsole(scanResults);
-
-        //SAST threshold calculation
+//
+//            SAST threshold calculation
 //            if (params.getCliSastParameters().isSastThresholdEnabled()) {
 //                ThresholdDto thresholdDto = new ThresholdDto(params.getCliSastParameters().getSastHighThresholdValue(), params.getCliSastParameters().getSastMediumThresholdValue(),
 //                        params.getCliSastParameters().getSastLowThresholdValue(), scanResults);
@@ -174,7 +174,7 @@ public class CLISASTScanJob extends CLIScanJob {
 //            }
 //        }
 
-    }
+//    }
 
     private void handleGITSource(int projectId) throws CLIJobException {
         try {

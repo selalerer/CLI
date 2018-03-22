@@ -72,14 +72,6 @@ public class SastResourceURIBuilder {
         }
     }
 
-    public static URL buildAddSastCommentURL(URL serverUrl, long scanId) {
-        try {
-            return new URL(serverUrl, APPLICATION_NAME + SAST_SCAN_RESOURCE + "/" + scanId);
-        } catch (MalformedURLException e) {
-            return serverUrl;
-        }
-    }
-
     public static URL buildUploadZipFileURL(URL serverUrl, int projectId) {
         try {
             return new URL(serverUrl, APPLICATION_NAME + PROJECTS_RESOURCE + "/" + projectId + SOURCECODE_RESOURCE + ZIP_FILE_ATTACHMENT_RESOURCE);
@@ -96,7 +88,7 @@ public class SastResourceURIBuilder {
         }
     }
 
-    public static URL buildGetSASTScanStatusURL(URL serverUrl, long scanId) {
+    public static URL buildGetSASTScanResourceURL(URL serverUrl, long scanId) {
         try {
             return new URL(serverUrl, APPLICATION_NAME + SAST_SCAN_RESOURCE + "/" + scanId);
         } catch (MalformedURLException e) {

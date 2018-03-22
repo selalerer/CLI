@@ -33,8 +33,6 @@ public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
 
     ScanQueueDTO getScanQueueResponse(long scanId) throws CxRestSASTClientException;
 
-    ScanStatusDTO getScanStatus(long scanId) throws CxRestSASTClientException;
-
     void createRemoteSourceScan(int projectId, T remoteSourceScanSettingDTO, RemoteSourceType remoteSourceType) throws CxRestSASTClientException;
 
     void createGITScan(int projectId, String locationURL, String locationBranch, byte[] privateKey) throws CxRestSASTClientException;
@@ -44,4 +42,6 @@ public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
     ReportStatusValue getReportStatus(int reportId) throws CxRestSASTClientException;
 
     void createReportFile(int reportId, String reportFilePath) throws CxRestSASTClientException;
+
+    ScanDTO getScanResults(long scanId) throws CxRestSASTClientException;
 }

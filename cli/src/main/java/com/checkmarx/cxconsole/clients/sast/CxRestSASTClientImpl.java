@@ -207,7 +207,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
         try {
             patchRequest = RequestBuilder.patch()
-                    .setUri(String.valueOf(SastResourceURIBuilder.buildAddSastCommentURL(new URL(hostName), scanId)))
+                    .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanResourceURL(new URL(hostName), scanId)))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .setEntity(SastHttpEntityBuilder.patchSastCommentEntity(comment))
                     .build();
@@ -267,19 +267,19 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
     }
 
     @Override
-    public ScanStatusDTO getScanStatus(long scanId) throws CxRestSASTClientException {
+    public ScanDTO getScanResults(long scanId) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpUriRequest getRequest;
 
         try {
             getRequest = RequestBuilder.get()
-                    .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanStatusURL(new URL(hostName), scanId)))
+                    .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanResourceURL(new URL(hostName), scanId)))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan status");
-            return RestClientUtils.parseJsonFromResponse(response, ScanStatusDTO.class);
+            return RestClientUtils.parseJsonFromResponse(response, ScanDTO.class);
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestSASTClientException("Failed to get SAST scan status: " + e.getMessage());
         } finally {
