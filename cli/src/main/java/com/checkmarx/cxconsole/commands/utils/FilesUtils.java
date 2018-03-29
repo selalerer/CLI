@@ -119,8 +119,8 @@ public class FilesUtils {
         return excludePatterns.toArray(new String[]{});
     }
 
-    public static void createReportFile(HttpResponse response, String filePath) {
-        try (FileOutputStream fos = new FileOutputStream(new File(filePath))) {
+    public static void createReportFile(HttpResponse response, File file) {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             InputStream is = response.getEntity().getContent();
             int read;
             byte[] buffer = new byte[32768];
@@ -132,7 +132,7 @@ public class FilesUtils {
             fos.close();
             is.close();
         } catch (IOException e) {
-            log.error("Failed to create report file: " + filePath + " : " + e.getMessage());
+            log.error("Failed to create report file: " + file + " : " + e.getMessage());
         }
     }
 

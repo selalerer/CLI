@@ -27,6 +27,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -58,7 +59,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSastPresetsURL(new URL(hostName))))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -79,7 +80,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetEngineConfigurationURL(new URL(hostName))))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -100,7 +101,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanSettingURL(new URL(hostName), id)))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -254,6 +255,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanQueueResponseURL(new URL(hostName), scanId)))
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -267,21 +269,21 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
     }
 
     @Override
-    public ScanDTO getScanResults(long scanId) throws CxRestSASTClientException {
+    public ResultsStatisticsDTO getScanResults(long scanId) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpUriRequest getRequest;
 
         try {
             getRequest = RequestBuilder.get()
-                    .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanResourceURL(new URL(hostName), scanId)))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanResultsURL(new URL(hostName), scanId)))
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
-            RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan status");
-            return RestClientUtils.parseJsonFromResponse(response, ScanDTO.class);
+            RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan results");
+            return RestClientUtils.parseJsonFromResponse(response, ResultsStatisticsDTO.class);
         } catch (IOException | CxValidateResponseException e) {
-            throw new CxRestSASTClientException("Failed to get SAST scan status: " + e.getMessage());
+            throw new CxRestSASTClientException("Failed to get SAST scan results: " + e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
         }
@@ -301,7 +303,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                 HttpEntity multipart = builder.build();
                 postRequest = RequestBuilder.post()
                         .setUri(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType, true)))
-                        .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
+                        .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                         .setEntity(multipart)
                         .build();
             } else {
@@ -386,7 +388,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         try {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetReportStatusURL(new URL(hostName), reportId)))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -401,7 +403,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
     }
 
     @Override
-    public void createReportFile(int reportId, String reportFilePath) throws CxRestSASTClientException {
+    public void createReportFile(int reportId, File reportFile) throws CxRestSASTClientException {
         HttpResponse response = null;
         HttpUriRequest getRequest;
 
@@ -413,7 +415,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
             response = apacheClient.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get report file");
-            FilesUtils.createReportFile(response, reportFilePath);
+            FilesUtils.createReportFile(response, reportFile);
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestSASTClientException("Failed to get report file: " + e.getMessage());
         } finally {

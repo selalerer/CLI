@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.thresholds.dto;
 
+import com.checkmarx.cxconsole.clients.sast.dto.ResultsStatisticsDTO;
 import com.checkmarx.cxconsole.constants.ScanType;
 import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 
@@ -25,14 +26,14 @@ public class ThresholdDto {
         this.lowSeverityScanResult = lowSeverityScanResult;
     }
 
-    public ThresholdDto(int highSeverityThreshold, int mediumSeverityThreshold, int lowSeverityThreshold, SASTResultsDTO sastResultsDTO) {
+    public ThresholdDto(int highSeverityThreshold, int mediumSeverityThreshold, int lowSeverityThreshold, ResultsStatisticsDTO sastResultsDTO) {
         this.scanType = ScanType.SAST_SCAN;
         this.highSeverityThreshold = highSeverityThreshold;
         this.mediumSeverityThreshold = mediumSeverityThreshold;
         this.lowSeverityThreshold = lowSeverityThreshold;
-        this.highSeverityScanResult = sastResultsDTO.getHighVulnerabilityResult();
-        this.mediumSeverityScanResult = sastResultsDTO.getMediumVulnerabilityResult();
-        this.lowSeverityScanResult = sastResultsDTO.getLowVulnerabilityResult();
+        this.highSeverityScanResult = sastResultsDTO.getHighSeverity();
+        this.mediumSeverityScanResult = sastResultsDTO.getMediumSeverity();
+        this.lowSeverityScanResult = sastResultsDTO.getLowSeverity();
     }
 
     public int getHighSeverityThreshold() {

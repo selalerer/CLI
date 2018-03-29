@@ -30,15 +30,24 @@ public class ScanQueueDTO {
 
     private int loc;
 
-    private boolean isIncremental;
-
-    private boolean isPublic;
 
     private int totalPercent;
 
     private int stagePercent;
 
     private String initiator;
+
+    private String owner;
+
+    private String origin;
+
+    private String initiatorName;
+
+    private String owningTeamId;
+
+    private boolean isPublic;
+
+    private boolean isIncremental;
 
     public ScanQueueDTO() {
     }
@@ -163,6 +172,38 @@ public class ScanQueueDTO {
         this.initiator = initiator;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getInitiatorName() {
+        return initiatorName;
+    }
+
+    public void setInitiatorName(String initiatorName) {
+        this.initiatorName = initiatorName;
+    }
+
+    public String getOwningTeamId() {
+        return owningTeamId;
+    }
+
+    public void setOwningTeamId(String owningTeamId) {
+        this.owningTeamId = owningTeamId;
+    }
+
     @Override
     public String toString() {
         return "ScanQueueDTO{" +
@@ -176,11 +217,15 @@ public class ScanQueueDTO {
                 ", engineStartedOn='" + engineStartedOn + '\'' +
                 ", completedOn='" + completedOn + '\'' +
                 ", loc=" + loc +
-                ", isIncremental=" + isIncremental +
-                ", isPublic=" + isPublic +
                 ", totalPercent=" + totalPercent +
                 ", stagePercent=" + stagePercent +
                 ", initiator='" + initiator + '\'' +
+                ", owner='" + owner + '\'' +
+                ", origin='" + origin + '\'' +
+                ", initiatorName='" + initiatorName + '\'' +
+                ", owningTeamId='" + owningTeamId + '\'' +
+                ", isPublic=" + isPublic +
+                ", isIncremental=" + isIncremental +
                 '}';
     }
 }

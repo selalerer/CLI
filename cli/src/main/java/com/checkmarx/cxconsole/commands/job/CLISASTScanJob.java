@@ -15,6 +15,7 @@ import com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils;
 import com.checkmarx.cxconsole.commands.utils.FilesUtils;
 import com.checkmarx.cxconsole.parameters.CLIMandatoryParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import com.checkmarx.cxconsole.utils.ConfigMgr;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.checkmarx.cxconsole.commands.constants.LocationType.*;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
+import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
 
 /**
  * Created by nirli on 05/11/2017.
@@ -133,7 +135,16 @@ public class CLISASTScanJob extends CLIScanJob {
             if (!params.getCliSastParameters().getReportType().isEmpty()) {
                 for (int i = 0; i < params.getCliSastParameters().getReportType().size(); i++) {
                     String reportFilePath = params.getCliSastParameters().getReportFile().get(i);
-                    log.info("Creating report file: " + reportFilePath);
+                    File reportFile;
+                    if (!reportFilePath.contains("\\\\")) {
+                        File folder = new File(System.getProperty("user.dir") + File.separator
+                                + cliMandatoryParameters.getProject().getName());
+                        folder.mkdir();
+                        reportFile =  new File(folder + File.separator + reportFilePath);
+                    } else {
+                        reportFile = new File(reportFilePath);
+                    }
+                    log.info("Creating report file: " + reportFile);
                     try {
                         int reportId = cxRestSASTClient.createReport(scanId, params.getCliSastParameters().getReportType().get(i));
                         ReportStatusValue reportStatus;
@@ -143,7 +154,7 @@ public class CLISASTScanJob extends CLIScanJob {
                             Thread.sleep(350);
                         } while (reportStatus == ReportStatusValue.IN_PROCESS);
                         if (reportStatus == ReportStatusValue.CREATED) {
-                            cxRestSASTClient.createReportFile(reportId, reportFilePath);
+                            cxRestSASTClient.createReportFile(reportId, reportFile);
                         } else {
                             log.error("Error creating " + params.getCliSastParameters().getReportType().get(i) + " report file");
                         }
@@ -154,27 +165,20 @@ public class CLISASTScanJob extends CLIScanJob {
             }
 
             try {
-                ScanDTO sastScan = cxRestSASTClient.getScanResults(scanId);
-                PrintResultsUtils.printSASTResultsToConsole(sastScan);
+                ResultsStatisticsDTO sastScanResults = cxRestSASTClient.getScanResults(scanId);
+                PrintResultsUtils.printSASTResultsToConsole(sastScanResults);
+                if (params.getCliSastParameters().isSastThresholdEnabled()) {
+                    ThresholdDto thresholdDto = new ThresholdDto(params.getCliSastParameters().getSastHighThresholdValue(), params.getCliSastParameters().getSastMediumThresholdValue(),
+                            params.getCliSastParameters().getSastLowThresholdValue(), sastScanResults);
+                    return resolveThresholdExitCode(thresholdDto);
+                }
             } catch (CxRestSASTClientException e) {
-                e.printStackTrace();
+                log.error("Error retrieving SAST scan result: " + e.getMessage());
             }
 
             return SCAN_SUCCEEDED_EXIT_CODE;
         }
     }
-
-//        if (!isAsyncScan) {
-//
-//            SAST threshold calculation
-//            if (params.getCliSastParameters().isSastThresholdEnabled()) {
-//                ThresholdDto thresholdDto = new ThresholdDto(params.getCliSastParameters().getSastHighThresholdValue(), params.getCliSastParameters().getSastMediumThresholdValue(),
-//                        params.getCliSastParameters().getSastLowThresholdValue(), scanResults);
-//                return resolveThresholdExitCode(thresholdDto);
-//            }
-//        }
-
-//    }
 
     private void handleGITSource(int projectId) throws CLIJobException {
         try {

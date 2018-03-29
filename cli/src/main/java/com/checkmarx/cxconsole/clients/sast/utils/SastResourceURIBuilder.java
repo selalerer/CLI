@@ -30,6 +30,7 @@ public class SastResourceURIBuilder {
     private static final String SAST_REMOTE_SOURCE_CODE_RESOURCE = "/sourceCode/remoteSettings";
     private static final String EXCLUSION_SETTING_RESOURCE = "excludeSettings";
     private static final String REPORTS_RESOURCE = "/reports/sastScan";
+    private static final String SCAN_RESULTS_RESOURCE = "/resultsStatistics";
 
     public static URL buildGetSastPresetsURL(URL serverUrl) {
         try {
@@ -91,6 +92,14 @@ public class SastResourceURIBuilder {
     public static URL buildGetSASTScanResourceURL(URL serverUrl, long scanId) {
         try {
             return new URL(serverUrl, APPLICATION_NAME + SAST_SCAN_RESOURCE + "/" + scanId);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildGetSASTScanResultsURL(URL serverUrl, long scanId) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + SAST_SCAN_RESOURCE + "/" + scanId + SCAN_RESULTS_RESOURCE);
         } catch (MalformedURLException e) {
             return serverUrl;
         }

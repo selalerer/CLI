@@ -6,6 +6,7 @@ import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
 import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -41,7 +42,7 @@ public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
 
     ReportStatusValue getReportStatus(int reportId) throws CxRestSASTClientException;
 
-    void createReportFile(int reportId, String reportFilePath) throws CxRestSASTClientException;
+    void createReportFile(int reportId, File reportFile) throws CxRestSASTClientException;
 
-    ScanDTO getScanResults(long scanId) throws CxRestSASTClientException;
+    ResultsStatisticsDTO getScanResults(long scanId) throws CxRestSASTClientException;
 }
