@@ -238,10 +238,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return cliMandatoryParameters.getMandatoryParams();
     }
 
-    @Override
-    public String getKeyDescriptions() {
-        return null;
-    }
+//    @Override
+//    public String getKeyDescriptions() {
+//        return null;
+//    }
 
     OptionGroup getOSAScanParamsOptionGroup() {
         OptionGroup osaParamsOptionGroup = new OptionGroup();

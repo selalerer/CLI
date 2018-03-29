@@ -361,61 +361,61 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
                 + "[ " + cliSharedParameters.getParamConfigFilePath() + " config ] ";
     }
 
-    @Override
-    public String getKeyDescriptions() {
-        String leftSpacing = "  ";
-        return leftSpacing + cliMandatoryParameters.getKeyDescriptions() +
-                cliSharedParameters.getParamLocationType() +
-                KEY_DESCR_INTEND_SMALL +
-                "- Location type of files for scan. Mandatory\n";
-    }
-
-    public String getOptionalKeyDescriptions() {
-        String leftSpacing = "  ";
-        StringBuilder keys = new StringBuilder(leftSpacing);
-
-        keys.append(cliSharedParameters.getParamLogFile());
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append(KEY_DESCR_INTEND_SINGLE);
-        keys.append("- Name or path to log file. Optional.\n");
-
-        keys.append(cliSharedParameters.getParamConfigFilePath());
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append(KEY_DESCR_INTEND_SINGLE);
-        keys.append("- Name or path to config file. Optional.\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_XML_FILE);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Name or path to results XML file. Optional.\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_PDF_FILE);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Name or path to results PDF file. Optional.\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_CSV_FILE);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Name or path to results CSV file. Optional.\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_EXCLUDE_FOLDERS);
-        keys.append(KEY_DESCR_INTEND_SINGLE);
-        keys.append("- Comma separated list of folder path patterns to exclude from scan. Example: -LocationPathExclude “**\\test*” excludes all folders which start with “test” prefix. Optional.\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_EXCLUDE_FILES);
-        keys.append(KEY_DESCR_INTEND_SINGLE);
-        keys.append("- Comma separated list of file name patterns to exclude from scan. Example: -LocationFilesExclude “*.class” excludes all .class files. Optional.\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_EXCLUDE_FILES);
-        keys.append(KEY_DESCR_INTEND_SINGLE);
-        keys.append("- Comma separated list of file name patterns to exclude from scan. Example: -LocationFilesExclude “*.class” excludes all .class files. Optional.\n");
-
-        return keys.toString();
-    }
+//    @Override
+//    public String getKeyDescriptions() {
+//        String leftSpacing = "  ";
+//        return leftSpacing + cliMandatoryParameters.getKeyDescriptions() +
+//                cliSharedParameters.getParamLocationType() +
+//                KEY_DESCR_INTEND_SMALL +
+//                "- Location type of files for scan. Mandatory\n";
+//    }
+//
+//    public String getOptionalKeyDescriptions() {
+//        String leftSpacing = "  ";
+//        StringBuilder keys = new StringBuilder(leftSpacing);
+//
+//        keys.append(cliSharedParameters.getParamLogFile());
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append(KEY_DESCR_INTEND_SINGLE);
+//        keys.append("- Name or path to log file. Optional.\n");
+//
+//        keys.append(cliSharedParameters.getParamConfigFilePath());
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append(KEY_DESCR_INTEND_SINGLE);
+//        keys.append("- Name or path to config file. Optional.\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_XML_FILE);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Name or path to results XML file. Optional.\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_PDF_FILE);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Name or path to results PDF file. Optional.\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_CSV_FILE);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Name or path to results CSV file. Optional.\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_EXCLUDE_FOLDERS);
+//        keys.append(KEY_DESCR_INTEND_SINGLE);
+//        keys.append("- Comma separated list of folder path patterns to exclude from scan. Example: -LocationPathExclude “**\\test*” excludes all folders which start with “test” prefix. Optional.\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_EXCLUDE_FILES);
+//        keys.append(KEY_DESCR_INTEND_SINGLE);
+//        keys.append("- Comma separated list of file name patterns to exclude from scan. Example: -LocationFilesExclude “*.class” excludes all .class files. Optional.\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_EXCLUDE_FILES);
+//        keys.append(KEY_DESCR_INTEND_SINGLE);
+//        keys.append("- Comma separated list of file name patterns to exclude from scan. Example: -LocationFilesExclude “*.class” excludes all .class files. Optional.\n");
+//
+//        return keys.toString();
+//    }
 
     OptionGroup getSASTScanParamsOptionGroup() {
         OptionGroup sastParamsOptionGroup = new OptionGroup();

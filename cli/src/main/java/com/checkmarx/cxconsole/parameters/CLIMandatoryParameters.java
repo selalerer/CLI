@@ -183,73 +183,73 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         return mandatoryParamsOptions;
     }
 
-    public String getKeyDescriptions() {
-        String leftSpacing = "  ";
-        StringBuilder keys = new StringBuilder(leftSpacing);
-
-        keys.append(PARAM_HOST);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Host name of web-service. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_USER);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- User login name. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_PASSWORD);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Login password. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_TOKEN);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Login token. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_PROJECT_NAME);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Full Project name. Mandatory\n");
-
-        return keys.toString();
-    }
-
-    public String getKeyDescriptionsRevokeToken() {
-        String leftSpacing = "  ";
-        StringBuilder keys = new StringBuilder(leftSpacing);
-
-        keys.append(PARAM_HOST);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Host name of web-service. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_TOKEN);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Login token. Mandatory\n");
-
-        return keys.toString();
-    }
-
-    public String getKeyDescriptionsGenerateToken() {
-        String leftSpacing = "  ";
-        StringBuilder keys = new StringBuilder(leftSpacing);
-
-        keys.append(PARAM_HOST);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Host name of web-service. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_USER);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- User login name. Mandatory\n");
-
-        keys.append(leftSpacing);
-        keys.append(PARAM_PASSWORD);
-        keys.append(KEY_DESCR_INTEND_SMALL);
-        keys.append("- Login password. Mandatory\n");
-
-        return keys.toString();
-    }
+//    public String getKeyDescriptions() {
+//        String leftSpacing = "  ";
+//        StringBuilder keys = new StringBuilder(leftSpacing);
+//
+//        keys.append(PARAM_HOST);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Host name of web-service. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_USER);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- User login name. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_PASSWORD);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Login password. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_TOKEN);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Login token. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_PROJECT_NAME);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Full Project name. Mandatory\n");
+//
+//        return keys.toString();
+//    }
+//
+//    public String getKeyDescriptionsRevokeToken() {
+//        String leftSpacing = "  ";
+//        StringBuilder keys = new StringBuilder(leftSpacing);
+//
+//        keys.append(PARAM_HOST);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Host name of web-service. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_TOKEN);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Login token. Mandatory\n");
+//
+//        return keys.toString();
+//    }
+//
+//    public String getKeyDescriptionsGenerateToken() {
+//        String leftSpacing = "  ";
+//        StringBuilder keys = new StringBuilder(leftSpacing);
+//
+//        keys.append(PARAM_HOST);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Host name of web-service. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_USER);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- User login name. Mandatory\n");
+//
+//        keys.append(leftSpacing);
+//        keys.append(PARAM_PASSWORD);
+//        keys.append(KEY_DESCR_INTEND_SMALL);
+//        keys.append("- Login password. Mandatory\n");
+//
+//        return keys.toString();
+//    }
 
     public String getMandatoryParams() {
         return PARAM_HOST + " hostName " + PARAM_USER + " login "
