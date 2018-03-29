@@ -16,8 +16,6 @@ public class ScanQueueDTO {
 
     private String stageDetails;
 
-    private String stepDetails;
-
     private String teamId;
 
     private String dateCreated;
@@ -29,7 +27,6 @@ public class ScanQueueDTO {
     private String completedOn;
 
     private int loc;
-
 
     private int totalPercent;
 
@@ -74,14 +71,6 @@ public class ScanQueueDTO {
 
     public void setStageDetails(String stageDetails) {
         this.stageDetails = stageDetails;
-    }
-
-    public String getStepDetails() {
-        return stepDetails;
-    }
-
-    public void setStepDetails(String stepDetails) {
-        this.stepDetails = stepDetails;
     }
 
     public String getTeamId() {
@@ -210,7 +199,6 @@ public class ScanQueueDTO {
                 "id=" + id +
                 ", stageDTO=" + stageDTO +
                 ", stageDetails='" + stageDetails + '\'' +
-                ", stepDetails='" + stepDetails + '\'' +
                 ", teamId='" + teamId + '\'' +
                 ", dateCreated='" + dateCreated + '\'' +
                 ", queuedOn='" + queuedOn + '\'' +

@@ -30,4 +30,11 @@ public class StageDTO {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "StageDTO{" +
+                "id=" + id +
+                ", value=" + value +
+                '}';
+    }
 }

@@ -4,10 +4,8 @@ import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Created by nirli on 01/03/2018.
@@ -25,7 +23,7 @@ public class CommandUtils {
 
             String httpUrl = "http://" + originalHost + CX_SWAGGER;
             if (isCxWebServiceAvailable(httpUrl)) {
-                return  "http://" + originalHost;
+                return "http://" + originalHost;
             }
 
             throw new CxRestClientException("Cx web service is not available in server: " + originalHost);
@@ -38,7 +36,7 @@ public class CommandUtils {
         int responseCode;
         HttpClient client = null;
         try {
-            client = new DefaultHttpClient();
+            client = HttpClientBuilder.create().build();
             HttpGet getMethod = new HttpGet(url);
             HttpResponse response = client.execute(getMethod);
             responseCode = response.getStatusLine().getStatusCode();

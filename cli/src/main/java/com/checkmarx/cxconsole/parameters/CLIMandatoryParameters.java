@@ -157,7 +157,7 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_USER);
     }
 
-    public OptionGroup getMandatoryParamsOptionGroup() {
+    OptionGroup getMandatoryParamsOptionGroup() {
         OptionGroup mandatoryParamsOptionGroup = new OptionGroup();
         for (Option opt : commandLineOptions.getOptions()) {
             mandatoryParamsOptionGroup.addOption(opt);

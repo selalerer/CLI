@@ -66,7 +66,7 @@ public class CommandParametersValidator {
         if (parameters.getCliMandatoryParameters().getOriginalHost() == null || parameters.getCliMandatoryParameters().getHost() == null) {
             throw new CLICommandParameterValidatorException("Please provide server");
         }
-        if (parameters.getCliMandatoryParameters().getProject().getName() == null) {
+        if (parameters.getCliMandatoryParameters().getProject() == null || parameters.getCliMandatoryParameters().getProject().getName() == null) {
             throw new CLICommandParameterValidatorException("Please provide project name");
         }
     }

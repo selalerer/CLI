@@ -16,9 +16,6 @@ public class ProjectDTO {
 
     private boolean isPublic;
 
-    public ProjectDTO() {
-    }
-
     public ProjectDTO(String name) {
         this.name = name;
     }
