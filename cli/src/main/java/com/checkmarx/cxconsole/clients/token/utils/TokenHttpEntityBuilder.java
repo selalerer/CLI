@@ -60,12 +60,28 @@ public class TokenHttpEntityBuilder {
         }
     }
 
-    public static StringEntity createGetAccessTokenParamsEntity(String token) throws CxRestLoginClientException {
+    public static StringEntity createGetAccessTokenFromRefreshTokenParamsEntity(String token) throws CxRestLoginClientException {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("grant_type", REFRESH_TOKEN));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
         urlParameters.add(new BasicNameValuePair(REFRESH_TOKEN, token));
+
+        try {
+            return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new CxRestLoginClientException(ERROR_MESSAGE_PREFIX + e.getMessage());
+        }
+    }
+
+    public static StringEntity createGetAccessTokenFromCredentialsParamsEntity(String userName, String password) throws CxRestLoginClientException {
+        List<NameValuePair> urlParameters = new ArrayList<>();
+        urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
+        urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
+        urlParameters.add(new BasicNameValuePair("grant_type", PASS_KEY));
+        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api"));
+        urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
+        urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
 
         try {
             return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());

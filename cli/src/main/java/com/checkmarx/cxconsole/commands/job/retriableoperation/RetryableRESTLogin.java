@@ -28,7 +28,7 @@ public class RetryableRESTLogin extends RetryableOperation {
         // Login
         try {
             if (params.getCliMandatoryParameters().isHasUserParam() && params.getCliMandatoryParameters().isHasPasswordParam()) {
-                cxRestLoginClient.credentialsLogin();
+                cxRestLoginClient.credentialsLogin(params.getCliMandatoryParameters().getUsername(), params.getCliMandatoryParameters().getPassword());
             } else if (params.getCliMandatoryParameters().isHasTokenParam()) {
                 cxRestLoginClient.tokenLogin();
             } else if (params.getCliSharedParameters().isSsoLoginUsed()) {

@@ -3,13 +3,13 @@ package com.checkmarx.cxconsole.clients.login;
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.dto.RestGetAccessTokenDTO;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
-import com.checkmarx.cxconsole.clients.login.utils.LoginHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.login.utils.LoginResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthSchemeProvider;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
@@ -26,12 +26,10 @@ import org.apache.http.impl.auth.DigestSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsCredentialsProvider;
 import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -53,15 +51,10 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private boolean isLoggedIn = false;
 
     private HttpClient client;
-    private static CookieStore cookieStore = new BasicCookieStore();
     private static List<Header> headers = new ArrayList<>();
-    private Header cxCsrfTokenHeader;
-    private String cookies;
-    private String csrfToken;
 
     private static final Header CLI_ORIGIN_HEADER = new BasicHeader("cxOrigin", "cx-CLI");
-    private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
-    private static final String CSRF_TOKEN_HEADER_KEY = "CXCSRFToken";
+    private static final Header CLI_CONTENT_TYPE_WITH_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
 
     private static final String SERVER_STACK_TRACE_ERROR_MESSAGE = "Failed to get access token: Fail to authenticate: status code: HTTP/1.1 400 Bad Request. error:\"error\":\"invalid_grant\"";
     private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
@@ -95,9 +88,9 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.token = null;
 
         //create http client
-        headers.add(cxCsrfTokenHeader);
+
         headers.add(CLI_ORIGIN_HEADER);
-        client = HttpClientBuilder.create().addInterceptorLast(responseFilter).setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
+        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
     }
 
     public CxRestLoginClientImpl(String hostname) {
@@ -107,7 +100,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.token = null;
 
         //create http client
-        headers.add(cxCsrfTokenHeader);
         headers.add(CLI_ORIGIN_HEADER);
         final Registry<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
                 .register(AuthSchemes.BASIC, new BasicSchemeFactory())
@@ -119,59 +111,33 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         client = HttpClientBuilder.create()
                 .setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
-                .addInterceptorLast(responseFilter)
                 .setDefaultHeaders(headers)
-                .setDefaultCookieStore(cookieStore)
                 .build();
     }
 
-    private final HttpResponseInterceptor responseFilter = new HttpResponseInterceptor() {
-        public void process(HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-            for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
-                if (CSRF_TOKEN_HEADER_KEY.equals(c.getName())) {
-                    csrfToken = c.getValue();
-                }
-            }
-            if (csrfToken != null) {
-                cxCsrfTokenHeader = new BasicHeader(CSRF_TOKEN_HEADER_KEY, csrfToken);
-                headers.add(cxCsrfTokenHeader);
-            }
-
-            Header[] setCookies = httpResponse.getHeaders("Set-Cookie");
-
-            StringBuilder sb = new StringBuilder();
-            for (Header h : setCookies) {
-                sb.append(h.getValue()).append(";");
-            }
-
-            cookies = (cookies == null ? "" : cookies) + sb.toString();
-        }
-    };
-
     @Override
-    public void credentialsLogin() throws CxRestLoginClientException {
-        cookies = null;
-        csrfToken = null;
-        HttpUriRequest request;
+    public void credentialsLogin(String username, String password) throws CxRestLoginClientException {
+        HttpUriRequest postRequest;
         HttpResponse loginResponse = null;
         try {
-            request = RequestBuilder.post()
-                    .setUri(String.valueOf(LoginResourceURIBuilder.buildCredentialsLoginURL(new URL(hostName))))
-                    .setEntity(LoginHttpEntityBuilder.createLoginParamsEntity(username, password))
-                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+            postRequest = RequestBuilder.post()
+                    .setUri(String.valueOf(LoginResourceURIBuilder.getAccessTokenURL(new URL(hostName))))
+                    .setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+                    .setEntity(TokenHttpEntityBuilder.createGetAccessTokenFromCredentialsParamsEntity(username, password))
                     .build();
-            loginResponse = client.execute(request);
+            loginResponse = client.execute(postRequest);
 
-            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
+            RestClientUtils.validateTokenResponse(loginResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
+            RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(loginResponse, RestGetAccessTokenDTO.class);
+            headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
+            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            isLoggedIn = true;
         } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with credentials: " + e.getMessage());
             throw new CxRestLoginClientException("Fail to login with credentials: " + e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(loginResponse);
         }
-
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
-        isLoggedIn = true;
     }
 
     @Override
@@ -201,7 +167,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             HttpClientUtils.closeQuietly(loginResponse);
         }
 
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).setDefaultCookieStore(cookieStore).build();
+        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
         isLoggedIn = true;
     }
 
@@ -214,7 +180,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             postRequest = RequestBuilder.post()
                     .setUri(String.valueOf(LoginResourceURIBuilder.getAccessTokenURL(new URL(hostName))))
                     .setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
-                    .setEntity(TokenHttpEntityBuilder.createGetAccessTokenParamsEntity(refreshToken))
+                    .setEntity(TokenHttpEntityBuilder.createGetAccessTokenFromRefreshTokenParamsEntity(refreshToken))
                     .build();
             getAccessTokenResponse = client.execute(postRequest);
 

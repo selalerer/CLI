@@ -20,6 +20,9 @@ public class ProjectDTO {
         this.name = name;
     }
 
+    public ProjectDTO() {
+    }
+
     public int getId() {
         return id;
     }
