@@ -52,13 +52,13 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_HTML_FILE = Option.builder("osareporthtml").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA HTML report. Optional.").build();
     private static final Option PARAM_OSA_JSON = Option.builder("osajson").hasArg(true).optionalArg(true).argName("file").desc("Name or path to OSA scan results (libraries and vulnerabilities) in Json format. Optional.").build();
 
-    private static final Option PARAM_OSA_EXCLUDE_FILES = Option.builder("osafilesexclude").hasArgs().argName("files list").desc("Comma separated list of file name patterns to exclude from OSA scan. Example: '-OsaFilesExclude *.class' excludes all files with '.class' extension. Optional.")
+    private static final Option PARAM_OSA_EXCLUDE_FILES = Option.builder("osafilesexclude").hasArg(true).hasArgs().argName("files list").desc("Comma separated list of file name patterns to exclude from OSA scan. Example: '-OsaFilesExclude *.class' excludes all files with '.class' extension. Optional.")
             .valueSeparator(',').build();
-    private static final Option PARAM_OSA_INCLUDE_FILES = Option.builder("osafilesinclude").hasArgs().argName("folders list").desc("Comma separated list of files extension to include in OSA scan. Example: '-OsaFilesInclude *.bin' include only files with .bin extension. Optional.")
+    private static final Option PARAM_OSA_INCLUDE_FILES = Option.builder("osafilesinclude").hasArg(true).hasArgs().argName("folders list").desc("Comma separated list of files extension to include in OSA scan. Example: '-OsaFilesInclude *.bin' include only files with .bin extension. Optional.")
             .valueSeparator(',').build();
-    private static final Option PARAM_OSA_EXCLUDE_FOLDERS = Option.builder("osapathexclude").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns to exclude from OSA scan. Example: '-OsaPathExclude test' excludes all folders which start with 'test' prefix. Optional.")
+    private static final Option PARAM_OSA_EXCLUDE_FOLDERS = Option.builder("osapathexclude").hasArg(true).hasArgs().argName("folders list").desc("Comma separated list of folder path patterns to exclude from OSA scan. Example: '-OsaPathExclude test' excludes all folders which start with 'test' prefix. Optional.")
             .valueSeparator(',').build();
-    private static final Option PARAM_OSA_EXTRACTABLE_INCLUDE_FILES = Option.builder("osaarchivetoextract").hasArgs().argName("folders list").desc("Comma separated list of files extension to be extracted for OSA scan. Example: '-OSAArchiveIncludes *.zip' extracts only files with .zip extension. Optional.")
+    private static final Option PARAM_OSA_EXTRACTABLE_INCLUDE_FILES = Option.builder("osaarchivetoextract").hasArg(true).hasArgs().argName("folders list").desc("Comma separated list of files extension to be extracted for OSA scan. Example: '-OSAArchiveIncludes *.zip' extracts only files with .zip extension. Optional.")
             .valueSeparator(',').build();
     private static final Option PARAM_OSA_SCAN_DEPTH = Option.builder("osascandepth").hasArg(true).argName("OSA analysis unzip depth").desc("Extraction depth for files to send for OSA analysis. Optional.").build();
 
