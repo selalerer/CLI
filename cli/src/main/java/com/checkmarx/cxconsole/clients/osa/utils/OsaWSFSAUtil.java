@@ -4,6 +4,7 @@ import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 import org.whitesource.fs.ComponentScan;
 
@@ -26,6 +27,7 @@ public class OsaWSFSAUtil {
             "tgz", "c", "cc", "cp", "cpp", "css", "c++", "h", "hh", "hpp", "hxx", "h++", "m", "mm", "pch", "c#", "cs", "csharp", "java",
             "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp", "6pl",
             "6pm", "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
+    private static final String ALL_FILES = "**/**";
 
     enum StringType {BASE_DIRECTORIES, OSA_FOLDER_EXCLUDE, OSA_INCLUDE_FILES, OSA_EXCLUDE_FILES, OSA_EXTRACTABLE_FILES}
 
@@ -51,6 +53,9 @@ public class OsaWSFSAUtil {
         }
 
         String osaFilesIncludesString = stringArrayToString(cliosaParameters.getOsaIncludedFiles(), OSA_INCLUDE_FILES);
+        if (Strings.isNullOrEmpty(osaFilesIncludesString)) {
+            osaFilesIncludesString = ALL_FILES;
+        }
         ret.put("includes", osaFilesIncludesString);
 
         String osaExtractableIncludesString = stringArrayToString(cliosaParameters.getOsaExtractableIncludeFiles(), OSA_EXTRACTABLE_FILES);
@@ -97,8 +102,8 @@ public class OsaWSFSAUtil {
         }
 
         if ((stringType.equals(StringType.OSA_EXCLUDE_FILES) || stringType.equals(StringType.OSA_EXTRACTABLE_FILES) || stringType.equals(StringType.OSA_INCLUDE_FILES)) && !Objects.equals(strArr[0], "")) {
-            if (Objects.equals(strArr[0], "**/**")) {
-                return "**/**";
+            if (Objects.equals(strArr[0], ALL_FILES)) {
+                return ALL_FILES;
             }
 
             for (String s : strArr) {

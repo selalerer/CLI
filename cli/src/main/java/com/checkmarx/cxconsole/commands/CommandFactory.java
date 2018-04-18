@@ -2,6 +2,7 @@ package com.checkmarx.cxconsole.commands;
 
 import com.checkmarx.cxconsole.commands.constants.Commands;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandFactoryException;
+import com.checkmarx.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,7 +46,15 @@ public class CommandFactory {
     }
 
     public static String getCommandNames() {
-        return StringUtils.join(Commands.class.getEnumConstants(), ", ");
+        StringBuilder commands = new StringBuilder();
+        commands
+                .append(Commands.SCAN.value()).append(", ")
+                .append(Commands.ASYNC_SCAN.value()).append(", ")
+                .append(Commands.OSA_SCAN.value()).append(", ")
+                .append(Commands.ASYNC_OSA_SCAN.value()).append(", ")
+                .append(Commands.GENERATE_TOKEN.value()).append(", ")
+                .append(Commands.REVOKE_TOKEN.value()).append(", ");
+        return commands.toString();
     }
 
     public static void verifyCommand(String command) throws CLICommandFactoryException {
