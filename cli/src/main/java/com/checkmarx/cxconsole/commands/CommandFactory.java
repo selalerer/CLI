@@ -2,9 +2,7 @@ package com.checkmarx.cxconsole.commands;
 
 import com.checkmarx.cxconsole.commands.constants.Commands;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandFactoryException;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by nirli on 01/11/2017.
