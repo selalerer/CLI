@@ -50,8 +50,8 @@ public class CLIOSAScanJob extends CLIScanJob {
             }
             cxRestOSAClient = new CxRestOSAClientImpl(cxRestLoginClient);
             try {
-                ScanPrerequisitesValidator scanPrerequisitesValidator = new ScanPrerequisitesValidator(cxRestGeneralClient,
-                        params.getCliMandatoryParameters().getTeam(), params.getCliMandatoryParameters().getProject());
+                new ScanPrerequisitesValidator(cxRestGeneralClient, params.getCliMandatoryParameters().getTeam(),
+                        params.getCliMandatoryParameters().getProject());
             } catch (CxScanPrerequisitesValidatorException e) {
                 throw new CLIJobException("Failed to initialize OSA scan prerequisites: " + e.getMessage());
             }

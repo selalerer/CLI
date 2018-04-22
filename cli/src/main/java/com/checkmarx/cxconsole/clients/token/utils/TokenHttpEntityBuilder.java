@@ -29,12 +29,14 @@ public class TokenHttpEntityBuilder {
     private static final String PASS_KEY = "password";
     private static final String USERNAME_KEY = "username";
     private static final String ERROR_MESSAGE_PREFIX = "Failed to create body entity, due to: ";
+    private static final String GRANT_TYPE_KEY = "grant_type";
+
 
     public static StringEntity createGenerateTokenParamsEntity(String userName, String password) throws CxRestClientException {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
         urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
-        urlParameters.add(new BasicNameValuePair("grant_type", PASS_KEY));
+        urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, PASS_KEY));
         urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api"));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
@@ -62,7 +64,7 @@ public class TokenHttpEntityBuilder {
 
     public static StringEntity createGetAccessTokenFromRefreshTokenParamsEntity(String token) throws CxRestLoginClientException {
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("grant_type", REFRESH_TOKEN));
+        urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, REFRESH_TOKEN));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
         urlParameters.add(new BasicNameValuePair(REFRESH_TOKEN, token));
@@ -78,7 +80,7 @@ public class TokenHttpEntityBuilder {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
         urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
-        urlParameters.add(new BasicNameValuePair("grant_type", PASS_KEY));
+        urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, PASS_KEY));
         urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api"));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));

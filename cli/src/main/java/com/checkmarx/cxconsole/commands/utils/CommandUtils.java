@@ -12,6 +12,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class CommandUtils {
 
+    private CommandUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static final String CX_SWAGGER = "/cxrestapi/help/swagger";
 
     public static String resolveServerProtocol(String originalHost) throws CxRestClientException {

@@ -3,7 +3,6 @@ package com.checkmarx.cxconsole.clients.utils;
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTO;
 import com.checkmarx.cxconsole.clients.sast.dto.ScanSettingDTODeserializer;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -21,6 +20,10 @@ import java.util.List;
  * Created by nirli on 20/02/2018.
  */
 public class RestClientUtils {
+
+    private RestClientUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static JSONObject parseJsonObjectFromResponse(HttpResponse response) throws IOException {
         String responseInString = createStringFromResponse(response).toString();

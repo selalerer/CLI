@@ -10,8 +10,6 @@ abstract class AbstractCLIScanParameters {
 
     public abstract String getMandatoryParams();
 
-//    public abstract String getKeyDescriptions();
-
     abstract void initCommandLineOptions();
 
 }

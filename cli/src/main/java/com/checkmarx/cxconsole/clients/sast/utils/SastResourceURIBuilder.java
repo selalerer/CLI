@@ -24,7 +24,6 @@ public class SastResourceURIBuilder {
     private static final String ENGINE_CONFIGURATION_RESOURCE = "/sast/engineConfigurations";
     private static final String SCAN_SETTING_RESOURCE = "/sast/scanSettings";
     private static final String SAST_SCAN_RESOURCE = "/sast/scans";
-    private static final String SAST_ADD_COMMENT_RESOURCE = "/comment";
     private static final String SAST_SCAN_QUEUE_RESOURCE = "/sast/scansQueue";
     private static final String SAST_SOURCE_CODE_RESOURCE = "/sourceCode";
     private static final String SAST_REMOTE_SOURCE_CODE_RESOURCE = "/sourceCode/remoteSettings";

@@ -8,6 +8,10 @@ import java.net.URL;
  */
 public class TokenResourceURIBuilder {
 
+    private TokenResourceURIBuilder() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static final String APPLICATION_NAME = "cxrestapi";
     private static final String REVOCATION_RESOURCE = "revocation";
     private static final String TOKEN_LOGIN_RESOURCE = "token";

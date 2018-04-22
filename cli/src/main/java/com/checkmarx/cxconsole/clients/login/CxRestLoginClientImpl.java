@@ -6,8 +6,8 @@ import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientExcepti
 import com.checkmarx.cxconsole.clients.login.utils.LoginResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
+import com.google.common.base.Strings;
 import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.CredentialsProvider;
@@ -54,7 +54,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private static List<Header> headers = new ArrayList<>();
 
     private static final Header CLI_ORIGIN_HEADER = new BasicHeader("cxOrigin", "cx-CLI");
-    private static final Header CLI_CONTENT_TYPE_WITH_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
 
     private static final String SERVER_STACK_TRACE_ERROR_MESSAGE = "Failed to get access token: Fail to authenticate: status code: HTTP/1.1 400 Bad Request. error:\"error\":\"invalid_grant\"";
     private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
@@ -88,7 +87,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.token = null;
 
         //create http client
-
         headers.add(CLI_ORIGIN_HEADER);
         client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
     }
@@ -116,7 +114,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     }
 
     @Override
-    public void credentialsLogin(String username, String password) throws CxRestLoginClientException {
+    public void credentialsLogin() throws CxRestLoginClientException {
         HttpUriRequest postRequest;
         HttpResponse loginResponse = null;
         try {
@@ -211,5 +209,15 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     @Override
     public boolean isLoggedIn() {
         return isLoggedIn;
+    }
+
+    @Override
+    public boolean isCredentialsLogin() {
+        return !Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password);
+    }
+
+    @Override
+    public boolean isTokenLogin() {
+        return !Strings.isNullOrEmpty(token);
     }
 }

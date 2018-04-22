@@ -9,7 +9,7 @@ import org.apache.http.client.HttpClient;
  */
 public interface CxRestLoginClient {
 
-    void credentialsLogin(String username, String password) throws CxRestLoginClientException;
+    void credentialsLogin() throws CxRestLoginClientException;
 
     void tokenLogin() throws CxRestLoginClientException;
 
@@ -20,4 +20,8 @@ public interface CxRestLoginClient {
     String getHostName();
 
     boolean isLoggedIn();
+
+    boolean isCredentialsLogin();
+
+    boolean isTokenLogin();
 }
