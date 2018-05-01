@@ -1,14 +1,17 @@
 package com.checkmarx.cxconsole.commands.job.retriableoperation;
 
-import com.checkmarx.clients.rest.login.CxRestLoginClient;
-import com.checkmarx.clients.rest.login.exceptions.CxRestLoginClientException;
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import org.apache.log4j.Logger;
 
 /**
  * Created by nirli on 06/11/2017.
  */
 public class RetryableRESTLogin extends RetryableOperation {
+
+    private static Logger log = Logger.getLogger(RetryableRESTLogin.class);
 
     private CxRestLoginClient cxRestLoginClient;
     private CLIScanParametersSingleton params;
@@ -18,33 +21,33 @@ public class RetryableRESTLogin extends RetryableOperation {
         this.params = parameters;
     }
 
-
     @Override
     protected void operation() throws CLIJobException {
-        log.info("Logging into the Checkmarx service.");
+        log.info("Logging into Checkmarx server.");
 
         // Login
         try {
-            if (params.getCliMandatoryParameters().isHasUserParam() && params.getCliMandatoryParameters().isHasPasswordParam()) {
+            if (cxRestLoginClient.isCredentialsLogin()) {
                 cxRestLoginClient.credentialsLogin();
-            } else if (params.getCliMandatoryParameters().isHasTokenParam()) {
+            } else if (cxRestLoginClient.isTokenLogin()) {
                 cxRestLoginClient.tokenLogin();
+            } else {
+                cxRestLoginClient.ssoLogin();
             }
 
-            if (cxRestLoginClient.getRestLoginResponseDTO() == null) {
+            if (cxRestLoginClient.getClient() == null || !cxRestLoginClient.isLoggedIn()) {
                 throw new CLIJobException("Unsuccessful login.");
             }
         } catch (CxRestLoginClientException e) {
             throw new CLIJobException("Unsuccessful login.");
         }
 
-        log.trace("REST login was completed successfully");
-        log.trace("Login was completed successfully");
+        log.info("Login was completed successfully");
         finished = true;
     }
 
     @Override
     public String getOperationName() {
-        return "REST login";
+        return "Login";
     }
 }

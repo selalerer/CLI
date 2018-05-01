@@ -3,7 +3,7 @@ package com.checkmarx.cxconsole.commands.job.utils;
 import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobUtilException;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,7 +38,7 @@ public class JobUtils {
         String folderPath = parameters.getCliMandatoryParameters().getSrcPath();
         if (folderPath == null || folderPath.isEmpty()) {
             //in case of ScanProject command
-            String prjName = PathHandler.normalizePathString(parameters.getCliMandatoryParameters().getProjectName());
+            String prjName = PathHandler.normalizePathString(parameters.getCliMandatoryParameters().getProject().getName());
             folderPath = System.getProperty("user.dir") + File.separator + prjName;
             File folder = new File(folderPath);
             if (!folder.exists()) {

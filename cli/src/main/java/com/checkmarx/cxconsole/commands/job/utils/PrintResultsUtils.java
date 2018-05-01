@@ -1,7 +1,7 @@
 package com.checkmarx.cxconsole.commands.job.utils;
 
-import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
-import com.checkmarx.cxconsole.cxosa.dto.OSASummaryResults;
+import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
+import com.checkmarx.cxconsole.clients.sast.dto.ResultsStatisticsDTO;
 import org.apache.log4j.Logger;
 
 /**
@@ -12,7 +12,7 @@ public class PrintResultsUtils {
     private static final String LINE_SPACER = "------------------------";
     private static final String RESULT_FOOTER = "-----------------------------------------------------------------------------------------";
 
-    protected static Logger log = Logger.getLogger(PrintResultsUtils.class);
+    private static Logger log = Logger.getLogger(PrintResultsUtils.class);
 
     private PrintResultsUtils() {
         throw new IllegalStateException("Utility class");
@@ -42,15 +42,15 @@ public class PrintResultsUtils {
         log.info(RESULT_FOOTER);
     }
 
-    public static void printSASTResultsToConsole(SASTResultsDTO scanResults) {
+    public static void printSASTResultsToConsole(ResultsStatisticsDTO scanResults) {
         log.info("----------------------------Checkmarx Scan Results(CxSAST):-------------------------------");
         log.info("");
         log.info(LINE_SPACER);
         log.info("SAST vulnerabilities Summary:");
         log.info(LINE_SPACER);
-        log.info("SAST high severity results: " + scanResults.getHighVulnerabilityResult());
-        log.info("SAST medium severity results: " + scanResults.getMediumVulnerabilityResult());
-        log.info("SAST low severity results: " + scanResults.getLowVulnerabilityResult());
+        log.info("SAST high severity results: " + scanResults.getHighSeverity());
+        log.info("SAST medium severity results: " + scanResults.getMediumSeverity());
+        log.info("SAST low severity results: " + scanResults.getLowSeverity());
         log.info("");
         log.info(RESULT_FOOTER);
     }

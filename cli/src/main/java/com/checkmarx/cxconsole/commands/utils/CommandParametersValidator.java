@@ -2,7 +2,7 @@ package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
 
@@ -66,7 +66,7 @@ public class CommandParametersValidator {
         if (parameters.getCliMandatoryParameters().getOriginalHost() == null || parameters.getCliMandatoryParameters().getHost() == null) {
             throw new CLICommandParameterValidatorException("Please provide server");
         }
-        if (parameters.getCliMandatoryParameters().getProjectName() == null) {
+        if (parameters.getCliMandatoryParameters().getProject() == null || parameters.getCliMandatoryParameters().getProject().getName() == null) {
             throw new CLICommandParameterValidatorException("Please provide project name");
         }
     }
@@ -122,17 +122,17 @@ public class CommandParametersValidator {
     }
 
     public static void validatePrivateKeyLocationGITSVN(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
-        if (parameters.getCliSastParameters().getLocationPrivateKey() != null
+        if (parameters.getCliSastParameters().getLocationPrivateKeyFilePath() != null
                 && parameters.getCliSharedParameters().getLocationType() != null
                 && (parameters.getCliSharedParameters().getLocationType() == LocationType.GIT || parameters.getCliSharedParameters().getLocationType() == LocationType.SVN)) {
-            File keyFile = new File(parameters.getCliSastParameters().getLocationPrivateKey().trim());
+            File keyFile = new File(parameters.getCliSastParameters().getLocationPrivateKeyFilePath().trim());
             if (!keyFile.exists()) {
                 throw new CLICommandParameterValidatorException("Private key file is not found in: " +
-                        parameters.getCliSastParameters().getLocationPrivateKey());
+                        parameters.getCliSastParameters().getLocationPrivateKeyFilePath());
             }
             if (keyFile.isDirectory()) {
                 throw new CLICommandParameterValidatorException("Private key file is a folder: " +
-                        parameters.getCliSastParameters().getLocationPrivateKey());
+                        parameters.getCliSastParameters().getLocationPrivateKeyFilePath());
             }
         }
     }
@@ -313,7 +313,7 @@ public class CommandParametersValidator {
 
     private static void validateWorkspaceParameterOnlyInPerforce(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
         if (parameters.getCliSharedParameters().getLocationType() != null &&
-                parameters.getCliSharedParameters().getLocationType() != LocationType.PERFORCE && parameters.getCliSastParameters().isPerforceWorkspaceMode()) {
+                parameters.getCliSharedParameters().getLocationType() != LocationType.PERFORCE && parameters.getCliSastParameters().getPerforceWorkspaceMode() != null) {
             throw new CLICommandParameterValidatorException("WorkspaceMode parameter should be specified only when locationType is Perforce");
         }
     }

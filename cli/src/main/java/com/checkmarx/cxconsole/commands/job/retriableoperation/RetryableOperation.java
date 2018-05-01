@@ -9,12 +9,12 @@ import org.apache.log4j.Logger;
  */
 public abstract class RetryableOperation {
 
-    protected Logger log = org.apache.log4j.Logger.getLogger("com.checkmarx.cxconsole.CxConsoleLauncher");
+    private static Logger log = Logger.getLogger(RetryableOperation.class);
 
     protected boolean finished = false;
     protected String error;
 
-    protected RetryableOperation() {
+    RetryableOperation() {
     }
 
     public void run() throws CLIJobException {
@@ -28,7 +28,7 @@ public abstract class RetryableOperation {
                     throw e;
                 }
                 count++;
-                log.trace("Error occurred during Retryable operation", e);
+                log.trace("Error occurred during retryable operation", e);
                 log.info("Error occurred during " + getOperationName() + ". Operation retry " + count);
             }
         }

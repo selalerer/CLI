@@ -1,32 +1,36 @@
 package com.checkmarx.cxconsole.commands;
 
-import com.checkmarx.clients.soap.login.exceptions.CxSoapLoginClientException;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandException;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
-import com.checkmarx.cxconsole.logger.CxConsoleLoggerFactory;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.utils.LoggerUtils;
+import com.google.common.base.Strings;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.RollingFileAppender;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.Writer;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.checkmarx.clients.soap.utils.SoapClientUtils.resolveServerProtocol;
-import static com.checkmarx.exitcodes.Constants.ErrorMassages.SERVER_CONNECTIVITY_VALIDATION_ERROR;
-import static com.checkmarx.exitcodes.ErrorHandler.errorCodeResolver;
+import static com.checkmarx.cxconsole.commands.utils.CommandUtils.resolveServerProtocol;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ErrorMassages.SERVER_CONNECTIVITY_VALIDATION_ERROR;
+import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 
 /**
  * Created by nirli on 30/10/2017.
  */
 public abstract class CLICommand {
 
-    protected Logger log = Logger.getLogger(CLICommand.class);
+    private static Logger log = Logger.getLogger(CLICommand.class);
 
     protected CLIScanParametersSingleton params;
 
@@ -55,19 +59,22 @@ public abstract class CLICommand {
     }
 
     public final int execute() throws CLICommandException {
-        try {
-            initLogging();
-        } catch (IOException e) {
-            log.error("Error initiate the logger: " + e.getMessage());
-            throw new CLICommandException("Error initiate the logger: " + e.getMessage());
+
+        if (!Strings.isNullOrEmpty(params.getCliSharedParameters().getLogFilePath())) {
+            try {
+                initLogging();
+            } catch (IOException e) {
+                log.error("Can't create new log file to path: " + params.getCliSharedParameters().getLogFilePath());
+            }
+        } else {
+            log.info("Default log file location: " + System.getProperty("user.dir") + File.separator + "logs\\cx_console.log");
         }
 
         try {
             String hostWithProtocol = resolveServerProtocol(params.getCliMandatoryParameters().getOriginalHost());
             params.getCliMandatoryParameters().setOriginalHost(hostWithProtocol);
             log.info("Server connectivity test succeeded to: " + params.getCliMandatoryParameters().getOriginalHost());
-        } catch (CxSoapLoginClientException e) {
-            log.error(SERVER_CONNECTIVITY_VALIDATION_ERROR + e.getMessage());
+        } catch (CxRestClientException e) {
             throw new CLICommandException(SERVER_CONNECTIVITY_VALIDATION_ERROR + e.getMessage());
         }
 
@@ -77,7 +84,6 @@ public abstract class CLICommand {
         } catch (CLICommandException e) {
             return errorCodeResolver(e.getMessage());
         } finally {
-            releaseLog();
             executor.shutdown();
         }
     }
@@ -101,7 +107,9 @@ public abstract class CLICommand {
                     log.debug("Option: " + StringUtils.capitalize(opt.getOpt()) + "   Value: True");
                 } else if (Objects.equals(option, "osalocationpath")
                         || Objects.equals(option, "osafilesexclude")
-                        || Objects.equals(option, "osaarchivetoextract")) {
+                        || Objects.equals(option, "osaarchivetoextract")
+                        || Objects.equals(option, "locationpathexclude")
+                        || Objects.equals(option, "locationfilesexclude")) {
                     log.debug("Option: " + StringUtils.capitalize(opt.getOpt()) + "   Value: " + StringUtils.join(opt.getValues(), ", "));
                 } else {
                     log.debug("Option: " + StringUtils.capitalize(opt.getOpt()) + "   Value: " + opt.getValue());
@@ -120,93 +128,15 @@ public abstract class CLICommand {
 
     private void initLogging() throws IOException {
         String logPath = "";
-        String logPathFromParam = params.getCliSharedParameters().getLogFile();
-        if (logPathFromParam != null) {
-            logPath = getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProjectName());
+        String logPathFromParam = params.getCliSharedParameters().getLogFilePath();
+        logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProject().getName());
+        Appender faAppender = Logger.getRootLogger().getAppender("FA");
+        try (Writer writer = new FileWriter(logPath)) {
+            ((RollingFileAppender) faAppender).setWriter(writer);
+            log.info("Log file location: " + logPath);
+        } catch (IOException e) {
+            log.error("Error initialize the log: " + e.getMessage());
         }
-
-        log = CxConsoleLoggerFactory.getLoggerFactory().getLogger(logPath);
-    }
-
-    private void releaseLog() {
-        log.removeAllAppenders();
-    }
-
-    private String getLogFileLocation(String logPath, String projectNameFromParam) {
-        String logFileLocation = logPath;
-        String projectName = projectNameFromParam;
-        String[] parts = new String[0];
-        if (projectName != null) {
-            projectName = projectName.replaceAll("/", "\\\\");
-            parts = projectName.split("\\\\");
-        }
-        String usrDir = System.getProperty("user.dir") + File.separator + normalizeLogPath(parts[parts.length - 1]) + File.separator;
-
-        if (logFileLocation == null) {
-            logFileLocation = usrDir + normalizeLogPath(parts[parts.length - 1]) + ".log";
-        } else {
-            String origPath = logFileLocation;
-            try {
-                logFileLocation = Paths.get(logFileLocation).toFile().getCanonicalPath();
-            } catch (IOException e) {
-                logFileLocation = origPath;
-            }
-
-            File logpath = new File(logFileLocation);
-            if (logpath.isAbsolute()) {
-                // Path is absolute
-                if (logFileLocation.endsWith(File.separator)) {
-                    // Directory path
-                    logFileLocation = logFileLocation + parts[parts.length - 1] + ".log";
-                } else {
-                    // File path
-                    if (logFileLocation.contains(File.separator)) {
-                        String dirPath = logFileLocation.substring(0, logFileLocation.lastIndexOf(File.separator));
-                        File logDirs = new File(dirPath);
-                        if (!logDirs.exists()) {
-                            logDirs.mkdirs();
-                        }
-                    }
-                }
-            } else {
-                // Path is not absolute
-                if (logFileLocation.endsWith(File.separator)) {
-                    // Directory path
-                    logFileLocation = usrDir + logFileLocation + parts[parts.length - 1] + ".log";
-                } else {
-                    // File path
-                    if (logFileLocation.contains(File.separator)) {
-                        String dirPath = logFileLocation.substring(0, logFileLocation.lastIndexOf(File.separator));
-                        File logDirs = new File(usrDir + dirPath);
-                        if (!logDirs.exists()) {
-                            logDirs.mkdirs();
-                        }
-                    }
-
-                    logFileLocation = usrDir + logFileLocation;
-                }
-            }
-        }
-
-        return logFileLocation;
-    }
-
-    private String normalizeLogPath(String projectName) {
-        if (projectName == null || projectName.isEmpty()) {
-            return "cx_scan.log";
-        }
-
-        String normalPathName = "";
-        normalPathName = projectName.replace("\\", "_");
-        normalPathName = normalPathName.replace("/", "_");
-        normalPathName = normalPathName.replace(":", "_");
-        normalPathName = normalPathName.replace("?", "_");
-        normalPathName = normalPathName.replace("*", "_");
-        normalPathName = normalPathName.replace("\"", "_");
-        normalPathName = normalPathName.replace("<", "_");
-        normalPathName = normalPathName.replace(">", "_");
-        normalPathName = normalPathName.replace("|", "_");
-        return normalPathName;
     }
 
     public abstract String getUsageExamples();

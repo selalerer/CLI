@@ -1,8 +1,8 @@
 package com.checkmarx.cxconsole.utils;
 
-import com.checkmarx.clients.rest.login.CxRestLoginClient;
-import com.checkmarx.clients.soap.login.CxSoapLoginClient;
-import com.checkmarx.parameters.CLIScanParametersSingleton;
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClientImpl;
+import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -35,12 +35,7 @@ public class ConfigMgr {
     public static final String KEY_OSA_EXTRACTABLE_INCLUDE_FILES = "scan.osa.extractable.include.files";
     public static final String KEY_OSA_SCAN_DEPTH = "scan.osa.extractable.depth";
     public static final String KEY_MAX_ZIP_SIZE = "scan.zip.max_size";
-    public static final String KEY_DEF_LOG_NAME = "scan.log.default.filename";
     public static final String KEY_DEF_PROJECT_NAME = "scan.default.projectname";
-    public static final String KEY_FILE_APP_PATTERN = "scan.log.appender.file.pattern";
-    public static final String KEY_FILE_APP_MAX_SIZE = "scan.log.appender.file.max_size";
-    public static final String KEY_FILE_APP_MAX_ROLLS = "scan.log.appender.file.max_rolls";
-    public static final String KEY_CLI_APP_PATTERN = "scan.log.appender.console.pattern";
     public static final String KEY_VERSION = "cxconsole.version";
     public static final String KEY_USE_KERBEROS_AUTH = "use_kerberos_authentication";
     public static final String KEY_KERBEROS_USERNAME = "kerberos.username";
@@ -53,7 +48,6 @@ public class ConfigMgr {
 
     private String defaultPath = userDir + separator + configDirRelativePath + separator + configFile;
     private Properties applicationProperties;
-    private static CxSoapLoginClient cxSoapLoginClient;
     private static CxRestLoginClient cxRestLoginClient;
 
     private static ConfigMgr mgr;
@@ -115,16 +109,11 @@ public class ConfigMgr {
         applicationProperties.put(KEY_EXCLUDED_FOLDERS, "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup");
         applicationProperties.put(KEY_EXCLUDED_FILES, "*.DS_Store, *.ipr, *.iws, *.bak, *.tmp, *.aac, *.aif, *.iff, *.m3u, *.mid, *.mp3, *.mpa, *.ra, *.wav, *.wma, *.3g2, *.3gp, *.asf, *.asx, *.avi, *.flv, *.mov, *.mp4, *.mpg, *.rm, *.swf, *.vob, *.wmv, *.bmp, *.gif, *.jpg, *.png, *.psd, *.tif, *.jar, *.zip, *.rar, *.exe, *.dll, *.pdb, *.7z, *.gz, *.tar.gz, *.tar, *.ahtm, *.ahtml, *.fhtml, *.hdm, *.hdml, *.hsql, *.ht, *.hta, *.htc, *.htd, *.htmls, *.ihtml, *.mht, *.mhtm, *.mhtml, *.ssi, *.stm, *.stml, *.ttml, *.txn, *.xhtm, *.xhtml, *.class, *.iml");
         applicationProperties.put(KEY_MAX_ZIP_SIZE, "200");
-        applicationProperties.put(KEY_DEF_LOG_NAME, "cx_scan.log");
         applicationProperties.put(KEY_DEF_PROJECT_NAME, "console.project");
         applicationProperties.put(KEY_VERSION, ConsoleUtils.getBuildVersion());
         applicationProperties.put(KEY_USE_KERBEROS_AUTH, "false");
         applicationProperties.put(KEY_KERBEROS_USERNAME, "");
         applicationProperties.put("kerberos.password", "");
-        applicationProperties.put(KEY_CLI_APP_PATTERN, "[%d{ISO8601} %-5p] %m%n)");
-        applicationProperties.put(KEY_FILE_APP_PATTERN, "%d{ISO8601} [%t] (%F\\:%L) %-5p - %m%n");
-        applicationProperties.put(KEY_FILE_APP_MAX_SIZE, "10MB");
-        applicationProperties.put(KEY_FILE_APP_MAX_ROLLS, "10");
 
         File propsFile = new File(defaultPath);
         if (!propsFile.exists()) {
@@ -179,20 +168,14 @@ public class ConfigMgr {
         mgr = new ConfigMgr(defConfig);
     }
 
-    public static CxSoapLoginClient getWSMgr() {
-        if (cxSoapLoginClient == null) {
-            cxSoapLoginClient = new CxSoapLoginClient();
-        }
-
-        return cxSoapLoginClient;
-    }
-
     public static CxRestLoginClient getRestWSMgr(CLIScanParametersSingleton parameters) {
         if (cxRestLoginClient == null) {
             if (parameters.getCliMandatoryParameters().isHasUserParam() && parameters.getCliMandatoryParameters().isHasPasswordParam()) {
-                cxRestLoginClient = new CxRestLoginClient(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getUsername(), parameters.getCliMandatoryParameters().getPassword());
+                cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getUsername(), parameters.getCliMandatoryParameters().getPassword());
             } else if (parameters.getCliMandatoryParameters().isHasTokenParam()) {
-                cxRestLoginClient = new CxRestLoginClient(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getToken());
+                cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getOriginalHost(), parameters.getCliMandatoryParameters().getToken());
+            } else if (parameters.getCliSharedParameters().isSsoLoginUsed()) {
+                cxRestLoginClient = new CxRestLoginClientImpl(parameters.getCliMandatoryParameters().getHost());
             }
         }
 
