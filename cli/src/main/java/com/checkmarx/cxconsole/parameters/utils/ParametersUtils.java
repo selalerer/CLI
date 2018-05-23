@@ -3,11 +3,6 @@ package com.checkmarx.cxconsole.parameters.utils;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import org.apache.commons.cli.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
 /**
  * Created by nirli on 30/10/2017.
  */

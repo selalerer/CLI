@@ -9,7 +9,7 @@ public class ConsoleUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static String getBuildVersion(){
+    public static String getBuildVersion() {
         return ConsoleUtils.class.getPackage().getImplementationVersion();
     }
 

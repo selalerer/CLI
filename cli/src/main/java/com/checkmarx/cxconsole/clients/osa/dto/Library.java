@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Library {
 
     String id;//:"36b32b00-9ee6-4e2f-85c9-3f03f26519a9",
-    String  name;//:"lib-name",
+    String name;//:"lib-name",
     String version;//:"lib-version",
     int highVulnerabilityCount;//:1,
     int mediumVulnerabilityCount;//:1,

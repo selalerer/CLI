@@ -6,6 +6,7 @@ public class CXFConfigurationUtils {
 
     /**
      * Dynamically sets off the CXF client WSDL schema validation - needed for schema backward compatibility.
+     *
      * @param sevice the SOAP web service to configure
      */
     public static void disableSchemaValidation(Object sevice) {
@@ -17,9 +18,10 @@ public class CXFConfigurationUtils {
     /**
      * Dynamically sets the correct parameters of CXF client for NTLM Authentication
      * Connection is Keep-Alive and Turn off chunking
+     *
      * @param sevice the SOAP web service to configure
      */
-    public static void setNTLMAuthentication(Object sevice){
+    public static void setNTLMAuthentication(Object sevice) {
 
         org.apache.cxf.endpoint.Client client = org.apache.cxf.frontend.ClientProxy.getClient(sevice);
         org.apache.cxf.transport.http.HTTPConduit conduit = (org.apache.cxf.transport.http.HTTPConduit) client.getConduit();

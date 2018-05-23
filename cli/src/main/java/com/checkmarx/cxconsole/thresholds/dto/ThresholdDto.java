@@ -2,7 +2,6 @@ package com.checkmarx.cxconsole.thresholds.dto;
 
 import com.checkmarx.cxconsole.clients.sast.dto.ResultsStatisticsDTO;
 import com.checkmarx.cxconsole.constants.ScanType;
-import com.checkmarx.cxconsole.commands.job.constants.SASTResultsDTO;
 
 public class ThresholdDto {
 

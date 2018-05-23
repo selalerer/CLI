@@ -5,16 +5,12 @@ import com.checkmarx.cxconsole.clients.sast.dto.EngineConfigurationDTO;
 import com.checkmarx.cxconsole.clients.sast.dto.PresetDTO;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
-import com.checkmarx.cxconsole.parameters.utils.ParametersUtils;
 import com.google.common.base.Strings;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.compress.utils.IOUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 

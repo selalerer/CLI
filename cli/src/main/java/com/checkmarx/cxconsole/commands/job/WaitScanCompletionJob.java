@@ -1,9 +1,9 @@
 package com.checkmarx.cxconsole.commands.job;
 
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClient;
-import com.checkmarx.cxconsole.clients.sast.dto.StageDTO;
 import com.checkmarx.cxconsole.clients.sast.constants.StageValues;
 import com.checkmarx.cxconsole.clients.sast.dto.ScanQueueDTO;
+import com.checkmarx.cxconsole.clients.sast.dto.StageDTO;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobUtilException;

@@ -22,7 +22,7 @@
 
 
     <category name="org.apache.http">
-    <priority value="WARN"/>
+        <priority value="WARN"/>
     </category>
 
     <category name="org.apache.cxf">

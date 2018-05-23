@@ -1,4 +1,5 @@
 package com.checkmarx.cxconsole.clients.osa.dto;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**

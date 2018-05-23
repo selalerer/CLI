@@ -140,7 +140,7 @@ public class CLISASTScanJob extends CLIScanJob {
                         File folder = new File(System.getProperty("user.dir") + File.separator
                                 + cliMandatoryParameters.getProject().getName());
                         folder.mkdir();
-                        reportFile =  new File(folder + File.separator + reportFilePath);
+                        reportFile = new File(folder + File.separator + reportFilePath);
                     } else {
                         reportFile = new File(reportFilePath);
                     }

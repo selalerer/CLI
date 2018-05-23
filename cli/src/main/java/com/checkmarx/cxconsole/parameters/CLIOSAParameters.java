@@ -1,8 +1,8 @@
 package com.checkmarx.cxconsole.parameters;
 
-import com.checkmarx.cxconsole.utils.ConfigMgr;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import com.checkmarx.cxconsole.parameters.utils.ParametersUtils;
+import com.checkmarx.cxconsole.utils.ConfigMgr;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
