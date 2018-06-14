@@ -294,7 +294,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         HttpUriRequest postRequest;
 
         try {
-            if (remoteSourceScanSettingDTO instanceof SVNAndTFSScanSettingDTO && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey().length > 1) {
+            if (remoteSourceScanSettingDTO instanceof SVNAndTFSScanSettingDTO && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey() != null && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey().length > 1) {
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
                 builder.addBinaryBody("privateKey", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey(), ContentType.APPLICATION_JSON, null);
                 builder.addTextBody("absoluteUrl", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getAbsoluteUrl(), ContentType.APPLICATION_JSON);
