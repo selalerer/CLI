@@ -53,6 +53,7 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(GeneralResourceURIBuilder.buildGetTeamsURL(new URL(hostName))))
                     .setHeader(CLI_ACCEPT_AND_VERSION_HEADER)
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
@@ -74,6 +75,7 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
             getRequest = RequestBuilder.get()
                     .setUri(String.valueOf(GeneralResourceURIBuilder.buildProjectsURL(new URL(hostName))))
                     .setHeader(CLI_ACCEPT_AND_VERSION_HEADER)
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
             response = apacheClient.execute(getRequest);
 
