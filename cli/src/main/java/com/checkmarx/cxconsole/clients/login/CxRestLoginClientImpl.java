@@ -140,7 +140,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
     @Override
     public void tokenLogin() throws CxRestLoginClientException {
-        getAccessTokenFromRefreshToken(token);
         client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
         isLoggedIn = true;
     }
@@ -192,7 +191,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         } finally {
             HttpClientUtils.closeQuietly(getAccessTokenResponse);
         }
-
         headers.add(new BasicHeader("Authorization", "Bearer " + accessToken));
     }
 
