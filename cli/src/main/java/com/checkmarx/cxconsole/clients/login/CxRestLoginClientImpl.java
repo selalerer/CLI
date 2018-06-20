@@ -68,6 +68,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         client = HttpClientBuilder.create().build();
         try {
             getAccessTokenFromRefreshToken(token);
+            headers.add(CLI_ORIGIN_HEADER);
+            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
@@ -76,8 +78,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                 log.error("Failed to login with token: " + e.getMessage());
             }
         }
-        headers.add(CLI_ORIGIN_HEADER);
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
     }
 
     public CxRestLoginClientImpl(String hostname, String username, String password) {
@@ -140,8 +140,12 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
     @Override
     public void tokenLogin() throws CxRestLoginClientException {
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
-        isLoggedIn = true;
+        if (headers.size() == 2) {
+            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            isLoggedIn = true;
+        } else {
+            throw new CxRestLoginClientException("Login failed");
+        }
     }
 
     @Override
