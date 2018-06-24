@@ -337,14 +337,13 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                         .build();
             } else {
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                builder.addBinaryBody("privateKey", privateKey);
-                builder.addTextBody("url", locationURL);
-                builder.addTextBody("branch", locationBranch);
-                HttpEntity multipart = builder.build();
+                builder.addTextBody("url", locationURL, ContentType.APPLICATION_JSON);
+                builder.addTextBody("branch", locationBranch, ContentType.APPLICATION_JSON);
+                builder.addBinaryBody("privateKey", privateKey, ContentType.APPLICATION_JSON, null);
                 postRequest = RequestBuilder.post()
                         .setUri(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, RemoteSourceType.GIT, true)))
-                        .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
-                        .setEntity(multipart)
+                        .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
+                        .setEntity(builder.build())
                         .build();
             }
             response = apacheClient.execute(postRequest);
