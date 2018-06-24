@@ -339,7 +339,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
                 builder.addTextBody("url", locationURL, ContentType.APPLICATION_JSON);
                 builder.addTextBody("branch", locationBranch, ContentType.APPLICATION_JSON);
-                builder.addBinaryBody("privateKey", privateKey, ContentType.APPLICATION_JSON, null);
+                builder.addBinaryBody("privateKey", privateKey, ContentType.MULTIPART_FORM_DATA, null);
                 postRequest = RequestBuilder.post()
                         .setUri(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, RemoteSourceType.GIT, true)))
                         .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
