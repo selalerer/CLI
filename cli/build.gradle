@@ -19,7 +19,7 @@ repositories {
 
 group = 'com.checkmarx'
 //For development purpose
-//version = '8.6.0' + "-" + getDate()
+//version = '8.60.2' + "-" + getDate()
 //For release purpose
 version = '8.60.2'
 compileJava.options.encoding = 'UTF-8'

@@ -354,9 +354,7 @@ public class OSAUtil {
 
         if (exclusions != null) {
             for (String exclusion : exclusions) {
-                if (!exclusion.startsWith("*.")) {
-                    exclusion = "*." + exclusion;
-                }
+                exclusion = addPrefix(exclusion);
                 if (SelectorUtils.matchPath(exclusion, relativePath, false)) {
                     log.trace("The file: " + relativePath + " has excluded extension or is excluded from OSA analysis");
                     return false;
@@ -366,9 +364,7 @@ public class OSAUtil {
 
         if (inclusions.length > 0) {
             for (String inclusion : inclusions) {
-                if (!inclusion.startsWith("*.")) {
-                    inclusion = "*." + inclusion;
-                }
+                inclusion = addPrefix(inclusion);
                 if (SelectorUtils.matchPath(inclusion, relativePath, false)) {
                     return true;
                 }
@@ -377,6 +373,18 @@ public class OSAUtil {
         }
 
         return isMatch;
+    }
+
+    private static String addPrefix(String suffix) {
+        if (suffix.startsWith("*.")) {
+            return "**/" + suffix;
+        } else if (suffix.startsWith("*/")) {
+            return suffix;
+        } else if (suffix.startsWith("**/*")) {
+            return suffix;
+        } else {
+            return "**/*." + suffix;
+        }
     }
 
     //calculate sha1 of file, and add the filename + sha1 to the output parameter ret
