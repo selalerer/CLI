@@ -74,9 +74,10 @@ public class OsaWSFSAUtil {
             ret.put("excludes", osaExcludes.toString().trim());
         }
         ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
-        if (cliosaParameters.isExecuteNpmAndBower()) {
+        if (cliosaParameters.isExecuteNpmAndBower() || cliosaParameters.isExecuteNpm()) {
             ret.put("npm.runPreStep", "true");
-            ret.put("bower.runPreStep", "true");
+            ret.put("npm.ignoreScripts", "true");
+            ret.put("bower.runPreStep", "false");
         }
         ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
 

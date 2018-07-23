@@ -44,6 +44,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private String osaReportHTML;
     private String osaJson;
     private boolean executeNpmAndBower = false;
+    private boolean executePackageDependency = false;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -66,7 +67,9 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_MEDIUM_THRESHOLD = Option.builder("osamedium").hasArg(true).argName("number of medium OSA vulnerabilities").desc("OSA medium severity vulnerability threshold. If the number of medium vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
     private static final Option PARAM_OSA_HIGH_THRESHOLD = Option.builder("osahigh").hasArg(true).argName("number of high OSA vulnerabilities").desc("OSA high severity vulnerability threshold. If the number of high vulnerabilities exceeds the threshold, scan will end with an error. Optional.").build();
 
-    private static final Option PARAM_OSA_EXECUTE_NPM_AND_BOWER = Option.builder("executenpmandbower").hasArg(false).argName("Pre scan installation of NPM and Bower dependencies").desc("Triggered in order to perform install command for NPM and Bower dependencies before initiate OSA analysis. Optional.").build();
+    private static final Option PARAM_OSA_EXECUTE_NPM_AND_BOWER = Option.builder("executenpmandbower").hasArg(false).argName("Pre scan installation of NPM dependencies").desc("Triggered in order to perform install command for NPM dependencies before initiate OSA analysis. Optional.(Currently kept for backward compatibility and will be removed in the future. You should use packagedependencyinstall instead)").build();
+    private static final Option PARAM_OSA_EXECUTE_NPM = Option.builder("executepackagedependency").hasArg(false).argName("Pre scan installation of NPM dependencies").desc("Triggered in order to perform install command for NPM dependencies before initiate OSA analysis. Optional.").build();
+
 
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -91,6 +94,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         String osaMediumThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_MEDIUM_THRESHOLD.getOpt());
         String osaHighThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_HIGH_THRESHOLD.getOpt());
         executeNpmAndBower = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER.getOpt());
+        executePackageDependency = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_NPM.getOpt());
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -213,6 +217,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return executeNpmAndBower;
     }
 
+    public boolean isExecuteNpm() {
+        return executePackageDependency;
+    }
+
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
@@ -231,6 +239,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_OSA_SCAN_DEPTH);
 
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER);
+        commandLineOptions.addOption(PARAM_OSA_EXECUTE_NPM);
     }
 
     @Override
