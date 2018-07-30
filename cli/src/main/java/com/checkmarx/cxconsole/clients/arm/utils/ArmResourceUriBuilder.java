@@ -13,7 +13,7 @@ public class ArmResourceUriBuilder {
 
     private static final String APPLICATION_NAME = "cxarm/policymanager";
 
-    private static final String ARM_GET_VIOLATIONS_RESOURCE = "projects/{projectId}/violations/{provider}";
+    private static final String ARM_GET_VIOLATIONS_RESOURCE = "projects/{projectId}/violations?provider={provider}";
 
 
     public static URL buildGetViolationsURL(URL serverUrl, int projectId, String provider) {
