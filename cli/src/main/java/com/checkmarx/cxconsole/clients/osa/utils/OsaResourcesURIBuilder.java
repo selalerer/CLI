@@ -18,6 +18,7 @@ public class OsaResourcesURIBuilder {
     private static final String OSA_SCAN_SUMMARY_RESOURCE = "osa/reports";
     private static final String OSA_CREATE_SCAN_WITH_FS = "osa/inventory";
     private static final String SCAN_ID_QUERY_PARAM = "?scanId=";
+    private static final String CX_ARM_CONFIGURATION =  "/Configurations/Portal";
 
     private static final String ITEM_PER_PAGE_QUERY_PARAM = "&itemsPerPage=";
 
@@ -51,6 +52,14 @@ public class OsaResourcesURIBuilder {
     public static URL buildGetOSAScanSpecificDetailsResultsURL(URL serverUrl, String scanId, String detailsType) {
         try {
             return new URL(serverUrl, APPLICATION_NAME + "/" + "osa/" + detailsType + SCAN_ID_QUERY_PARAM + scanId + ITEM_PER_PAGE_QUERY_PARAM + MAX_ITEMS);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildGetCxArmConfigurationURL(URL serverUrl) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + "/" + CX_ARM_CONFIGURATION);
         } catch (MalformedURLException e) {
             return serverUrl;
         }

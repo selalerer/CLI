@@ -45,6 +45,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private String osaJson;
     private boolean executeNpmAndBower = false;
     private boolean executePackageDependency = false;
+    private boolean checkPolicyViolations = false;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -69,7 +70,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
 
     private static final Option PARAM_OSA_EXECUTE_NPM_AND_BOWER = Option.builder("executenpmandbower").hasArg(false).argName("Pre scan installation of NPM dependencies").desc("Triggered in order to perform install command for NPM dependencies before initiate OSA analysis. Optional.(Currently kept for backward compatibility and will be removed in the future. You should use packagedependencyinstall instead)").build();
     private static final Option PARAM_OSA_EXECUTE_NPM = Option.builder("executepackagedependency").hasArg(false).argName("Pre scan installation of NPM dependencies").desc("Triggered in order to perform install command for NPM dependencies before initiate OSA analysis. Optional.").build();
-
+    private static final Option PARAM_RUN_POLICY_VIOLATIONS = Option.builder("checkpolicy").hasArg(false).argName("Check Policy Violations").desc("Mark the build as failed or unstable if the project's policy is violated. Optional.").build();
 
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -95,6 +96,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         String osaHighThresholdStr = parsedCommandLineArguments.getOptionValue(PARAM_OSA_HIGH_THRESHOLD.getOpt());
         executeNpmAndBower = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER.getOpt());
         executePackageDependency = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_NPM.getOpt());
+        checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -221,6 +223,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return executePackageDependency;
     }
 
+    public boolean isCheckPolicyViolations() {
+        return checkPolicyViolations;
+    }
+
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
@@ -240,6 +246,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
 
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER);
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_NPM);
+        commandLineOptions.addOption(PARAM_RUN_POLICY_VIOLATIONS);
     }
 
     @Override

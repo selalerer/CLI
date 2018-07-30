@@ -1,5 +1,10 @@
 package com.checkmarx.cxconsole.commands.job;
 
+import com.checkmarx.cxconsole.clients.arm.CxRestArmClient;
+import com.checkmarx.cxconsole.clients.arm.CxRestArmClientImpl;
+import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
+import com.checkmarx.cxconsole.clients.arm.exceptions.CxRestARMClientException;
+import com.checkmarx.cxconsole.clients.general.dto.CxProviders;
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
 import com.checkmarx.cxconsole.clients.osa.CxRestOSAClient;
@@ -11,6 +16,7 @@ import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.clients.osa.dto.OSASummaryResults;
 import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.osa.utils.OsaWSFSAUtil;
+import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.JobUtils;
 import com.checkmarx.cxconsole.commands.job.utils.PathHandler;
@@ -22,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
+import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.POLICY_VIOLATION_ERROR_EXIT_CODE;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
 import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
@@ -41,6 +48,7 @@ public class CLIOSAScanJob extends CLIScanJob {
     public Integer call() throws CLIJobException {
         OSASummaryResults osaSummaryResults;
         CLIOSAParameters cliosaParameters = params.getCliOsaParameters();
+        int exitCode = SCAN_SUCCEEDED_EXIT_CODE;
         try {
             log.info("Project name is \"" + params.getCliMandatoryParameters().getProject().getName() + "\"");
 
@@ -126,13 +134,33 @@ public class CLIOSAScanJob extends CLIScanJob {
                     log.error("Error occurred during CxOSA reports. Error message: " + e.getMessage());
                     return errorCodeResolver(e.getMessage());
                 }
+                if(cliosaParameters.isCheckPolicyViolations()){
+                    CxArmConfig armConfig = null;
+                    try {
+                        armConfig = cxRestOSAClient.getCxArmConfiguration();
+                    } catch (CxRestOSAClientException e) {
+                        log.error("Error occurred during CxOSA get CXArm configuration. Error message: " + e.getMessage());
+                        return errorCodeResolver(e.getMessage());
+                    }
+                    try {
+                        CxRestArmClient armClient = new CxRestArmClientImpl(cxRestLoginClient, armConfig.getCxARMPolicyURL());
+                        exitCode = RestClientUtils.getArmViolationExitCode(armClient, CxProviders.OPEN_SOURCE, params.getCliMandatoryParameters().getProject().getId(), log);
+                    } catch (CxRestARMClientException e) {
+                        log.error("Error occurred during getting CxARM violations. Error message: " + e.getMessage());
+                        return errorCodeResolver(e.getMessage());
+                    }
+                }
 
                 //Osa threshold calculation
                 if (cliosaParameters.isOsaThresholdEnabled()) {
                     ThresholdDto thresholdDto = new ThresholdDto(ScanType.OSA_SCAN, cliosaParameters.getOsaHighThresholdValue(), cliosaParameters.getOsaMediumThresholdValue(),
                             cliosaParameters.getOsaLowThresholdValue(), osaSummaryResults.getTotalHighVulnerabilities(),
                             osaSummaryResults.getTotalMediumVulnerabilities(), osaSummaryResults.getTotalLowVulnerabilities());
-                    return resolveThresholdExitCode(thresholdDto);
+                    int thresholdExitCode = resolveThresholdExitCode(thresholdDto);
+                    if(exitCode != POLICY_VIOLATION_ERROR_EXIT_CODE){
+                        exitCode = thresholdExitCode;
+                    }
+
                 }
             } else {
                 log.info("OSA scan queued successfully. Job finished");
@@ -146,7 +174,7 @@ public class CLIOSAScanJob extends CLIScanJob {
             return errorCodeResolver(super.getErrorMsg());
         }
 
-        return SCAN_SUCCEEDED_EXIT_CODE;
+        return exitCode;
     }
 
 }

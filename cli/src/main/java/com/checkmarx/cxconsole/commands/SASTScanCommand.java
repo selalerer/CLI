@@ -61,6 +61,10 @@ class SASTScanCommand extends CLICommand {
                 osaCommand = CommandFactory.getCommand(OSA_SCAN.value(), params);
             }
             int osaScanExitCode = osaCommand.execute();
+            //Policy violation is highest on exit code rank.
+            if(osaScanExitCode == POLICY_VIOLATION_ERROR_EXIT_CODE){
+                return osaScanExitCode;
+            }
             if (osaScanExitCode >= OSA_HIGH_THRESHOLD_ERROR_EXIT_CODE && exitCode >= SAST_HIGH_THRESHOLD_ERROR_EXIT_CODE) {
                 return GENERIC_THRESHOLD_FAILURE_ERROR_EXIT_CODE;
             } else if (osaScanExitCode != SCAN_SUCCEEDED_EXIT_CODE) {

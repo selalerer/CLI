@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.clients.osa;
 
+import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanRequest;
 import com.checkmarx.cxconsole.clients.osa.dto.CreateOSAScanResponse;
 import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
@@ -19,4 +20,6 @@ public interface CxRestOSAClient {
     void close();
 
     OSAScanStatus waitForOSAScanToFinish(String scanId, long scanTimeoutInMin, ScanWaitHandler<OSAScanStatus> waitHandler, boolean isAsyncOsaScan) throws CxRestOSAClientException;
+
+    CxArmConfig getCxArmConfiguration() throws CxRestOSAClientException;
 }

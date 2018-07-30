@@ -21,7 +21,10 @@ public class Constants {
         public static final int OSA_HIGH_THRESHOLD_ERROR_EXIT_CODE = 13;
         public static final int OSA_MEDIUM_THRESHOLD_ERROR_EXIT_CODE = 14;
         public static final int OSA_LOW_THRESHOLD_ERROR_EXIT_CODE = 15;
+
+        public static final int POLICY_VIOLATION_ERROR_EXIT_CODE = 18;
         public static final int GENERIC_THRESHOLD_FAILURE_ERROR_EXIT_CODE = 19;
+
     }
 
     public class ErrorMassages {
@@ -49,5 +52,6 @@ public class Constants {
         public static final String OSA_MEDIUM_THRESHOLD_ERROR_MSG = "OSA medium vulnerability threshold exceeded";
         public static final String OSA_LOW_THRESHOLD_ERROR_MSG = "OSA low vulnerability threshold exceeded";
         public static final String GENERIC_THRESHOLD_FAILURE_ERROR_MSG = "SAST and OSA vulnerabilities threshold exceeded";
+        public static final String POLICY_VIOLATED_ERROR_MSG = "Policy violated";
     }
 }

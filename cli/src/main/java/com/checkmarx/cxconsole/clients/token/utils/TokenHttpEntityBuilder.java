@@ -37,7 +37,7 @@ public class TokenHttpEntityBuilder {
         urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
         urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
         urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, PASS_KEY));
-        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api"));
+        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api cxarm_api"));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
 
@@ -81,7 +81,7 @@ public class TokenHttpEntityBuilder {
         urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
         urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
         urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, PASS_KEY));
-        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api"));
+        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access cxarm_api"));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
 
