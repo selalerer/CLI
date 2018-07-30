@@ -123,8 +123,8 @@ public class RestClientUtils {
             String commaSeperatedPolicies = builder.toString();
             //Remove last comma
             commaSeperatedPolicies = commaSeperatedPolicies.substring(0, commaSeperatedPolicies.length() - SEPARATOR.length());
-            log.info("Policy Status: Violated");
-            log.info("Policy violations : " + violatedPolicies.size() + "(" + commaSeperatedPolicies +")");
+            log.info("Policy status: Violated");
+            log.info("Policy violations: " + violatedPolicies.size() + "(" + commaSeperatedPolicies +")");
 
         } else{
             log.info("Policy Status: Compliant");
