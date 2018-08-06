@@ -131,7 +131,8 @@ public abstract class CLICommand {
         String logPathFromParam = params.getCliSharedParameters().getLogFilePath();
         logPath = LoggerUtils.getLogFileLocation(logPathFromParam, params.getCliMandatoryParameters().getProject().getName());
         Appender faAppender = Logger.getRootLogger().getAppender("FA");
-        try (Writer writer = new FileWriter(logPath)) {
+        try {
+            Writer writer = new FileWriter(logPath);
             ((RollingFileAppender) faAppender).setWriter(writer);
             log.info("Log file location: " + logPath);
         } catch (IOException e) {
