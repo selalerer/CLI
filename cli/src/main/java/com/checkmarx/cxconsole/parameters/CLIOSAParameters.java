@@ -46,6 +46,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private boolean executeNpmAndBower = false;
     private boolean executePackageDependency = false;
     private boolean checkPolicyViolations = false;
+    private String osaDockerImageName;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -71,6 +72,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_EXECUTE_NPM_AND_BOWER = Option.builder("executenpmandbower").hasArg(false).argName("Pre scan installation of package managers dependencies").desc("Triggered in order to perform install dependencies command for package managers before initiate OSA analysis. Optional.(Currently kept for backward compatibility and will be removed in the future. You should use packagedependencyinstall instead)").build();
     private static final Option PARAM_OSA_EXECUTE_PACKAGE_INSTALL = Option.builder("executepackagedependency").hasArg(false).argName("Pre scan installation of package managers dependencies").desc("Triggered in order to perform install dependencies command for package managers before initiate OSA analysis. Optional.").build();
     private static final Option PARAM_RUN_POLICY_VIOLATIONS = Option.builder("checkpolicy").hasArg(false).argName("Check Policy Violations").desc("Mark the build as failed or unstable if the project's policy is violated. Optional.").build();
+    private static final Option PARAM_OSA_SCAN_DOCKER = Option.builder("dockerscan").hasArg(true).argName("Docker image name").desc("Supports scanning of docker images as part of the OSA scan. Optional.").build();
 
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -97,6 +99,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         executeNpmAndBower = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER.getOpt());
         executePackageDependency = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_PACKAGE_INSTALL.getOpt());
         checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
+        osaDockerImageName = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_SCAN_DOCKER.getOpt());
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -227,6 +230,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return checkPolicyViolations;
     }
 
+    public String getOsaDockerImageName() {
+        return osaDockerImageName;
+    }
+
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
@@ -247,6 +254,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER);
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_PACKAGE_INSTALL);
         commandLineOptions.addOption(PARAM_RUN_POLICY_VIOLATIONS);
+        commandLineOptions.addOption(PARAM_OSA_SCAN_DOCKER);
     }
 
     @Override
