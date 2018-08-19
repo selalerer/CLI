@@ -74,7 +74,7 @@ dependencies {
             'org.slf4j:slf4j-api:1.7.25',
             'org.slf4j:slf4j-log4j12:1.7.25',
             'org.apache.logging.log4j:log4j-core:2.10.0',
-            compile('org.whitesource:whitesource-fs-agent:18.7.1') {
+            compile('org.whitesource:whitesource-fs-agent:18.7.2') {
                 exclude group: 'org.slf4j', module: 'slf4j-api'
                 exclude group: 'org.slf4j', module: 'slf4j-log4j12'
                 exclude group: 'ch.qos.logback', module: 'logback-classic'
