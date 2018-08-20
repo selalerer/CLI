@@ -91,6 +91,7 @@ public class ScanPrerequisitesValidator {
             }
         }
         log.info("Project id for project: \"" + projectInput.getName() + "\" was not found in server");
+        log.info("Make sure you specify the full project path. For example: -ProjectName CxServer\\SP\\Company\\Users\\my project");
         return false;
     }
 
@@ -132,6 +133,7 @@ public class ScanPrerequisitesValidator {
             }
         }
         if (Strings.isNullOrEmpty(projectInput.getTeamId())) {
+            log.info("Team: \"" + teamInput.getFullName() + "\" was not found in server");
             throw new CxScanPrerequisitesValidatorException("Team: \"" + teamInput.getFullName() + "\" was not found in server");
         }
     }
