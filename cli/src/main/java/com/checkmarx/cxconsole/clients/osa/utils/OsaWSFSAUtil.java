@@ -25,7 +25,7 @@ public class OsaWSFSAUtil {
     private static final String[] ACCEPT_EXTENSIONS_LISTS = {"jar", "war", "ear", "aar", "dll", "exe", "msi", "nupkg", "egg", "whl",
             "tar.gz", "gem", "deb", "udeb", "dmg", "drpm", "rpm", "pkg.tar.xz", "swf", "swc", "air", "apk", "zip", "gzip", "tar.bz2",
             "tgz", "c", "cc", "cp", "cpp", "css", "c++", "h", "hh", "hpp", "hxx", "h++", "m", "mm", "pch", "c#", "cs", "csharp", "java",
-            "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp", "6pl",
+            "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp,6pl",
             "6pm", "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
     private static final String ALL_FILES = "**/**";
 
@@ -74,12 +74,21 @@ public class OsaWSFSAUtil {
             ret.put("excludes", osaExcludes.toString().trim());
         }
         ret.put("archiveExtractionDepth", cliosaParameters.getOsaScanDepth());
-        if (cliosaParameters.isExecuteNpmAndBower() || cliosaParameters.isExecuteNpm()) {
+        if (cliosaParameters.isExecuteNpmAndBower() || cliosaParameters.isExecutePackageDependency()) {
             ret.put("npm.runPreStep", "true");
             ret.put("npm.ignoreScripts", "true");
             ret.put("bower.runPreStep", "false");
+
+            ret.put("nuget.resolveDependencies", "true");
+            ret.put("nuget.restoreDependencies", "true");
+            ret.put("python.resolveDependencies", "true");
+            ret.put("python.ignorePipInstallErrors", "true");
         }
         ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
+        if(cliosaParameters.getOsaDockerImageName() != null && !cliosaParameters.getOsaDockerImageName().isEmpty()){
+            ret.put("docker.scanImages","true");
+            ret.put("docker.includes",cliosaParameters.getOsaDockerImageName());
+        }
 
         return ret;
     }

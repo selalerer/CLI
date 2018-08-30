@@ -58,6 +58,8 @@ public class ErrorHandler {
         codeToMessageMap.put(SAST_HIGH_THRESHOLD_ERROR_EXIT_CODE, SAST_HIGH_THRESHOLD_ERROR_MSG);
         codeToMessageMap.put(SAST_MEDIUM_THRESHOLD_ERROR_EXIT_CODE, SAST_MEDIUM_THRESHOLD_ERROR_MSG);
         codeToMessageMap.put(SAST_LOW_THRESHOLD_ERROR_EXIT_CODE, SAST_LOW_THRESHOLD_ERROR_MSG);
+        //Policy manager violations
+        codeToMessageMap.put(POLICY_VIOLATION_ERROR_EXIT_CODE, POLICY_VIOLATED_ERROR_MSG);
 
         return codeToMessageMap;
     }

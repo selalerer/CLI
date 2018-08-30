@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.clients.osa;
 
+import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
 import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
@@ -262,6 +263,28 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
         }
 
         return scanStatus;
+    }
+
+    @Override
+    public CxArmConfig getCxArmConfiguration() throws CxRestOSAClientException{
+        HttpUriRequest getRequest;
+        HttpResponse response = null;
+
+        try {
+            getRequest = RequestBuilder.get()
+                    .setUri(String.valueOf(OsaResourcesURIBuilder.buildGetCxArmConfigurationURL(new URL(hostName))))
+                    .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
+                    .build();
+            response = apacheClient.execute(getRequest);
+
+            RestClientUtils.validateClientResponse(response, 200, "fail get CXARM configuration");
+            return parseJsonFromResponse(response, CxArmConfig.class);
+        } catch (IOException | CxValidateResponseException e) {
+            log.error("Failed to get CXARM configuration: " + e.getMessage());
+            throw new CxRestOSAClientException("Failed to get CXARM configuration: " + e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(response);
+        }
     }
 
     private int checkRetry(int retry, String errorMessage) throws CxRestOSAClientException {
