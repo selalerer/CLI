@@ -29,7 +29,7 @@ public abstract class RetryableOperation {
                 }
                 count++;
                 log.trace("Error occurred during retryable operation", e);
-                log.info("Error occurred during " + getOperationName() + ". Operation retry " + count);
+                log.info(" Attempt #" + count + " - Error occurred during " + getOperationName());
             }
         }
     }
