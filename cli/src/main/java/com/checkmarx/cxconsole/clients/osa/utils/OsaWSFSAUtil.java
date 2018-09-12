@@ -79,10 +79,9 @@ public class OsaWSFSAUtil {
             ret.put("npm.ignoreScripts", "true");
             ret.put("bower.runPreStep", "false");
 
-            ret.put("nuget.resolveDependencies", "true");
-            ret.put("nuget.restoreDependencies", "true");
-            ret.put("python.resolveDependencies", "true");
-            ret.put("python.ignorePipInstallErrors", "true");
+            setResolveDependencies(ret,"true");
+        }else {
+            setResolveDependencies(ret,"false");
         }
         ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
         if(cliosaParameters.getOsaDockerImageName() != null && !cliosaParameters.getOsaDockerImageName().isEmpty()){
@@ -91,6 +90,13 @@ public class OsaWSFSAUtil {
         }
 
         return ret;
+    }
+
+    private static void setResolveDependencies(Properties ret, String resolveDependencies) {
+        ret.put("nuget.resolveDependencies", resolveDependencies);
+        ret.put("nuget.restoreDependencies", resolveDependencies);
+        ret.put("python.resolveDependencies", resolveDependencies);
+        ret.put("python.ignorePipInstallErrors", resolveDependencies);
     }
 
     private static String stringArrayToString(String[] strArr, StringType stringType) {
