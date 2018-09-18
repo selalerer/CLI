@@ -18,15 +18,13 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.checkmarx.cxconsole.CxConsoleLauncher.LOG_NAME;
-
 /**
  * Created by nirli on 26/10/2017.
  */
 public class CxSoapSASTClient {
 
     private CxCLIWebServiceV1Soap cxSoapClient;
-    private Logger log = Logger.getLogger(LOG_NAME);
+    private Logger log = Logger.getLogger(CxSoapSASTClient.class);
 
     private static final String SOAP_ACTION_URL = "http://Checkmarx.com/v7/GetScanSummary";
     private static final String SDK_URL = "/Cxwebinterface/sdk/cxsdkwebservice.asmx";
@@ -195,7 +193,7 @@ public class CxSoapSASTClient {
             throw new CxSoapSASTClientException("Error retrieving scan status from server: " + e.getMessage());
         }
 
-        log.trace("ScanStatus response: " + response);
+        log.trace("ScanStatus response: " + response.getCurrentStatus().toString());
         return response;
     }
 
@@ -204,47 +202,64 @@ public class CxSoapSASTClient {
         CxWSReportRequest reportRequest = new CxWSReportRequest();
         reportRequest.setScanID(scanId);
         reportRequest.setType(CxWSReportType.fromValue(type));
-        final CxWSCreateReportResponse resp = cxSoapClient.createScanReport(sessionId, reportRequest);
-        log.trace("ScanStatus response: " + resp);
-        if (!resp.isIsSuccesfull()) {
-            String err = "Cannot create scan(" + scanId + ") " + type + " report: " + resp.getErrorMessage();
-            log.error(err);
-            throw new CxSoapSASTClientException(err);
-        }
-
-        final long repoId = resp.getID();
-        // check status report complete
-        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        FutureTask<CxWSReportStatusResponse> checkRepoStatusTask = new FutureTask<CxWSReportStatusResponse>(new Thread(), null) {
-            CxWSReportStatusResponse statusResp;
-
-            @Override
-            public void run() {
-                statusResp = cxSoapClient.getScanReportStatus(sessionId, repoId);
-                if (statusResp.isIsReady()) {
-                    // status report is ready
-                    scheduler.shutdown();
-                    set(statusResp);
-                }
-                //continue task
+        long repoId = 0;
+        for (int i = 0; i < 3; i++) {
+            final CxWSCreateReportResponse resp = cxSoapClient.createScanReport(sessionId, reportRequest);
+            log.trace("ScanStatus response: " + resp);
+            if (!resp.isIsSuccesfull()) {
+                String err = "Cannot create scan(" + scanId + ") " + type + " report: " + resp.getErrorMessage();
+                log.error(err);
+                throw new CxSoapSASTClientException(err);
             }
-        };
 
-        scheduler.scheduleAtFixedRate(checkRepoStatusTask, 1, 3, TimeUnit.SECONDS);
-        CxWSReportStatusResponse statusResp;
-        int reportTimeout = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.REPORT_TIMEOUT);
-        try {
-            statusResp = checkRepoStatusTask.get(reportTimeout, TimeUnit.MINUTES);
-        } catch (Exception e) {
-            String err = "Timeout to get scan(" + scanId + ") " + type + " report(" + repoId + ")";
-            log.error(err);
-            throw new CxSoapSASTClientException(err);
+            repoId = resp.getID();
+            final long tempRepoId = repoId;
+            // check status report complete
+            final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            FutureTask<CxWSReportStatusResponse> checkRepoStatusTask = new FutureTask<CxWSReportStatusResponse>(new Thread(), null) {
+                CxWSReportStatusResponse statusResp;
+
+                @Override
+                public void run() {
+                    statusResp = cxSoapClient.getScanReportStatus(sessionId, tempRepoId);
+                    if (statusResp.isIsReady()) {
+                        // status report is ready
+                        log.info("SAST report is ready");
+                        scheduler.shutdown();
+                        set(statusResp);
+                    } else if (statusResp.isIsFailed()) {
+                        log.warn("SAST report failed...");
+                        scheduler.shutdown();
+                        set(statusResp);
+                    }
+                    //continue task
+                }
+            };
+
+            scheduler.scheduleAtFixedRate(checkRepoStatusTask, 5, 3, TimeUnit.SECONDS);
+            CxWSReportStatusResponse statusResp;
+            int reportTimeout = ConfigMgr.getCfgMgr().getIntProperty(ConfigMgr.REPORT_TIMEOUT);
+            try {
+                statusResp = checkRepoStatusTask.get(reportTimeout, TimeUnit.MINUTES);
+                if (statusResp.isIsSuccesfull() && statusResp.isIsReady() && !(statusResp.isIsFailed())) {
+                    break;
+                }
+            } catch (Exception e) {
+                String err = "Timeout to get scan(" + scanId + ") " + type + " report(" + repoId + ")";
+                log.error(err);
+                throw new CxSoapSASTClientException(err);
+            }
+            if (statusResp.isIsFailed()) {
+                String err = "Cannot get scan(" + scanId + ") " + type + " report(" + repoId + ") status: " + statusResp.getErrorMessage();
+                log.warn(err + ", on attempt: " + i);
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    log.trace("Attempt '" + i + "' for creating SAST report failed.");
+                }
+            }
         }
-        if (statusResp.isIsFailed()) {
-            String err = "Cannot get scan(" + scanId + ") " + type + " report(" + repoId + ") status: " + statusResp.getErrorMessage();
-            log.error(err);
-            throw new CxSoapSASTClientException(err);
-        }
+
         // get status report dto
         CxWSResponseScanResults repoResp = cxSoapClient.getScanReport(sessionId, repoId);
         if (!repoResp.isIsSuccesfull()) {

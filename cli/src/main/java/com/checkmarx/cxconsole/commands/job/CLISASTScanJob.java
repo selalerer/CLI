@@ -170,10 +170,15 @@ public class CLISASTScanJob extends CLIScanJob {
             String scanSummary;
             try {
                 scanSummary = cxSoapSASTClient.getScanSummary(params.getCliMandatoryParameters().getOriginalHost(), sessionId, scanId);
-                storeXMLResults(resultsFileName, cxSoapSASTClient.getScanReport(sessionId, scanId, "XML"));
             } catch (CxSoapSASTClientException e) {
                 log.error("Error retrieving scan summary report: " + e.getMessage());
                 throw new CLIJobException("Error retrieving scan summary report: " + e.getMessage());
+            }
+            try {
+                storeXMLResults(resultsFileName, cxSoapSASTClient.getScanReport(sessionId, scanId, "XML"));
+            } catch (CxSoapSASTClientException e) {
+                log.error("Error retrieving full scan report: " + e.getMessage());
+                throw new CLIJobException("Error retrieving full scan summary report: " + e.getMessage());
             }
 
             //SAST print results
