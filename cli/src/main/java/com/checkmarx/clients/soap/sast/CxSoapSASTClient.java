@@ -250,7 +250,7 @@ public class CxSoapSASTClient {
             }
             if (statusResp.isIsFailed()) {
                 String err = "Cannot get scan(" + scanId + ") " + type + " report(" + repoId + ") status: " + statusResp.getErrorMessage();
-                log.error(err);
+                log.warn(err + ", on attempt: " + i);
                 try {
                     Thread.sleep(10000);
                 } catch (InterruptedException e) {
