@@ -48,8 +48,7 @@ Yes!  Visit [our homepage](http://akveo.com/) or simply leave us a message to [c
 |-LocationBranch <branch> |Mandatory if -LocationType is GIT |Source GIT branch. |
 |-LocationUser <username> |Mandatory if -Locationtype is TFS/Perforce/shared |Source control / network credentials. |
 |-LocationPrivateKey <path\file> |Mandatory if -Locationtype is GIT using SSH |GIT SSH key locations. |
-|-Preset <preset> |Optional |	
-If not provided, will use preset defined in existing project or, for a new project, the default preset. |
+|-Preset <preset> |Optional | If not provided, will use preset defined in existing project or, for a new project, the default preset. |
 |-ForceScan |Optional |Force scan on source code, which has not been changed since the last scan of the same project (not compatible with -Incremental option). |
 |-Incremental  |Optional |Run incremental scan instead of a full scan. Scans only new and modified files, relative to project's last scan(-Incremental will disable any -ForceScan setting). |
 |–LocationPathExclude <folders list> |Optional |Comma separated list of folder name patterns to exclude from scan. |
