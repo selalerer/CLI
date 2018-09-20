@@ -39,8 +39,7 @@ Yes!  Visit [our homepage](http://akveo.com/) or simply leave us a message to [c
 |-CxPassword <password> |Mandatory unless -useSSO is used|CxSAST login credentials (username and password)|
 |-enableOsa |Optional |Enable open source analysis (CxOSA). -osaLocationPath should be specified or the -LocationType parameter needs to be defined as 'folder' or 'shared' (if -osaLocationPath doesn't exist, use -locationPath). |
 |-OsaLocationPath <filename> |Optional |Local or network path to sources or source repository branch. May include multiple list of folders (local or shared) separated by comma. |
-|-ProjectName <project name> |Mandatory |An existing or new project name with full path. If the project doesn't exist, it will be created
-                                         For example: -ProjectName CxServer\SP\Company\Users\my project |
+|-ProjectName <project name> |Mandatory |An existing or new project name with full path. If the project doesn't exist, it will be created |                                       
 |-LocationType <type> |Mandatory|Source location type. One of: folder, shared, SVN, TFS, Perforce, Git|
 |-WorkspaceMode <path>  |Optional |When -LocationType parameter is set to Perforce, add this parameter and add the workspace name into -locationPath |
 |-LocationPath <path> |Mandatory if -LocationType is folder, SVN, TFS, Perforce or shared |Local or network path to sources or source repository branch. |
