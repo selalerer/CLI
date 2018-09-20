@@ -52,21 +52,18 @@ Yes!  Visit [our homepage](http://akveo.com/) or simply leave us a message to [c
 If not provided, will use preset defined in existing project or, for a new project, the default preset. |
 |-ForceScan |Optional |Force scan on source code, which has not been changed since the last scan of the same project (not compatible with -Incremental option). |
 |-Incremental  |Optional |Run incremental scan instead of a full scan. Scans only new and modified files, relative to project's last scan(-Incremental will disable any -ForceScan setting). |
-|–LocationPathExclude <folders list> |Optional |Comma separated list of folder name patterns to exclude from scan. For example, exclude all test and log folders: -locationPathExclude test* log_* |
-|–LocationFilesExclude <files list> |Optional |Comma separated list of file name patterns to exclude from scan. For example, exclude all files with '.class' extension: -LocationFilesExclude *.class  |
+|–LocationPathExclude <folders list> |Optional |Comma separated list of folder name patterns to exclude from scan. |
+|–LocationFilesExclude <files list> |Optional |Comma separated list of file name patterns to exclude from scan. |
 |-SASTHigh  |Optional. Not supported in AsyncScan mode |CxSAST high severity vulnerability threshold. If the number of high vulnerabilities exceeds the threshold, scan will end with an error (see Error/Exit Codes). |
 |-SASTMedium  |Optional. Not supported in AsyncScan mode |CxSAST medium severity vulnerability threshold. If the number of medium vulnerabilities exceeds the threshold, scan will end with an error (see Error/Exit Codes). |
 |-SASTLow |Optional. Not supported in AsyncScan mode |CxSAST low severity vulnerability threshold. If the number of low vulnerabilities exceeds the threshold, scan will end with an error (see Error/Exit Codes). |
 |-Configuration <configuration> |Optional |Code language configuration |
 |-Private |Optional |Scan will not be visible to other users. |
 |-Log <path\file> |Optional |Log file to be created. |
-|-OsaArchiveToExtract <files list> |Optional |Comma separated list of file extensions to be extracted in the OSA scan. 
-                                              For example: -OsaArchiveToExtract *.zip extracts only files with .zip extension. |
-|-OsaFilesInclude <files list> |Optional |Comma separated list of file name patterns to exclude from the OSA scan. 
-                                          For example: *.dll will include only dll files. |
+|-OsaArchiveToExtract <files list> |Optional |Comma separated list of file extensions to be extracted in the OSA scan. |
+|-OsaFilesInclude <files list> |Optional |Comma separated list of file name patterns to exclude from the OSA scan. |
 |-OsaFilesExclude <files list> |Optional |Comma separated list of file name patterns to exclude from the OSA scan. Exclude extensions by using *.<extension>, or exclude files by using */<file>.|
-|-OsaPathExclude <folders list> |Optional |Comma separated list of folder path patterns to exclude from the OSA scan. 
-                                           For example: -OsaPathExclude test excludes all folders which start with test prefix. |
+|-OsaPathExclude <folders list> |Optional |Comma separated list of folder path patterns to exclude from the OSA scan. |
 |-OsaScanDepth <OSA analysis unzip depth> |Optional |Extraction depth of files to include in the OSA scan. |
 |-executepackagedependency |Optional |Retrieve all NPM package dependencies before performing OSA scan (see Remarks section). |
 |-OSAHigh |Optional. Not supported in AsyncScan mode |CxOSA high severity vulnerability threshold. If the number of high vulnerabilities exceeds the threshold, scan will end with an error (see Error/Exit Codes). |
@@ -79,7 +76,7 @@ If not provided, will use preset defined in existing project or, for a new proje
 |-ReportPDF <file> |Optional. Not supported in AsyncScan mode |Name or path to results report, by type. |
 |-ReportCSV <file> |Optional. Not supported in AsyncScan mode |Name or path to results report, by type. |
 |-ReportRTF <file> |Optional. Not supported in AsyncScan mode |Name or path to results report, by type. |
-|-Comment <text> |Optional. Not supported in AsyncScan mode |Saves a comment with the scan results. For example: -comment 'important scan1' |
+|-Comment <text> |Optional. Not supported in AsyncScan mode |Saves a comment with the scan results. |
 |-verbose or -v |Optional | Turns on verbose mode. All messages and events will be sent to the console or log file. |
 
 
