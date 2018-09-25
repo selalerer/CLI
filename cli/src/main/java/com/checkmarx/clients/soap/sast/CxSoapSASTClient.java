@@ -203,6 +203,7 @@ public class CxSoapSASTClient {
         reportRequest.setScanID(scanId);
         reportRequest.setType(CxWSReportType.fromValue(type));
         long repoId = 0;
+        //todo: extract number of tries for creating SAST report (GEN_SAST_REPORT_TRY_LIMIT & GEN_SAST_REPORT_TIMEOUT)
         for (int i = 0; i < 3; i++) {
             final CxWSCreateReportResponse resp = cxSoapClient.createScanReport(sessionId, reportRequest);
             log.trace("ScanStatus response: " + resp);
