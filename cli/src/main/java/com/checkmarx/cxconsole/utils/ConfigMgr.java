@@ -28,6 +28,8 @@ public class ConfigMgr {
     public static final String KEY_OSA_PROGRESS_INTERVAL = "scan.osa.job.progress.interval";
     public static final String KEY_RETIRES = "scan.job.connection.retries";
     public static final String REPORT_TIMEOUT = "scan.job.report.timeout";
+    public static final String REPORT_GENERATION_TIMEOUT_MILLISECONDS = "scan.job.report.generation.timeout";
+    public static final String REPORT_GENERATION_RETRIES_LIMIT = "scan.job.report.generation.retries";
     public static final String KEY_EXCLUDED_FOLDERS = "scan.zip.ignored.folders";
     public static final String KEY_EXCLUDED_FILES = "scan.zip.ignored.files";
     public static final String KEY_OSA_INCLUDED_FILES = "scan.osa.include.files";
@@ -109,6 +111,8 @@ public class ConfigMgr {
 
     protected void loadDefaults() {
         applicationProperties.put(REPORT_TIMEOUT, "30");
+        applicationProperties.put(REPORT_GENERATION_TIMEOUT_MILLISECONDS, "10000");
+        applicationProperties.put(REPORT_GENERATION_RETRIES_LIMIT, "3");
         applicationProperties.put(KEY_PROGRESS_INTERVAL, "15");
         applicationProperties.put(KEY_OSA_PROGRESS_INTERVAL, "5");
         applicationProperties.put(KEY_RETIRES, "3");
