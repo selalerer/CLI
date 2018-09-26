@@ -7,13 +7,6 @@ The CxSAST scan enables you to run a static application security test (CxSAST) a
 - Checkmarx CxSAST/CxOSA installed
 - [Checkmarx CLI Plugin](https://www.checkmarx.com/plugins/) 
 
-## Made with help of
-- [react-native](https://github.com/facebook/react-native)
-- [react-native-ui-kitten](https://github.com/akveo/react-native-ui-kitten)
-- [realm](https://github.com/realm/realm-js)
-- [react-navigation](https://github.com/react-community/react-navigation)
-- [victory-native](https://github.com/FormidableLabs/victory-native) charts
-- [Google Analytics](https://github.com/idehub/react-native-google-analytics-bridge)
 
 ## Syntax
 
@@ -22,9 +15,7 @@ The CxSAST scan enables you to run a static application security test (CxSAST) a
 
 - Asynchronous Mode:
     runCxConsole AsyncScan -v -CxServer <host> -projectName <projectName> -CxUser <username> -CxPassword <password> -Locationtype <Locationtype> -locationpath <locationpath> -Preset <preset> -EnableOsa -OsaLocationPath <filename>
-       
-## Can I hire you guys?
-Yes!  Visit [our homepage](http://akveo.com/) or simply leave us a message to [contact@akveo.com](mailto:contact@akveo.com). We will be happy to work with you!
+
 
 ## License
 [Apache 2.0](LICENSE.txt) license.
