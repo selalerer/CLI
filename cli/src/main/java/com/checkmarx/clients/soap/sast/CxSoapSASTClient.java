@@ -18,8 +18,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.checkmarx.cxconsole.utils.ConfigMgr.REPORT_GENERATION_RETRIES_LIMIT;
-import static com.checkmarx.cxconsole.utils.ConfigMgr.REPORT_GENERATION_TIMEOUT_MILLISECONDS;
+import static com.checkmarx.cxconsole.utils.ConfigMgr.KEY_REPORT_GENERATION_RETRIES_LIMIT;
+import static com.checkmarx.cxconsole.utils.ConfigMgr.KEY_REPORT_GENERATION_TIMEOUT_MILLISECONDS;
 
 /**
  * Created by nirli on 26/10/2017.
@@ -205,8 +205,8 @@ public class CxSoapSASTClient {
         reportRequest.setScanID(scanId);
         reportRequest.setType(CxWSReportType.fromValue(type));
         long repoId = 0;
-        int reportGenRetries = Integer.parseInt(REPORT_GENERATION_RETRIES_LIMIT);
-        long reportGenTimeoutMilliseconds = Long.parseLong(REPORT_GENERATION_TIMEOUT_MILLISECONDS);
+        int reportGenRetries = ConfigMgr.getCfgMgr().getIntProperty(KEY_REPORT_GENERATION_RETRIES_LIMIT);
+        long reportGenTimeoutMilliseconds = ConfigMgr.getCfgMgr().getLongProperty(KEY_REPORT_GENERATION_TIMEOUT_MILLISECONDS);
         for (int i = 0; i < reportGenRetries; i++) {
             final CxWSCreateReportResponse resp = cxSoapClient.createScanReport(sessionId, reportRequest);
             log.trace("ScanStatus response: " + resp);
