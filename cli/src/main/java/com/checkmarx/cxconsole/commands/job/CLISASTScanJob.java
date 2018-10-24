@@ -8,6 +8,7 @@ import com.checkmarx.cxconsole.clients.sast.CxRestSASTClient;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
+import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
 import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
@@ -24,12 +25,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.checkmarx.cxconsole.commands.constants.LocationType.*;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
 import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
 
@@ -78,18 +79,25 @@ public class CLISASTScanJob extends CLIScanJob {
             throw new CLIJobException(e);
         }
 
-        if (params.getCliSharedParameters().getLocationType() == FOLDER) {
-            handleLocalFolderSource(cliMandatoryParameters.getProject().getId());
-        } else if (params.getCliSharedParameters().getLocationType() == SHARED) {
-            handleSharedFolderSource(cliMandatoryParameters.getProject().getId());
-        } else if (params.getCliSharedParameters().getLocationType() == SVN) {
-            handleSVNSource(cliMandatoryParameters.getProject().getId());
-        } else if (params.getCliSharedParameters().getLocationType() == TFS) {
-            handleTFSSource(cliMandatoryParameters.getProject().getId());
-        } else if (params.getCliSharedParameters().getLocationType() == PERFORCE) {
-            handlePerforceSource(cliMandatoryParameters.getProject().getId());
-        } else if (params.getCliSharedParameters().getLocationType() == GIT) {
-            handleGITSource(cliMandatoryParameters.getProject().getId());
+        switch (params.getCliSharedParameters().getLocationType()) {
+            case FOLDER:
+                handleLocalFolderSource(cliMandatoryParameters.getProject().getId());
+                break;
+            case SHARED:
+                handleSharedFolderSource(cliMandatoryParameters.getProject().getId());
+                break;
+            case SVN:
+                handleSVNSource(cliMandatoryParameters.getProject().getId());
+                break;
+            case TFS:
+                handleTFSSource(cliMandatoryParameters.getProject().getId());
+                break;
+            case PERFORCE:
+                handlePerforceSource(cliMandatoryParameters.getProject().getId());
+                break;
+            case GIT:
+                handleGITSource(cliMandatoryParameters.getProject().getId());
+                break;
         }
 
         log.info("Request SAST scan");
@@ -135,54 +143,58 @@ public class CLISASTScanJob extends CLIScanJob {
                 }
             }
 
-            //SAST reports
-            if (!params.getCliSastParameters().getReportType().isEmpty()) {
-                for (int i = 0; i < params.getCliSastParameters().getReportType().size(); i++) {
-                    String reportFilePath = params.getCliSastParameters().getReportFile().get(i);
-                    File reportFile;
-                    if (!reportFilePath.contains("\\\\")) {
-                        File folder = new File(System.getProperty("user.dir") + File.separator
-                                + cliMandatoryParameters.getProject().getName());
-                        folder.mkdir();
-                        reportFile = new File(folder + File.separator + reportFilePath);
-                    } else {
-                        reportFile = new File(reportFilePath);
-                    }
-                    log.info("Creating report file: " + reportFile);
-                    try {
-                        int reportId = cxRestSASTClient.createReport(scanId, params.getCliSastParameters().getReportType().get(i));
-                        ReportStatusValue reportStatus;
-                        do {
-                            //TODO: change sleep to something smarter
-                            reportStatus = cxRestSASTClient.getReportStatus(reportId);
-                            Thread.sleep(350);
-                        } while (reportStatus == ReportStatusValue.IN_PROCESS);
-                        if (reportStatus == ReportStatusValue.CREATED) {
-                            cxRestSASTClient.createReportFile(reportId, reportFile);
-                        } else {
-                            log.error("Error creating " + params.getCliSastParameters().getReportType().get(i) + " report file");
-                        }
-                    } catch (CxRestSASTClientException | InterruptedException e) {
-                        log.error("Error creating report: " + reportFilePath + " :" + e.getMessage());
-                    }
-                }
+            for (Map.Entry<ReportType, String> report : params.getCliSastParameters().getReportsPath().entrySet()) {
+                createReportFile(report, scanId, cliMandatoryParameters.getProject().getName());
             }
+        }
 
-            try {
-                ResultsStatisticsDTO sastScanResults = cxRestSASTClient.getScanResults(scanId);
-                PrintResultsUtils.printSASTResultsToConsole(sastScanResults);
-                if (params.getCliSastParameters().isSastThresholdEnabled()) {
-                    ThresholdDto thresholdDto = new ThresholdDto(params.getCliSastParameters().getSastHighThresholdValue(), params.getCliSastParameters().getSastMediumThresholdValue(),
-                            params.getCliSastParameters().getSastLowThresholdValue(), sastScanResults);
-                    return resolveThresholdExitCode(thresholdDto);
-                }
-            } catch (CxRestSASTClientException e) {
-                log.error("Error retrieving SAST scan result: " + e.getMessage());
+        try {
+            ResultsStatisticsDTO sastScanResults = cxRestSASTClient.getScanResults(scanId);
+            PrintResultsUtils.printSASTResultsToConsole(sastScanResults);
+            if (params.getCliSastParameters().isSastThresholdEnabled()) {
+                ThresholdDto thresholdDto = new ThresholdDto(params.getCliSastParameters().getSastHighThresholdValue(), params.getCliSastParameters().getSastMediumThresholdValue(),
+                        params.getCliSastParameters().getSastLowThresholdValue(), sastScanResults);
+                return resolveThresholdExitCode(thresholdDto);
             }
+        } catch (CxRestSASTClientException e) {
+            log.error("Error retrieving SAST scan result: " + e.getMessage());
+        }
 
-            return SCAN_SUCCEEDED_EXIT_CODE;
+        return SCAN_SUCCEEDED_EXIT_CODE;
+    }
+
+
+    private void createReportFile(Map.Entry<ReportType, String> report, int scanId, String projectName) {
+        String reportFilePath = report.getValue();
+        ReportType reportType = report.getKey();
+
+        File reportFile = new File(reportFilePath);
+        if (!reportFile.isAbsolute()) {
+            reportFile = new File(System.getProperty("user.dir") + File.separator + projectName + File.separator + reportFile);
+        }
+
+        if (!reportFile.getParentFile().exists()) {
+            reportFile.getParentFile().mkdirs();
+        }
+
+        log.info("Creating report file at: " + reportFile);
+        try {
+            int reportId = cxRestSASTClient.createReport(scanId, reportType);
+            ReportStatusValue reportStatus = cxRestSASTClient.getReportStatus(reportId);
+            while (reportStatus == ReportStatusValue.IN_PROCESS) {
+                Thread.sleep(500);
+                reportStatus = cxRestSASTClient.getReportStatus(reportId);
+            }
+            if (reportStatus == ReportStatusValue.CREATED) {
+                cxRestSASTClient.createReportFile(reportId, reportFile);
+            } else {
+                log.error("Error creating " + reportType + " report file");
+            }
+        } catch (CxRestSASTClientException | InterruptedException e) {
+            log.error("Error creating report: " + reportFilePath + " :" + e.getMessage());
         }
     }
+
 
     private void handleGITSource(int projectId) throws CLIJobException {
         try {
