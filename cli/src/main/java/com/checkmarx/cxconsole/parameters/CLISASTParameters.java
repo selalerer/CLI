@@ -11,8 +11,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by nirli on 29/10/2017.
@@ -34,8 +34,10 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     private EngineConfigurationDTO configuration;
     private boolean isIncrementalScan = false;
     private boolean forceScan = true;
-    private List<ReportType> reportType = new ArrayList<>();
-    private List<String> reportFile = new ArrayList<>();
+
+    //Mapping a Map<reportType, reportPath> / (e.g. PDF) to its file path
+    private Map<ReportType, String> reports = new HashMap<>();
+
     private String xmlFile;
     private boolean isOsaEnabled = false;
 
@@ -103,18 +105,11 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
     void initSastParams(CommandLine parsedCommandLineArguments, LocationType locationType) throws CLIParameterParsingException {
         String presetName = parsedCommandLineArguments.getOptionValue(PARAM_PRESET.getOpt());
-        if (Strings.isNullOrEmpty(presetName)) {
-            presetDTO = new PresetDTO(DEFAULT_PRESET_NAME);
-        } else {
-            presetDTO = new PresetDTO(presetName);
-        }
+        presetDTO = Strings.isNullOrEmpty(presetName) ? new PresetDTO(DEFAULT_PRESET_NAME) : new PresetDTO(presetName);
 
         String configurationName = parsedCommandLineArguments.getOptionValue(PARAM_CONFIGURATION.getOpt());
-        if (Strings.isNullOrEmpty(configurationName)) {
-            configuration = new EngineConfigurationDTO(DEFAULT_ENGINE_CONFIGURATION_NAME);
-        } else {
-            configuration = new EngineConfigurationDTO(configurationName);
-        }
+        configuration = Strings.isNullOrEmpty(configurationName) ? new EngineConfigurationDTO(DEFAULT_ENGINE_CONFIGURATION_NAME) :
+                new EngineConfigurationDTO(configurationName);
 
         isIncrementalScan = parsedCommandLineArguments.hasOption(PARAM_INCREMENTAL.getOpt());
         forceScan = !parsedCommandLineArguments.hasOption(PARAM_FORCE_SCAN.getOpt());
@@ -191,20 +186,16 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
     private void initReportFilesParams(CommandLine parsedCommandLineArguments) {
         if (parsedCommandLineArguments.hasOption(PARAM_XML_FILE.getOpt())) {
-            reportType.add(ReportType.XML);
-            reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_XML_FILE.getOpt()));
+            reports.put(ReportType.XML, parsedCommandLineArguments.getOptionValue(PARAM_XML_FILE.getOpt()));
         }
         if (parsedCommandLineArguments.hasOption(PARAM_PDF_FILE.getOpt())) {
-            reportType.add(ReportType.PDF);
-            reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_PDF_FILE.getOpt()));
+            reports.put(ReportType.PDF, parsedCommandLineArguments.getOptionValue(PARAM_PDF_FILE.getOpt()));
         }
         if (parsedCommandLineArguments.hasOption(PARAM_CSV_FILE.getOpt())) {
-            reportType.add(ReportType.CSV);
-            reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_CSV_FILE.getOpt()));
+            reports.put(ReportType.CSV, parsedCommandLineArguments.getOptionValue(PARAM_CSV_FILE.getOpt()));
         }
         if (parsedCommandLineArguments.hasOption(PARAM_RTF_FILE.getOpt())) {
-            reportType.add(ReportType.RTF);
-            reportFile.add(parsedCommandLineArguments.getOptionValue(PARAM_RTF_FILE.getOpt()));
+            reports.put(ReportType.RTF, parsedCommandLineArguments.getOptionValue(PARAM_RTF_FILE.getOpt()));
         }
     }
 
@@ -248,12 +239,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         isOsaEnabled = osaEnabled;
     }
 
-    public List<ReportType> getReportType() {
-        return reportType;
-    }
-
-    public List<String> getReportFile() {
-        return reportFile;
+    public Map<ReportType, String> getReportsPath() {
+        return reports;
     }
 
     public String getXmlFile() {

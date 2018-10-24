@@ -209,9 +209,7 @@ public class CommandParametersValidator {
     }
 
     public static void validateSASTAsyncScanParams(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
-        if (!parameters.getCliSastParameters().getReportFile().isEmpty() ||
-                parameters.getCliSastParameters().getXmlFile() != null ||
-                !parameters.getCliSastParameters().getReportType().isEmpty()) {
+        if (!parameters.getCliSastParameters().getReportsPath().isEmpty()) {
             throw new CLICommandParameterValidatorException("Asynchronous run does not allow report creation. Please remove the report parameters and run again");
         }
         if (parameters.getCliSastParameters().getSastHighThresholdValue() != Integer.MAX_VALUE ||
