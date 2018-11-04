@@ -23,8 +23,8 @@ version = '9.00.0' + "-" + getDate()
 //For release purpose
 //version = '9.00.0'
 compileJava.options.encoding = 'UTF-8'
-compileJava.sourceCompatibility = 7
-compileJava.targetCompatibility = 7
+compileJava.sourceCompatibility = 8
+compileJava.targetCompatibility = 8
 
 jar.doFirst {
     manifest {

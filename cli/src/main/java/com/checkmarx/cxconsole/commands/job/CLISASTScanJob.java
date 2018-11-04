@@ -48,10 +48,11 @@ public class CLISASTScanJob extends CLIScanJob {
     @Override
     public Integer call() throws CLIJobException {
         CLIMandatoryParameters cliMandatoryParameters = params.getCliMandatoryParameters();
-        log.info("Project name is \"" + cliMandatoryParameters.getProject().getName() + "\"");
+        log.info(String.format("Project name is %s", cliMandatoryParameters.getProject().getName()));
         if (!cxRestLoginClient.isLoggedIn()) {
-            super.login();
+           login();
         }
+
         cxRestSASTClient = new CxRestSASTClientImpl(cxRestLoginClient);
         ScanPrerequisitesValidator scanPrerequisitesValidator;
         try {
@@ -67,10 +68,13 @@ public class CLISASTScanJob extends CLIScanJob {
             } else {
                 updateExistingSastProject(cliMandatoryParameters.getProject());
             }
-            if (params.getCliSastParameters().isHasExcludedFilesParam() || params.getCliSastParameters().isHasExcludedFoldersParam()) {
-                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(),
-                        params.getCliSastParameters().getExcludedFolders(), params.getCliSastParameters().getExcludedFiles());
+
+            String[] excludeFoldersPatterns = FilesUtils.createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FOLDERS, params.getCliSastParameters());
+            String[] excludeFilesPatterns = FilesUtils.createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FILES, params.getCliSastParameters());
+            if (excludeFilesPatterns.length > 1 || excludeFilesPatterns.length > 1) {
+                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(), excludeFoldersPatterns, excludeFilesPatterns);
             }
+
         } catch (CxRestGeneralClientException | CxRestSASTClientException e) {
             throw new CLIJobException(e);
         }
