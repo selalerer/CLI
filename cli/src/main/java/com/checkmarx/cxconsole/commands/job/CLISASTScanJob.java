@@ -121,7 +121,9 @@ public class CLISASTScanJob extends CLIScanJob {
         if (isAsyncScan) {
             log.info("Asynchronous scan initiated, Waiting for SAST scan to enter the queue.");
         } else {
-            log.info("Full scan initiated, Waiting for SAST scan to finish.");
+            log.info(params.getCliSastParameters().isIncrementalScan()
+                    ? "Incremental scan initiated, waiting for SAST scan to finish"
+                    : "Full scan initiated, Waiting for SAST scan to finish.");
         }
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         WaitScanCompletionJob waiterJob = new WaitScanCompletionJob(cxRestSASTClient, scanId, isAsyncScan);
