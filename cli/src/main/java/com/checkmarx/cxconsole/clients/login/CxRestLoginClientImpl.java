@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthSchemeProvider;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
@@ -19,6 +20,7 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicSchemeFactory;
@@ -26,6 +28,7 @@ import org.apache.http.impl.auth.DigestSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsCredentialsProvider;
 import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.message.BasicHeader;
@@ -42,6 +45,8 @@ import java.util.List;
  */
 public class CxRestLoginClientImpl implements CxRestLoginClient {
 
+    private static final String CX_COOKIE = "cxCookie";
+    private static final String CSRF_TOKEN_HEADER = "CXCSRFToken";
     private static Logger log = Logger.getLogger(CxRestLoginClientImpl.class);
 
     private final String username;
@@ -57,6 +62,10 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
     private static final String SERVER_STACK_TRACE_ERROR_MESSAGE = "Failed to get access token: Fail to authenticate: status code: HTTP/1.1 400 Bad Request. error:\"error\":\"invalid_grant\"";
     private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
+
+    private static CookieStore cookieStore = new BasicCookieStore();
+    private String cxCookie = null;
+    private String csrfToken = null;
 
     public CxRestLoginClientImpl(String hostname, String token) {
         this.hostName = hostname;
@@ -97,7 +106,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.password = null;
         this.token = null;
 
-        //create http client
         headers.add(CLI_ORIGIN_HEADER);
         final Registry<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
                 .register(AuthSchemes.BASIC, new BasicSchemeFactory())
@@ -109,6 +117,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         client = HttpClientBuilder.create()
                 .setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
+                .setDefaultCookieStore(cookieStore)
                 .setDefaultHeaders(headers)
                 .build();
     }
@@ -167,6 +176,18 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         } finally {
             HttpClientUtils.closeQuietly(loginResponse);
         }
+
+        for (Cookie cookie : cookieStore.getCookies()) {
+            if (cookie.getName().equals(CSRF_TOKEN_HEADER)) {
+                csrfToken = cookie.getValue();
+            }
+            if (cookie.getName().equals(CX_COOKIE)) {
+                cxCookie = cookie.getValue();
+            }
+        }
+
+        headers.add(new BasicHeader(CSRF_TOKEN_HEADER, csrfToken));
+        headers.add(new BasicHeader("cookie", String.format("CXCSRFToken=%s; cxCookie=%s", csrfToken, cxCookie)));
 
         client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
         isLoggedIn = true;

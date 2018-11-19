@@ -32,7 +32,7 @@ public abstract class CLIScanJob implements Callable<Integer> {
         cxRestLoginClient = ConfigMgr.getRestWSMgr(this.params);
     }
 
-    void login() throws CLIJobException {
+    protected void login() throws CLIJobException {
         final RetryableOperation login = new RetryableRESTLogin(params, cxRestLoginClient);
         login.run();
         cxRestGeneralClient = new CxRestGeneralClientImpl(cxRestLoginClient);
