@@ -21,10 +21,10 @@ group = 'com.checkmarx'
 //For development purpose
 version = '8.90.0' + "-" + getDate()
 //For release purpose
-//version = '8.90.0'
+//version = '8.80.0'
 compileJava.options.encoding = 'UTF-8'
-compileJava.sourceCompatibility = 7
-compileJava.targetCompatibility = 7
+compileJava.sourceCompatibility = 8
+compileJava.targetCompatibility = 8
 
 jar.doFirst {
     manifest {
@@ -74,7 +74,7 @@ dependencies {
             'org.slf4j:slf4j-api:1.7.25',
             'org.slf4j:slf4j-log4j12:1.7.25',
             'org.apache.logging.log4j:log4j-core:2.10.0',
-            compile('org.whitesource:whitesource-fs-agent:18.7.2') {
+            compile('org.whitesource:whitesource-fs-agent:18.3.1.1') {
                 exclude group: 'org.slf4j', module: 'slf4j-api'
                 exclude group: 'org.slf4j', module: 'slf4j-log4j12'
                 exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -92,13 +92,13 @@ distributions {
                 filter(FixCrLfFilter.class,
                         eol: FixCrLfFilter.CrLf.newInstance("lf"))
             }
-            from('src/main/scripts/V870') {
+            from('src/main/scripts/V8900') {
                 filter {
                     it.replaceAll('cx_console\\.jar', jar.archiveName)
                 }
                 filter(FixCrLfFilter.class,
                         eol: FixCrLfFilter.CrLf.newInstance("lf"))
-                into 'Examples\\V870'
+                into 'Examples\\V890'
             }
             from('src/main') {
                 include 'config/krb5.conf'

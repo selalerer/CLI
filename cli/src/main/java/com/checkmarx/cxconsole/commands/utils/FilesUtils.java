@@ -12,8 +12,8 @@ import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by nirli on 01/03/2018.
@@ -27,8 +27,6 @@ public class FilesUtils {
     private static Logger log = Logger.getLogger(FilesUtils.class);
 
     private static int numOfZippedFiles;
-    private static String[] excludeFilesPatterns;
-    private static String[] excludeFoldersPatterns;
 
     public static void zipFolder(String location, CLISASTParameters cliSastParameters, long maxZipSize, ByteArrayOutputStream byteArrayOutputStream) {
         numOfZippedFiles = 0;
@@ -37,16 +35,12 @@ public class FilesUtils {
         }
         try {
             log.info("Zipping files from: " + location + " Please wait");
-            excludeFilesPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FILES, cliSastParameters);
-            excludeFoldersPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FOLDERS, cliSastParameters);
+            String[] excludeFilesPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FILES, cliSastParameters);
+            String[] excludeFoldersPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FOLDERS, cliSastParameters);
             String[] includeAllPatterns = new String[]{"**/*"};//the default is to include all files
-            ZipListener zipListener = new ZipListener() {
-
-                @Override
-                public void updateProgress(String fileName, long size) {
-                    numOfZippedFiles++;
-                    log.trace("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
-                }
+            ZipListener zipListener = (fileName, size) -> {
+                numOfZippedFiles++;
+                log.trace("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
             };
             Zipper zipper = new Zipper();
             zipper.zip(new File(location), ArrayUtils.addAll(excludeFilesPatterns, excludeFoldersPatterns), includeAllPatterns, byteArrayOutputStream, maxZipSize, zipListener);
@@ -72,53 +66,6 @@ public class FilesUtils {
         }
     }
 
-    private static boolean isProjectDirectoryValid(String location) {
-        File projectDir = new File(location);
-        if (!projectDir.exists()) {
-            log.error("Project directory [" + location + "] does not exist.");
-            return false;
-        }
-
-        if (!projectDir.isDirectory()) {
-            log.error("Project path [" + location + "] should point to a directory.");
-            return false;
-        }
-        return true;
-    }
-
-    private static String[] createExclusionPatternsArray(String defaultKey, CLISASTParameters cliSastParameters) {
-        LinkedList<String> excludePatterns = new LinkedList<>();
-        try {
-            String defaultExcluded = ConfigMgr.getCfgMgr().getProperty(defaultKey);
-            for (String file : StringUtils.split(defaultExcluded, ",")) {
-                String trimmedPattern = file.trim();
-                if (!Objects.equals(trimmedPattern, "")) {
-                    excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
-                }
-            }
-
-            if (defaultKey.contains("files") && cliSastParameters.isHasExcludedFilesParam()) {
-                for (String file : cliSastParameters.getExcludedFiles()) {
-                    String trimmedPattern = file.trim();
-                    if (!Objects.equals(trimmedPattern, "")) {
-                        excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
-                    }
-                }
-            } else if (defaultKey.contains("folders") && cliSastParameters.isHasExcludedFoldersParam()) {
-                for (String file : cliSastParameters.getExcludedFolders()) {
-                    String trimmedPattern = file.trim();
-                    if (!Objects.equals(trimmedPattern, "")) {
-                        excludePatterns.add("**/" + trimmedPattern.replace('\\', '/'));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error occurred creation of exclude patterns");
-        }
-
-        return excludePatterns.toArray(new String[]{});
-    }
-
     public static void createReportFile(HttpResponse response, File file) {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             InputStream is = response.getEntity().getContent();
@@ -136,11 +83,58 @@ public class FilesUtils {
         }
     }
 
-    public static String[] getExcludeFilesPatterns() {
-        return excludeFilesPatterns;
+    private static boolean isProjectDirectoryValid(String location) {
+        File projectDir = new File(location);
+        if (!projectDir.exists()) {
+            log.error("Project directory [" + location + "] does not exist.");
+            return false;
+        }
+
+        if (!projectDir.isDirectory()) {
+            log.error("Project path [" + location + "] should point to a directory.");
+            return false;
+        }
+        return true;
     }
 
-    public static String[] getExcludeFoldersPatterns() {
-        return excludeFoldersPatterns;
+    public static String[] createExclusionPatternsArray(String propertyKey, CLISASTParameters cliSastParameters) {
+        List<String> configFileExclusionsList = new ArrayList<>();
+        List<String> commandLineExclusionsList = new ArrayList<>();
+        String formattedString = "%s";
+
+        try {
+            String[] excludesParams;
+            switch (propertyKey) {
+                case ConfigMgr.KEY_EXCLUDED_FILES:
+                    excludesParams = cliSastParameters.getExcludedFiles();
+                    break;
+                case ConfigMgr.KEY_EXCLUDED_FOLDERS:
+                    excludesParams = cliSastParameters.getExcludedFolders();
+                    formattedString = "**/%s/**/*";
+                    break;
+                default:
+                    log.error(String.format("default key %s is invalid", propertyKey));
+                    excludesParams = new String[0];
+                    break;
+            }
+
+            String configFileExclusions = ConfigMgr.getCfgMgr().getProperty(propertyKey);
+            String finalFormattedString = formattedString;
+            configFileExclusionsList = Arrays.stream(StringUtils.split(configFileExclusions, ",")).map(param -> String.format(finalFormattedString, param.trim())).collect(Collectors.toList());
+
+            commandLineExclusionsList = Arrays.stream(excludesParams).map(param -> String.format(finalFormattedString, param.trim())).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error(String.format("Error: %s", e));
+        }
+
+        return mergeListsWithNoDuplicates(configFileExclusionsList, commandLineExclusionsList).toArray(new String[]{});
+    }
+
+    private static List<String> mergeListsWithNoDuplicates(List<String> listA, List<String> listB) {
+        Set<String> set = new HashSet<>(listA);
+        set.addAll(listB);
+        List<String> mergedList = new ArrayList<>();
+        mergedList.addAll(set);
+        return mergedList;
     }
 }
