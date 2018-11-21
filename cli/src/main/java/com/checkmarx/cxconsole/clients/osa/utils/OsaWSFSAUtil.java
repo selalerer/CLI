@@ -5,8 +5,10 @@ import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.log4j.Logger;
 import org.whitesource.fs.ComponentScan;
+import org.whitesource.fs.FSAConfigProperties;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -37,8 +39,8 @@ public class OsaWSFSAUtil {
         return String.format("%s/CxWebClient/SPA/#/viewer/project/%s", url, projectId);
     }
 
-    private static Properties generateOsaScanProperties(String[] osaLocationPath, CLIOSAParameters cliosaParameters) {
-        Properties ret = new Properties();
+    private static FSAConfigProperties generateOsaScanProperties(String[] osaLocationPath, CLIOSAParameters cliosaParameters) {
+        FSAConfigProperties ret = new FSAConfigProperties();
         String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
         ret.put("d", osaDirectoriesToAnalyze);
 
@@ -79,14 +81,15 @@ public class OsaWSFSAUtil {
             ret.put("npm.ignoreScripts", "true");
             ret.put("bower.runPreStep", "false");
 
-            setResolveDependencies(ret,"true");
-        }else {
-            setResolveDependencies(ret,"false");
+            setResolveDependencies(ret, "true");
+        } else {
+            setResolveDependencies(ret, "false");
         }
         ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
-        if(cliosaParameters.getOsaDockerImageName() != null && !cliosaParameters.getOsaDockerImageName().isEmpty()){
-            ret.put("docker.scanImages","true");
-            ret.put("docker.includes",cliosaParameters.getOsaDockerImageName());
+
+        if (!Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
+            ret.put("docker.scanImages", "true");
+            ret.put("docker.includes", cliosaParameters.getOsaDockerImageName());
         }
 
         return ret;
@@ -138,7 +141,7 @@ public class OsaWSFSAUtil {
         String osaDependenciesJson = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Properties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
+            FSAConfigProperties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
             log.trace("Scanner properties: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(scannerProperties.toString()));
             log.info("Generated FSA properties for analysis");
 
