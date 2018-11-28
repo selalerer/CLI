@@ -109,7 +109,6 @@ public class CLISASTScanJob extends CLIScanJob {
         } catch (CxRestSASTClientException e) {
             throw new CLIJobException(e);
         }
-
         // wait for scan completion
         if (isAsyncScan) {
             log.info("Asynchronous scan initiated, Waiting for SAST scan to enter the queue.");
