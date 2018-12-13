@@ -33,10 +33,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.log4j.Logger;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +51,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
     private static final String CX_COOKIE = "cxCookie";
     private static final String CSRF_TOKEN_HEADER = "CXCSRFToken";
+    private static final String TLS_PROTOCOL = "TLSv1.2";
     private static Logger log = Logger.getLogger(CxRestLoginClientImpl.class);
 
     private final String username;
@@ -73,12 +78,12 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.username = null;
         this.password = null;
 
-        //create http client
+        SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
         client = HttpClientBuilder.create().build();
         try {
             getAccessTokenFromRefreshToken(token);
             headers.add(CLI_ORIGIN_HEADER);
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
@@ -97,7 +102,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         //create http client
         headers.add(CLI_ORIGIN_HEADER);
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+        SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
+        client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
     }
 
     public CxRestLoginClientImpl(String hostname) {
@@ -107,6 +113,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.token = null;
 
         headers.add(CLI_ORIGIN_HEADER);
+        SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
         final Registry<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
                 .register(AuthSchemes.BASIC, new BasicSchemeFactory())
                 .register(AuthSchemes.DIGEST, new DigestSchemeFactory())
@@ -119,6 +126,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
                 .setDefaultCookieStore(cookieStore)
                 .setDefaultHeaders(headers)
+                .setSSLContext(sslContext)
                 .build();
     }
 
@@ -137,7 +145,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             RestClientUtils.validateTokenResponse(loginResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
             RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(loginResponse, RestGetAccessTokenDTO.class);
             headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
+            client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
             isLoggedIn = true;
         } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with credentials: " + e.getMessage());
@@ -150,7 +159,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     @Override
     public void tokenLogin() throws CxRestLoginClientException {
         if (headers.size() == 2) {
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
+            client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
             isLoggedIn = true;
         } else {
             throw new CxRestLoginClientException("Login failed");
@@ -189,7 +199,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         headers.add(new BasicHeader(CSRF_TOKEN_HEADER, csrfToken));
         headers.add(new BasicHeader("cookie", String.format("CXCSRFToken=%s; cxCookie=%s", csrfToken, cxCookie)));
 
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+        SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
+        client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
         isLoggedIn = true;
     }
 
@@ -243,4 +254,15 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     public boolean isTokenLogin() {
         return !Strings.isNullOrEmpty(token);
     }
+
+    private SSLContext generateSSLContext(String protocol, Logger log) {
+        SSLContext sslContext = null;
+        try {
+            sslContext = SSLContextBuilder.create().setProtocol(protocol).build();
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            log.warn("Failed to build SSL context error was: " + e.getMessage());
+        }
+        return sslContext;
+    }
+
 }

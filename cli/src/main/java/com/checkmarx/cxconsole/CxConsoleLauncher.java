@@ -16,6 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -75,8 +76,8 @@ public class CxConsoleLauncher {
         initConfigurationManager(args);
 
         // Temporary solution
-        SSLUtilities.trustAllHostnames();
-        SSLUtilities.trustAllHttpsCertificates();
+//        SSLUtilities.trustAllHostnames();
+//        SSLUtilities.trustAllHttpsCertificates();
 
         String commandName = args[0];
         argumentsLessCommandName = java.util.Arrays.copyOfRange(args, 1, args.length);
