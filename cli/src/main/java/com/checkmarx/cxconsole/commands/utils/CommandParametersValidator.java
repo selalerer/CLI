@@ -3,6 +3,7 @@ package com.checkmarx.cxconsole.commands.utils;
 import com.checkmarx.cxconsole.commands.constants.LocationType;
 import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
+import com.google.common.base.Strings;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
 
@@ -141,7 +142,9 @@ public class CommandParametersValidator {
         if (parameters.getCliOsaParameters().getOsaLocationPath() == null &&
                 (parameters.getCliSharedParameters().getLocationType() != LocationType.FOLDER &&
                         parameters.getCliSharedParameters().getLocationType() != LocationType.SHARED)) {
-            throw new CLICommandParameterValidatorException("For OSA Scan (OsaScan), provide  OsaLocationPath  or locationType (values: folder/shared)");
+            if (Strings.isNullOrEmpty(parameters.getCliOsaParameters().getOsaDockerImageName())) {
+                throw new CLICommandParameterValidatorException("For OSA Scan (OsaScan), provide  OsaLocationPath  or locationType (values: folder/shared)");
+            }
         }
     }
 

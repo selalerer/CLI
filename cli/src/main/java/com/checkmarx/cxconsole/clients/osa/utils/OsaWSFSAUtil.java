@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.whitesource.fs.ComponentScan;
 import org.whitesource.fs.FSAConfigProperties;
@@ -41,8 +42,12 @@ public class OsaWSFSAUtil {
 
     private static FSAConfigProperties generateOsaScanProperties(String[] osaLocationPath, CLIOSAParameters cliosaParameters) {
         FSAConfigProperties ret = new FSAConfigProperties();
-        String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
-        ret.put("d", osaDirectoriesToAnalyze);
+        if ((osaLocationPath[0] == null) && !Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
+            ret.put("d", "");
+        } else {
+            String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
+            ret.put("d", osaDirectoriesToAnalyze);
+        }
 
         String osaFolderExcludeString = "";
         if (cliosaParameters.isHasOsaExcludedFoldersParam() || cliosaParameters.getOsaExcludedFolders() != null) {
@@ -91,7 +96,7 @@ public class OsaWSFSAUtil {
             ret.put("docker.scanImages", "true");
             ret.put("docker.includes", cliosaParameters.getOsaDockerImageName());
         }
-
+        ret.put("log.level", "debug");
         return ret;
     }
 
@@ -144,7 +149,6 @@ public class OsaWSFSAUtil {
             FSAConfigProperties scannerProperties = generateOsaScanProperties(osaLocationPath, cliosaParametersr);
             log.trace("Scanner properties: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(scannerProperties.toString()));
             log.info("Generated FSA properties for analysis");
-
             ComponentScan componentScan = new ComponentScan(scannerProperties);
             log.info("Starting FSA component scan");
             osaDependenciesJson = componentScan.scan();
