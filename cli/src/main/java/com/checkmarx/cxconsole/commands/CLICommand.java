@@ -67,7 +67,8 @@ public abstract class CLICommand {
                 log.error("Can't create new log file to path: " + params.getCliSharedParameters().getLogFilePath());
             }
         } else {
-            log.info("Default log file location: " + System.getProperty("user.dir") + File.separator + "logs\\cx_console.log");
+            log.info("Default log file location: " + System.getProperty("user.dir") + File.separator +
+                    String.format("logs%scx_console.log", File.separator));
         }
 
         try {
@@ -98,7 +99,7 @@ public abstract class CLICommand {
 
     private void printCommandsDebug() {
         log.debug("----------------------------Configured Commands:-----------------------------");
-        log.debug("Cx CLI plugin version 8.80.0");
+        log.debug("Cx CLI plugin version 9.00.0");
         log.debug("Command type: " + getCommandName());
         for (Option opt : params.getParsedCommandLineArguments().getOptions()) {
             String option = opt.getOpt();

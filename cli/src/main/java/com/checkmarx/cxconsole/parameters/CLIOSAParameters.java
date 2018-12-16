@@ -47,6 +47,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private boolean executePackageDependency = false;
     private boolean checkPolicyViolations = false;
     private String osaDockerImageName;
+    private String excludeDockerPattern;
+
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -73,6 +75,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_EXECUTE_PACKAGE_INSTALL = Option.builder("executepackagedependency").hasArg(false).argName("Pre scan installation of package managers dependencies").desc("Triggered in order to perform install dependencies command for package managers before initiate OSA analysis. Optional.").build();
     private static final Option PARAM_RUN_POLICY_VIOLATIONS = Option.builder("checkpolicy").hasArg(false).argName("Check Policy Violations").desc("Mark the build as failed or unstable if the project's policy is violated. Optional.").build();
     private static final Option PARAM_OSA_SCAN_DOCKER = Option.builder("dockerscan").hasArg(true).argName("Docker image name").desc("Supports scanning of docker images as part of the OSA scan. Optional.").build();
+    private static final Option PARAM_DOCKER_EXCLUDE = Option.builder("dockerexcludescan").hasArg(true).argName("Docker exclude pattern").desc("Set the GLOB pattern property for excluding docker files to scan. Optional.").build();
 
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -100,6 +103,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         executePackageDependency = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_PACKAGE_INSTALL.getOpt());
         checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
         osaDockerImageName = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_SCAN_DOCKER.getOpt());
+        excludeDockerPattern = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_DOCKER_EXCLUDE.getOpt());
+
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -234,6 +239,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         return osaDockerImageName;
     }
 
+    public String getExcludeDockerPattern() {
+        return excludeDockerPattern == null ? "" : excludeDockerPattern;
+    }
+
     @Override
     void initCommandLineOptions() {
         commandLineOptions = new Options();
@@ -255,6 +264,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_PACKAGE_INSTALL);
         commandLineOptions.addOption(PARAM_RUN_POLICY_VIOLATIONS);
         commandLineOptions.addOption(PARAM_OSA_SCAN_DOCKER);
+        commandLineOptions.addOption(PARAM_DOCKER_EXCLUDE);
     }
 
     @Override
@@ -270,4 +280,5 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
 
         return osaParamsOptionGroup;
     }
+
 }

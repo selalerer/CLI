@@ -75,7 +75,17 @@ public class ScanPrerequisitesValidator {
             throw new CxScanPrerequisitesValidatorException(e);
         }
         if (!isProjectExists) {
-            throw new CxScanPrerequisitesValidatorException(NO_PROJECT_PRIOR_TO_OSA_SCAN_ERROR_MSG);
+            int projectId;
+            ProjectDTO project = new ProjectDTO();
+            project.setName(projectInput.getName());
+            project.setTeamId(projectInput.getTeamId());
+            project.setPublic(true);
+            try {
+                projectId = cxRestGeneralClient.createNewProject(project);
+                projectInput.setId(projectId);
+            } catch (CxRestGeneralClientException e) {
+                throw new CxScanPrerequisitesValidatorException(e.getMessage(), e);
+            }
         }
         log.info("OSA scan prerequisites were validated successfully");
     }
@@ -90,8 +100,6 @@ public class ScanPrerequisitesValidator {
                 return true;
             }
         }
-        log.info("Project id for project: \"" + projectInput.getName() + "\" was not found in server");
-        log.info("Make sure you specify the full project path. For example: -ProjectName CxServer\\SP\\Company\\Users\\my project");
         return false;
     }
 

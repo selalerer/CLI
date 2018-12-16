@@ -24,6 +24,7 @@ import com.checkmarx.cxconsole.constants.ScanType;
 import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.checkmarx.cxconsole.parameters.CLIScanParametersSingleton;
 import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 
 import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
@@ -69,7 +70,9 @@ public class CLIOSAScanJob extends CLIScanJob {
 
             String[] osaLocationPath = cliosaParameters.getOsaLocationPath() != null ? cliosaParameters.getOsaLocationPath() : new String[]{params.getCliSharedParameters().getLocationPath()};
             log.info("Setting up OSA analysis request");
-            log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
+            if (osaLocationPath[0] != null) {
+                log.info("OSA source location: " + StringUtils.join(osaLocationPath, ", "));
+            }
             CreateOSAScanRequest osaScanRequest;
             log.debug("    #############################################  Starting FSA    ###########################################    ");
             osaScanRequest = OsaWSFSAUtil.createOsaScanRequest(params.getCliMandatoryParameters().getProject().getId(),
@@ -134,7 +137,7 @@ public class CLIOSAScanJob extends CLIScanJob {
                     log.error("Error occurred during CxOSA reports. Error message: " + e.getMessage());
                     return errorCodeResolver(e.getMessage());
                 }
-                if(cliosaParameters.isCheckPolicyViolations()){
+                if (cliosaParameters.isCheckPolicyViolations()) {
                     CxArmConfig armConfig = null;
                     try {
                         armConfig = cxRestOSAClient.getCxArmConfiguration();
@@ -157,7 +160,7 @@ public class CLIOSAScanJob extends CLIScanJob {
                             cliosaParameters.getOsaLowThresholdValue(), osaSummaryResults.getTotalHighVulnerabilities(),
                             osaSummaryResults.getTotalMediumVulnerabilities(), osaSummaryResults.getTotalLowVulnerabilities());
                     int thresholdExitCode = resolveThresholdExitCode(thresholdDto);
-                    if(exitCode != POLICY_VIOLATION_ERROR_EXIT_CODE){
+                    if (exitCode != POLICY_VIOLATION_ERROR_EXIT_CODE) {
                         exitCode = thresholdExitCode;
                     }
 

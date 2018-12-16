@@ -87,9 +87,10 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
     }
 
     @Override
-    public void createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException {
+    public int createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException {
         HttpResponse response = null;
         HttpUriRequest postRequest;
+        int projectId = 0;
 
         try {
             postRequest = RequestBuilder.post()
@@ -102,7 +103,8 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
             RestClientUtils.validateClientResponse(response, 201, "Failed to create new project");
 
             JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
-            projectToCreate.setId(jsonResponse.getInt("id"));
+            projectId = jsonResponse.getInt("id");
+            projectToCreate.setId(projectId);
             if (projectToCreate.getId() == UNASSIGNED_VALUE) {
                 throw new CxRestGeneralClientException("Failed to get new project id");
             }
@@ -111,6 +113,8 @@ public class CxRestGeneralClientImpl implements CxRestGeneralClient {
         } finally {
             HttpClientUtils.closeQuietly(response);
         }
+
+        return projectId;
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface CxRestGeneralClient {
 
     List<ProjectDTO> getProjects() throws CxRestGeneralClientException;
 
-    void createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException;
+    int createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException;
 
     boolean isLoggedIn();
 }

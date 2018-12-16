@@ -95,8 +95,10 @@ public class OsaWSFSAUtil {
         if (!Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
             ret.put("docker.scanImages", "true");
             ret.put("docker.includes", cliosaParameters.getOsaDockerImageName());
+            ret.put("docker.excludes", cliosaParameters.getExcludeDockerPattern());
+            log.info("OSA Docker image scan: " + cliosaParameters.getOsaDockerImageName());
         }
-        ret.put("log.level", "debug");
+
         return ret;
     }
 
