@@ -35,8 +35,8 @@ public class FilesUtils {
         }
         try {
             log.info("Zipping files from: " + location + " Please wait");
-            String[] excludeFilesPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FILES, cliSastParameters);
-            String[] excludeFoldersPatterns = createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FOLDERS, cliSastParameters);
+            String[] excludeFilesPatterns = createExclusionPatternsArray(ConfigMgr.EXCLUDED_FILES_TO_PACK, cliSastParameters);
+            String[] excludeFoldersPatterns = createExclusionPatternsArray(ConfigMgr.EXCLUDED_FOLDERS_TO_PACK, cliSastParameters);
             String[] includeAllPatterns = new String[]{"**/*"};//the default is to include all files
             ZipListener zipListener = (fileName, size) -> {
                 numOfZippedFiles++;
@@ -105,10 +105,10 @@ public class FilesUtils {
         try {
             String[] excludesParams;
             switch (propertyKey) {
-                case ConfigMgr.KEY_EXCLUDED_FILES:
+                case ConfigMgr.EXCLUDED_FILES_TO_PACK:
                     excludesParams = cliSastParameters.getExcludedFiles();
                     break;
-                case ConfigMgr.KEY_EXCLUDED_FOLDERS:
+                case ConfigMgr.EXCLUDED_FOLDERS_TO_PACK:
                     excludesParams = cliSastParameters.getExcludedFolders();
                     formattedString = "**/%s/**/*";
                     break;

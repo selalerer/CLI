@@ -28,8 +28,8 @@ public class ConfigMgr {
     public static final String KEY_OSA_PROGRESS_INTERVAL = "scan.osa.job.progress.interval";
     public static final String KEY_RETIRES = "scan.job.connection.retries";
     public static final String REPORT_TIMEOUT = "scan.job.report.timeout";
-    public static final String KEY_EXCLUDED_FOLDERS = "scan.zip.ignored.folders";
-    public static final String KEY_EXCLUDED_FILES = "scan.zip.ignored.files";
+    public static final String EXCLUDED_FOLDERS_TO_PACK = "scan.zip.ignored.folders";
+    public static final String EXCLUDED_FILES_TO_PACK = "scan.zip.ignored.files";
     public static final String KEY_OSA_INCLUDED_FILES = "scan.osa.include.files";
     public static final String KEY_OSA_EXCLUDED_FILES = "scan.osa.exclude.files";
     public static final String KEY_OSA_EXTRACTABLE_INCLUDE_FILES = "scan.osa.extractable.include.files";
@@ -106,8 +106,8 @@ public class ConfigMgr {
         applicationProperties.put(KEY_PROGRESS_INTERVAL, "15");
         applicationProperties.put(KEY_OSA_PROGRESS_INTERVAL, "5");
         applicationProperties.put(KEY_RETIRES, "3");
-        applicationProperties.put(KEY_EXCLUDED_FOLDERS, "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup");
-        applicationProperties.put(KEY_EXCLUDED_FILES, "*.DS_Store, *.ipr, *.iws, *.bak, *.tmp, *.aac, *.aif, *.iff, *.m3u, *.mid, *.mp3, *.mpa, *.ra, *.wav, *.wma, *.3g2, *.3gp, *.asf, *.asx, *.avi, *.flv, *.mov, *.mp4, *.mpg, *.rm, *.swf, *.vob, *.wmv, *.bmp, *.gif, *.jpg, *.png, *.psd, *.tif, *.jar, *.zip, *.rar, *.exe, *.dll, *.pdb, *.7z, *.gz, *.tar.gz, *.tar, *.ahtm, *.ahtml, *.fhtml, *.hdm, *.hdml, *.hsql, *.ht, *.hta, *.htc, *.htd, *.htmls, *.ihtml, *.mht, *.mhtm, *.mhtml, *.ssi, *.stm, *.stml, *.ttml, *.txn, *.xhtm, *.xhtml, *.class, *.iml");
+        applicationProperties.put(EXCLUDED_FOLDERS_TO_PACK, "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup");
+        applicationProperties.put(EXCLUDED_FILES_TO_PACK, "*.DS_Store, *.ipr, *.iws, *.bak, *.tmp, *.aac, *.aif, *.iff, *.m3u, *.mid, *.mp3, *.mpa, *.ra, *.wav, *.wma, *.3g2, *.3gp, *.asf, *.asx, *.avi, *.flv, *.mov, *.mp4, *.mpg, *.rm, *.swf, *.vob, *.wmv, *.bmp, *.gif, *.jpg, *.png, *.psd, *.tif, *.jar, *.zip, *.rar, *.exe, *.dll, *.pdb, *.7z, *.gz, *.tar.gz, *.tar, *.ahtm, *.ahtml, *.fhtml, *.hdm, *.hdml, *.hsql, *.ht, *.hta, *.htc, *.htd, *.htmls, *.ihtml, *.mht, *.mhtm, *.mhtml, *.ssi, *.stm, *.stml, *.ttml, *.txn, *.xhtm, *.xhtml, *.class, *.iml");
         applicationProperties.put(KEY_MAX_ZIP_SIZE, "200");
         applicationProperties.put(KEY_DEF_PROJECT_NAME, "console.project");
         applicationProperties.put(KEY_VERSION, ConsoleUtils.getBuildVersion());
