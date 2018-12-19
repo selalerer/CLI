@@ -1,5 +1,8 @@
 package com.checkmarx.cxconsole.clients.sast;
 
+import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
+import com.checkmarx.cxconsole.clients.general.CxRestClient;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
@@ -12,7 +15,7 @@ import java.util.List;
 /**
  * Created by nirli on 01/03/2018.
  */
-public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
+public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> extends CxRestClient {
 
     List<PresetDTO> getSastPresets() throws CxRestSASTClientException;
 
@@ -45,4 +48,7 @@ public interface CxRestSASTClient<T extends RemoteSourceScanSettingDTO> {
     void createReportFile(int reportId, File reportFile) throws CxRestSASTClientException;
 
     ResultsStatisticsDTO getScanResults(long scanId) throws CxRestSASTClientException;
+
+    CxArmConfig getCxArmConfiguration() throws CxRestOSAClientException;
+
 }

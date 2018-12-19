@@ -98,6 +98,8 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_SAST_HIGH_THRESHOLD = Option.builder("sasthigh").hasArg(true).argName("number of high SAST vulnerabilities")
             .desc("SAST high severity vulnerability threshold. If the number of high vulnerabilities exceeds the threshold, scan will end with an error. Optional. ").build();
 
+    private static final Option PARAM_RUN_POLICY_VIOLATIONS = Option.builder("checkpolicy").hasArg(false).argName("Check Policy Violations").desc("Mark the build as failed or unstable if the project's policy is violated. Optional.").build();
+    private boolean checkPolicyViolations = false;
 
     CLISASTParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
@@ -111,6 +113,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
         configuration = Strings.isNullOrEmpty(configurationName) ? new EngineConfigurationDTO(DEFAULT_ENGINE_CONFIGURATION_NAME) :
                 new EngineConfigurationDTO(configurationName);
 
+        checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
         isIncrementalScan = parsedCommandLineArguments.hasOption(PARAM_INCREMENTAL.getOpt());
         forceScan = !parsedCommandLineArguments.hasOption(PARAM_FORCE_SCAN.getOpt());
         isOsaEnabled = parsedCommandLineArguments.hasOption(PARAM_ENABLE_OSA.getOpt());
@@ -293,6 +296,10 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
     public boolean isHasExcludedFilesParam() {
         return hasExcludedFilesParam;
+    }
+
+    public boolean isCheckPolicyViolations() {
+        return checkPolicyViolations;
     }
 
     public void setPerforceWorkspaceMode(String perforceWorkspaceMode) {

@@ -1,9 +1,15 @@
 package com.checkmarx.cxconsole.commands.job;
 
+import com.checkmarx.cxconsole.clients.arm.CxRestArmClient;
+import com.checkmarx.cxconsole.clients.arm.CxRestArmClientImpl;
+import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
+import com.checkmarx.cxconsole.clients.arm.exceptions.CxRestARMClientException;
+import com.checkmarx.cxconsole.clients.general.dto.CxProviders;
 import com.checkmarx.cxconsole.clients.general.dto.ProjectDTO;
 import com.checkmarx.cxconsole.clients.general.exception.CxRestGeneralClientException;
 import com.checkmarx.cxconsole.clients.general.exception.CxScanPrerequisitesValidatorException;
 import com.checkmarx.cxconsole.clients.general.utils.ScanPrerequisitesValidator;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClient;
 import com.checkmarx.cxconsole.clients.sast.CxRestSASTClientImpl;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
@@ -11,6 +17,7 @@ import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
 import com.checkmarx.cxconsole.clients.sast.dto.*;
 import com.checkmarx.cxconsole.clients.sast.exceptions.CxRestSASTClientException;
+import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.checkmarx.cxconsole.commands.job.exceptions.CLIJobException;
 import com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils;
 import com.checkmarx.cxconsole.commands.utils.FilesUtils;
@@ -32,6 +39,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
+import static com.checkmarx.cxconsole.exitcodes.ErrorHandler.errorCodeResolver;
 import static com.checkmarx.cxconsole.thresholds.ThresholdResolver.resolveThresholdExitCode;
 
 /**
@@ -47,10 +55,11 @@ public class CLISASTScanJob extends CLIScanJob {
 
     @Override
     public Integer call() throws CLIJobException {
+        int exitCode = SCAN_SUCCEEDED_EXIT_CODE;
         CLIMandatoryParameters cliMandatoryParameters = params.getCliMandatoryParameters();
         log.info(String.format("Project name is %s", cliMandatoryParameters.getProject().getName()));
         if (!cxRestLoginClient.isLoggedIn()) {
-           login();
+            login();
         }
 
         cxRestSASTClient = new CxRestSASTClientImpl(cxRestLoginClient);
@@ -160,7 +169,24 @@ public class CLISASTScanJob extends CLIScanJob {
             log.error("Error retrieving SAST scan result: " + e.getMessage());
         }
 
-        return SCAN_SUCCEEDED_EXIT_CODE;
+        if (params.getCliSastParameters().isCheckPolicyViolations()) {
+            CxArmConfig armConfig;
+            try {
+                armConfig = cxRestSASTClient.getCxArmConfiguration();
+            } catch (CxRestOSAClientException e) {
+                log.error("Error occurred during CxSAST get CXArm configuration. Error message: " + e.getMessage());
+                return errorCodeResolver(e.getMessage());
+            }
+            try {
+                CxRestArmClient armClient = new CxRestArmClientImpl(cxRestLoginClient, armConfig.getCxARMPolicyURL());
+                exitCode = RestClientUtils.getArmViolationExitCode(armClient, CxProviders.SAST, params.getCliMandatoryParameters().getProject().getId(), log);
+            } catch (CxRestARMClientException e) {
+                log.error("Error occurred during getting CxARM violations. Error message: " + e.getMessage());
+                return errorCodeResolver(e.getMessage());
+            }
+        }
+
+        return exitCode;
     }
 
 

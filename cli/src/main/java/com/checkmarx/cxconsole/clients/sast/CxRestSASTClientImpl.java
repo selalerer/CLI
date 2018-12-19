@@ -1,7 +1,10 @@
 package com.checkmarx.cxconsole.clients.sast;
 
+import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
+import com.checkmarx.cxconsole.clients.osa.utils.OsaResourcesURIBuilder;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
@@ -32,6 +35,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonFromResponse;
 import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
 
 /**
@@ -420,5 +424,10 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
         } finally {
             HttpClientUtils.closeQuietly(response);
         }
+    }
+
+    @Override
+    public CxArmConfig getCxArmConfiguration() throws CxRestOSAClientException {
+        return getPolicyConfig(apacheClient, hostName);
     }
 }
