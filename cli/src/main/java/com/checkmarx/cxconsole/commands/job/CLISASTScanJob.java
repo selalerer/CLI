@@ -69,12 +69,10 @@ public class CLISASTScanJob extends CLIScanJob {
                 updateExistingSastProject(cliMandatoryParameters.getProject());
             }
 
-            String[] excludeFoldersPatterns = FilesUtils.createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FOLDERS, params.getCliSastParameters());
-            String[] excludeFilesPatterns = FilesUtils.createExclusionPatternsArray(ConfigMgr.KEY_EXCLUDED_FILES, params.getCliSastParameters());
-            if (excludeFilesPatterns.length > 1 || excludeFilesPatterns.length > 1) {
-                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(), excludeFoldersPatterns, excludeFilesPatterns);
+            if (params.getCliSastParameters().isHasExcludedFilesParam() || params.getCliSastParameters().isHasExcludedFoldersParam()) {
+                cxRestSASTClient.updateScanExclusions(cliMandatoryParameters.getProject().getId(),
+                        params.getCliSastParameters().getExcludedFolders(), params.getCliSastParameters().getExcludedFiles());
             }
-
         } catch (CxRestGeneralClientException | CxRestSASTClientException e) {
             throw new CLIJobException(e);
         }
