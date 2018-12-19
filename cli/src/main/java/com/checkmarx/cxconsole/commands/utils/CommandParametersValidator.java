@@ -7,7 +7,7 @@ import com.google.common.base.Strings;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
+import java.io.*;
 
 
 /**
@@ -342,4 +342,13 @@ public class CommandParametersValidator {
 
     }
 
+    public static void validateDockerInstall(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
+        if (!Strings.isNullOrEmpty(parameters.getCliOsaParameters().getOsaDockerImageName())) {
+            try {
+                Runtime.getRuntime().exec("docker images");
+            } catch (IOException e) {
+                throw new CLICommandParameterValidatorException("Docker image OSA scanning cannot be executed, Docker is not detected on the machine", e);
+            }
+        }
+    }
 }

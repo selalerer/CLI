@@ -57,6 +57,7 @@ class OSAScanCommand extends CLICommand {
     public void checkParameters() throws CLICommandParameterValidatorException {
         CommandParametersValidator.validateScanMandatoryParams(params);
         CommandParametersValidator.validateOSALocationType(params);
+        CommandParametersValidator.validateDockerInstall(params);
         CommandParametersValidator.validateOSAExcludedFilesFolder(params);
         CommandParametersValidator.validateOSAIncludedFiles(params);
         CommandParametersValidator.validateOSAExtractableFiles(params);

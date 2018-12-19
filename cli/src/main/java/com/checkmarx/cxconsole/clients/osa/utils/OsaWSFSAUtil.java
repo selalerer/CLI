@@ -91,7 +91,7 @@ public class OsaWSFSAUtil {
             setResolveDependencies(ret, "false");
         }
         ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
-
+        ret.put("followSymbolicLinks", "false");
         if (!Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
             ret.put("docker.scanImages", "true");
             ret.put("docker.includes", cliosaParameters.getOsaDockerImageName());
