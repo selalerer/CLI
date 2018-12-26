@@ -74,5 +74,10 @@ pipeline {
 				}
             }
         }
+		stage('Archive Artifacts') {
+			steps {
+				archiveArtifacts "cli\\build\\distributions\\*.zip"
+			}
+		}
     }
 }
