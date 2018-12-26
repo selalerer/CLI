@@ -1,5 +1,5 @@
 pipeline {
-	Parameters {        
+	parameters {        
 		booleanParam(name: 'IsReleaseBuild', description: 'Check the box if you want to create a release build') 
 		string(name: 'BranchName', defaultValue: 'master', description: 'Branch used by the job')  
 	}
