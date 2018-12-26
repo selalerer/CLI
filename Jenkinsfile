@@ -14,11 +14,11 @@ pipeline {
             }
         }
 		
-		stage ('Clean Workspace') {
-            steps {
-                cleanWs()
-            }        
-        }
+		//stage ('Clean Workspace') {
+        //    steps {
+        //        cleanWs()
+        //    }        
+        //}
 
         stage('Remove Snapshot From Build') {
             when {
@@ -69,7 +69,9 @@ pipeline {
 
         stage('Build') {
             steps {
-				bat ".\\gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=master --stacktrace clean build && exit %%ERRORLEVEL%%"
+				dir("cli") {
+					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=master --stacktrace clean build && exit %%ERRORLEVEL%%"
+				}
             }
         }
     }
