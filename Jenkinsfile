@@ -10,59 +10,59 @@ pipeline {
     stage ('Clean Workspace') {
         steps {cleanWs()}        
     }
-        stage('Remove Snapshot From Build') {
-            when {
-                expression {
-                    return params.IsReleaseBuild
-                }
-            }
-            steps {
-                echo " ----------------------------------------------------- "
-                echo "|  SNAPSHOT DISABLED: Removing Snapshot Before Build  |"
-                echo " ----------------------------------------------------- "
+	stage('Remove Snapshot From Build') {
+	    when {
+			expression {
+				return params.IsReleaseBuild
+			}
+	    }
+	    steps {
+			echo " ----------------------------------------------------- "
+			echo "|  SNAPSHOT DISABLED: Removing Snapshot Before Build  |"
+			echo " ----------------------------------------------------- "
 
-                dir("cli") {
-                    powershell '''		If(Test-Path gradle.properties)
-					{  
-						$FileContent = Get-Content -Path gradle.properties
-						Foreach($LineContent in $FileContent)
-						{
-							If($LineContent.Length -gt 9)
+			dir("cli") {
+				powershell '''		If(Test-Path gradle.properties)
+						{  
+							$FileContent = Get-Content -Path gradle.properties
+							Foreach($LineContent in $FileContent)
 							{
-								If($LineContent.Substring(0,9) -eq "version =")
+								If($LineContent.Length -gt 9)
 								{
-									$NewLineContent = $LineContent.Replace("-SNAPSHOT", "")
-									(Get-Content gradle.properties) | ForEach-Object { $_ -replace "$LineContent", "$NewLineContent" } | Set-Content gradle.properties
+									If($LineContent.Substring(0,9) -eq "version =")
+									{
+										$NewLineContent = $LineContent.Replace("-SNAPSHOT", "")
+										(Get-Content gradle.properties) | ForEach-Object { $_ -replace "$LineContent", "$NewLineContent" } | Set-Content gradle.properties
+									}
 								}
 							}
-						}
-					}'''
-					
-					powershell '''		If(Test-Path build.gradle)
-					{  
-						$FileContent = Get-Content -Path build.gradle
-						Foreach($LineContent in $FileContent)
-						{
-							If($LineContent.Length -gt 9)
+						}'''
+
+						powershell '''		If(Test-Path build.gradle)
+						{  
+							$FileContent = Get-Content -Path build.gradle
+							Foreach($LineContent in $FileContent)
 							{
-								If($LineContent.Substring(0,9) -eq "version =")
+								If($LineContent.Length -gt 9)
 								{
-									$NewLineContent = $LineContent.Replace("-SNAPSHOT", "")
-									(Get-Content build.gradle) | ForEach-Object { $_ -replace "$LineContent", "$NewLineContent" } | Set-Content build.gradle
+									If($LineContent.Substring(0,9) -eq "version =")
+									{
+										$NewLineContent = $LineContent.Replace("-SNAPSHOT", "")
+										(Get-Content build.gradle) | ForEach-Object { $_ -replace "$LineContent", "$NewLineContent" } | Set-Content build.gradle
+									}
 								}
 							}
-						}
-					}'''
-                }
-            }
+						}'''
+			}
         }
+      }
 
         stage('Build') {
             steps {
 				dir("cli") {
 					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=master --stacktrace clean build && exit %%ERRORLEVEL%%"
 				}
-            }
-        }
+			}
+		}
     }
 }
