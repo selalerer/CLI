@@ -83,8 +83,7 @@ public class ScanPrerequisitesValidator {
     private boolean findProjectOnServer() throws CxRestGeneralClientException {
         final List<ProjectDTO> projects = cxRestGeneralClient.getProjects();
         for (ProjectDTO project : projects) {
-            if (project.getTeamId().equals(projectInput.getTeamId()) &&
-                    (project.getName().equals(projectInput.getName()))) {
+            if (project.getTeamId().equals(projectInput.getTeamId()) && (project.getName().equalsIgnoreCase(projectInput.getName()))) {
                 projectInput.setId(project.getId());
                 log.info("Project id (" + projectInput.getId() + ") found in server");
                 return true;
