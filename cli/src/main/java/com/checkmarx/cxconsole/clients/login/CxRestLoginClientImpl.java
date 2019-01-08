@@ -8,19 +8,23 @@ import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.google.common.base.Strings;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicSchemeFactory;
@@ -30,15 +34,19 @@ import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -83,7 +91,12 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         try {
             getAccessTokenFromRefreshToken(token);
             headers.add(CLI_ORIGIN_HEADER);
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
+            client = HttpClientBuilder
+                    .create()
+                    .setDefaultHeaders(headers)
+                    .setSSLContext(sslContext)
+                    .setRedirectStrategy(new LaxRedirectStrategy())
+                    .build();
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
@@ -126,6 +139,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
                 .setDefaultCookieStore(cookieStore)
                 .setDefaultHeaders(headers)
+                .setRedirectStrategy(new LaxRedirectStrategy())
                 .setSSLContext(sslContext)
                 .build();
     }
@@ -175,30 +189,31 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             request = RequestBuilder.post()
                     .setUri(String.valueOf(LoginResourceURIBuilder.buildWindowsAuthenticationLoginURL(new URL(hostName))))
                     .setConfig(RequestConfig.DEFAULT)
-                    .setEntity(new StringEntity(""))
+                    .setHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.toString())
+                    .setEntity(generateEntity())
                     .build();
             loginResponse = client.execute(request);
-
-            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
-        } catch (IOException | CxValidateResponseException e) {
+//            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
+            RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(loginResponse, RestGetAccessTokenDTO.class);
+            headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
+        } catch (IOException e) {
             log.error("Fail to login with windows authentication: " + e.getMessage());
             throw new CxRestLoginClientException("Fail to login with windows authentication: " + e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(loginResponse);
         }
 
-        for (Cookie cookie : cookieStore.getCookies()) {
-            if (cookie.getName().equals(CSRF_TOKEN_HEADER)) {
-                csrfToken = cookie.getValue();
-            }
-            if (cookie.getName().equals(CX_COOKIE)) {
-                cxCookie = cookie.getValue();
-            }
-        }
-
-        headers.add(new BasicHeader(CSRF_TOKEN_HEADER, csrfToken));
-        headers.add(new BasicHeader("cookie", String.format("CXCSRFToken=%s; cxCookie=%s", csrfToken, cxCookie)));
-
+//        for (Cookie cookie : cookieStore.getCookies()) {
+//            if (cookie.getName().equals(CSRF_TOKEN_HEADER))
+//                csrfToken = cookie.getValue();
+//            }
+//            if (cookie.getName().equals(CX_COOKIE)) {
+//                cxCookie = cookie.getValue();
+//            }
+//        }
+//
+//        headers.add(new BasicHeader(CSRF_TOKEN_HEADER, csrfToken));
+//        headers.add(new BasicHeader("cookie", String.format("CXCSRFToken=%s; cxCookie=%s", csrfToken, cxCookie)));
         SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
         client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
         isLoggedIn = true;
@@ -265,4 +280,15 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         return sslContext;
     }
 
+    private StringEntity generateEntity() throws CxRestLoginClientException {
+        List<NameValuePair> urlParameters = new ArrayList<>();
+        urlParameters.add(new BasicNameValuePair("redirectUrl", "http://ARMTESTING2-NIR.dm.cx/CxWebClient/authCallback.html?"));
+        urlParameters.add(new BasicNameValuePair("providerid", "2"));
+
+        try {
+            return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new CxRestLoginClientException(e.getMessage());
+        }
+    }
 }
