@@ -109,6 +109,7 @@ public class RestClientUtils {
     public static int getArmViolationExitCode(CxRestArmClient armClient, CxProviders provider, int projectId, Logger log) throws CxRestARMClientException {
         List<String> violatedPolicies = new ArrayList<>();
         int exitCode = SCAN_SUCCEEDED_EXIT_CODE;
+        String status = armClient.getPolicyStatus(projectId);
         List<Policy> policiesViolations = armClient.getProjectViolations(projectId, provider.name());
         for (Policy policy: policiesViolations) {
                 violatedPolicies.add(policy.getPolicyName());
@@ -120,11 +121,11 @@ public class RestClientUtils {
                 builder.append(policy);
                 builder.append(SEPARATOR);
             }
-            String commaSeperatedPolicies = builder.toString();
+            String commaSeparatedPolicies = builder.toString();
             //Remove last comma
-            commaSeperatedPolicies = commaSeperatedPolicies.substring(0, commaSeperatedPolicies.length() - SEPARATOR.length());
+            commaSeparatedPolicies = commaSeparatedPolicies.substring(0, commaSeparatedPolicies.length() - SEPARATOR.length());
             log.info("Policy status: Violated");
-            log.info("Policy violations: " + violatedPolicies.size() + " - " + commaSeperatedPolicies);
+            log.info("Policy violations: " + violatedPolicies.size() + " - " + commaSeparatedPolicies);
 
         } else{
             log.info("Policy Status: Compliant");

@@ -137,8 +137,9 @@ public class CLIOSAScanJob extends CLIScanJob {
                     log.error("Error occurred during CxOSA reports. Error message: " + e.getMessage());
                     return errorCodeResolver(e.getMessage());
                 }
+
                 if (cliosaParameters.isCheckPolicyViolations()) {
-                    CxArmConfig armConfig = null;
+                    CxArmConfig armConfig;
                     try {
                         armConfig = cxRestOSAClient.getCxArmConfiguration();
                     } catch (CxRestOSAClientException e) {
