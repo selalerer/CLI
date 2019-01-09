@@ -25,7 +25,9 @@ public abstract class RetryableOperation {
                 operation();
             } catch (Exception e) {
                 if (count >= retries) {
-                    throw e;
+                    String errorMsg = e.getMessage() + "\nIn addition, Make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.";
+                    log.error(errorMsg);
+                    throw new CLIJobException(errorMsg, e);
                 }
                 count++;
                 log.trace("Error occurred during retryable operation", e);
