@@ -131,16 +131,7 @@ public class ScanPrerequisitesValidator {
     }
 
     private void validateScanTeam() throws CxScanPrerequisitesValidatorException, CxRestGeneralClientException {
-        final List<TeamDTO> teams;
-        try {
-            teams = cxRestGeneralClient.getTeams();
-        } catch (CxRestGeneralClientException e) {
-            String errorMsg = "Connection Failed.\n" +
-                    "Possible reason: Plugin version incompatible with CxSAST v8.7 or lower.\n" +
-                    "If your CxSAST version is v8.8 or greater, please recheck connection details or contact support.";
-            log.error(errorMsg);
-            throw new CxScanPrerequisitesValidatorException(errorMsg, e);
-        }
+        final List<TeamDTO> teams = cxRestGeneralClient.getTeams();
         for (TeamDTO team : teams) {
             if (team.getFullName().equalsIgnoreCase(teamInput.getFullName())) {
                 teamInput.setId(team.getId());
