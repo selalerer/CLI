@@ -24,7 +24,9 @@ public class CxGenerateTokenJob extends CLITokenJob {
         log.info("Trying to login to server: " + params.getCliMandatoryParameters().getOriginalHost());
         String token;
         try {
-            token = cxRestTokenClient.generateToken(new URL(mandatoryParamsContainer.getOriginalHost()), mandatoryParamsContainer.getUsername(), mandatoryParamsContainer.getPassword());
+            token = cxRestTokenClient.generateToken(new URL(mandatoryParamsContainer.getOriginalHost()),
+                    mandatoryParamsContainer.getUsername(), mandatoryParamsContainer.getPassword(),
+                    params.getCliOsaParameters().isCheckPolicyViolations());
         } catch (MalformedURLException | CxRestClientException e) {
             throw new CLITokenJobException("Fail to generate login token: " + e.getMessage());
         }

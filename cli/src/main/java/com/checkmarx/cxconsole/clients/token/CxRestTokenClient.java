@@ -9,7 +9,7 @@ import java.net.URL;
  */
 public interface CxRestTokenClient {
 
-    String generateToken(URL serverUrl, String userName, String password) throws CxRestClientException;
+    String generateToken(URL serverUrl, String userName, String password, boolean checkPolicyViolations) throws CxRestClientException;
 
     void revokeToken(URL serverUrl, String token) throws CxRestClientException;
 }

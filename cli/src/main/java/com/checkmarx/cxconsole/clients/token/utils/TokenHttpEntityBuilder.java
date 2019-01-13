@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class TokenHttpEntityBuilder {
 
+
     private TokenHttpEntityBuilder() {
         throw new IllegalStateException("Utility class");
     }
@@ -30,14 +31,17 @@ public class TokenHttpEntityBuilder {
     private static final String USERNAME_KEY = "username";
     private static final String ERROR_MESSAGE_PREFIX = "Failed to create body entity, due to: ";
     private static final String GRANT_TYPE_KEY = "grant_type";
+    private static final String DEFAULT_SCOPES = "sast_rest_api offline_access";
 
 
-    public static StringEntity createGenerateTokenParamsEntity(String userName, String password) throws CxRestClientException {
+    public static StringEntity createGenerateTokenParamsEntity(String userName, String password, boolean isCheckedPolicy) throws CxRestClientException {
+        String scopes = isCheckedPolicy ? DEFAULT_SCOPES + " cxarm_api" : DEFAULT_SCOPES;
+
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
         urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
         urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, PASS_KEY));
-        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access soap_api cxarm_api"));
+        urlParameters.add(new BasicNameValuePair("scope", scopes));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
 
@@ -76,12 +80,14 @@ public class TokenHttpEntityBuilder {
         }
     }
 
-    public static StringEntity createGetAccessTokenFromCredentialsParamsEntity(String userName, String password) throws CxRestLoginClientException {
+    public static StringEntity createGetAccessTokenFromCredentialsParamsEntity(String userName, String password, boolean isCheckedPolicy) throws CxRestLoginClientException {
+        String scopes = isCheckedPolicy ? DEFAULT_SCOPES + " cxarm_api" : DEFAULT_SCOPES;
+
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair(USERNAME_KEY, userName));
         urlParameters.add(new BasicNameValuePair(PASS_KEY, password));
         urlParameters.add(new BasicNameValuePair(GRANT_TYPE_KEY, PASS_KEY));
-        urlParameters.add(new BasicNameValuePair("scope", "sast_rest_api offline_access cxarm_api"));
+        urlParameters.add(new BasicNameValuePair("scope", scopes));
         urlParameters.add(new BasicNameValuePair(CLIENT_ID_KEY, CLI_CLIENT));
         urlParameters.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET_VALUE));
 

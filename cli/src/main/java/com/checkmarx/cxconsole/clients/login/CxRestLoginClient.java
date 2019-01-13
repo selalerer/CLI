@@ -8,7 +8,7 @@ import org.apache.http.client.HttpClient;
  */
 public interface CxRestLoginClient {
 
-    void credentialsLogin() throws CxRestLoginClientException;
+    void credentialsLogin(boolean isCheckedPolicy) throws CxRestLoginClientException;
 
     void tokenLogin() throws CxRestLoginClientException;
 
@@ -23,4 +23,5 @@ public interface CxRestLoginClient {
     boolean isCredentialsLogin();
 
     boolean isTokenLogin();
+
 }

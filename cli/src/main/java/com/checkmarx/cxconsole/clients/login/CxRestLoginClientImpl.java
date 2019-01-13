@@ -123,14 +123,14 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     }
 
     @Override
-    public void credentialsLogin() throws CxRestLoginClientException {
+    public void credentialsLogin(boolean checkPolicyViolations) throws CxRestLoginClientException {
         HttpUriRequest postRequest;
         HttpResponse loginResponse = null;
         try {
             postRequest = RequestBuilder.post()
                     .setUri(String.valueOf(LoginResourceURIBuilder.getAccessTokenURL(new URL(hostName))))
                     .setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
-                    .setEntity(TokenHttpEntityBuilder.createGetAccessTokenFromCredentialsParamsEntity(username, password))
+                    .setEntity(TokenHttpEntityBuilder.createGetAccessTokenFromCredentialsParamsEntity(username, password, checkPolicyViolations))
                     .build();
             loginResponse = client.execute(postRequest);
 
