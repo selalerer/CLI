@@ -28,7 +28,7 @@ public class RetryableRESTLogin extends RetryableOperation {
         // Login
         try {
             if (cxRestLoginClient.isCredentialsLogin()) {
-                cxRestLoginClient.credentialsLogin();
+                cxRestLoginClient.credentialsLogin(params.getCliOsaParameters().isCheckPolicyViolations());
             } else if (cxRestLoginClient.isTokenLogin()) {
                 cxRestLoginClient.tokenLogin();
             } else {

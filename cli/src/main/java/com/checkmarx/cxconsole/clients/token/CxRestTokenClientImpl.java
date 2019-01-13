@@ -28,7 +28,7 @@ public class CxRestTokenClientImpl implements CxRestTokenClient {
     private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
 
     @Override
-    public String generateToken(URL serverUrl, String userName, String password) throws CxRestClientException {
+    public String generateToken(URL serverUrl, String userName, String password, boolean checkPolicyViolations) throws CxRestClientException {
         HttpResponse generateTokenResponse = null;
         HttpUriRequest postRequest;
 
@@ -36,7 +36,7 @@ public class CxRestTokenClientImpl implements CxRestTokenClient {
             postRequest = RequestBuilder.post()
                     .setUri(String.valueOf(TokenResourceURIBuilder.buildGenerateTokenURL(serverUrl)))
                     .setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
-                    .setEntity(TokenHttpEntityBuilder.createGenerateTokenParamsEntity(userName, password))
+                    .setEntity(TokenHttpEntityBuilder.createGenerateTokenParamsEntity(userName, password, checkPolicyViolations))
                     .build();
             generateTokenResponse = client.execute(postRequest);
 
