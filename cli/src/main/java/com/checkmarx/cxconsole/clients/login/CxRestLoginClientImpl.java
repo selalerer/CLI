@@ -40,6 +40,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -193,16 +194,17 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                     .setEntity(generateEntity())
                     .build();
             loginResponse = client.execute(request);
-//            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
+
+            RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
             RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(loginResponse, RestGetAccessTokenDTO.class);
             headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
-        } catch (IOException e) {
+        } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with windows authentication: " + e.getMessage());
             throw new CxRestLoginClientException("Fail to login with windows authentication: " + e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(loginResponse);
         }
-
+        isLoggedIn = true;
 //        for (Cookie cookie : cookieStore.getCookies()) {
 //            if (cookie.getName().equals(CSRF_TOKEN_HEADER))
 //                csrfToken = cookie.getValue();
@@ -214,9 +216,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 //
 //        headers.add(new BasicHeader(CSRF_TOKEN_HEADER, csrfToken));
 //        headers.add(new BasicHeader("cookie", String.format("CXCSRFToken=%s; cxCookie=%s", csrfToken, cxCookie)));
-        SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
-        isLoggedIn = true;
     }
 
     private void getAccessTokenFromRefreshToken(String refreshToken) throws CxRestLoginClientException {
@@ -282,7 +281,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
     private StringEntity generateEntity() throws CxRestLoginClientException {
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("redirectUrl", "http://ARMTESTING2-NIR.dm.cx/CxWebClient/authCallback.html?"));
+        urlParameters.add(new BasicNameValuePair("redirectUrl", String.format("%s/CxWebClient/authCallback.html?", hostName)));
         urlParameters.add(new BasicNameValuePair("providerid", "2"));
 
         try {
