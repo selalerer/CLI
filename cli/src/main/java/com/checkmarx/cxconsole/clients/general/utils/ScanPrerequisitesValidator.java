@@ -62,7 +62,9 @@ public class ScanPrerequisitesValidator {
             validateScanEngineConfiguration();
             isProjectExists = findProjectOnServer();
         } catch (CxRestGeneralClientException | CxRestSASTClientException e) {
-            throw new CxScanPrerequisitesValidatorException(e);
+            String errorMsg = e.getMessage() + "\nPossible cause, Make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.";
+            log.error(errorMsg);
+            throw new CxScanPrerequisitesValidatorException(errorMsg, e);
         }
         log.info("SAST scan prerequisites were validated successfully");
     }
@@ -72,7 +74,9 @@ public class ScanPrerequisitesValidator {
             validateScanTeam();
             isProjectExists = findProjectOnServer();
         } catch (CxRestGeneralClientException e) {
-            throw new CxScanPrerequisitesValidatorException(e);
+            String errorMsg = e.getMessage() + "\nPossible cause, Make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.";
+            log.error(errorMsg);
+            throw new CxScanPrerequisitesValidatorException(errorMsg, e);
         }
         if (!isProjectExists) {
             throw new CxScanPrerequisitesValidatorException(NO_PROJECT_PRIOR_TO_OSA_SCAN_ERROR_MSG);
@@ -123,12 +127,7 @@ public class ScanPrerequisitesValidator {
 
     private void validateScanTeam() throws CxScanPrerequisitesValidatorException, CxRestGeneralClientException {
         final List<TeamDTO> teams;
-        try {
-            teams = cxRestGeneralClient.getTeams();
-        } catch (CxRestGeneralClientException e) {
-            log.error(e.getMessage());
-            throw new CxScanPrerequisitesValidatorException(e.getMessage(), e);
-        }
+        teams = cxRestGeneralClient.getTeams();
         for (TeamDTO team : teams) {
             if (team.getFullName().equalsIgnoreCase(teamInput.getFullName())) {
                 teamInput.setId(team.getId());
