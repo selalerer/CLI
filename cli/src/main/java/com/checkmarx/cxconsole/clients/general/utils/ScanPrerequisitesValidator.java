@@ -126,10 +126,9 @@ public class ScanPrerequisitesValidator {
     }
 
     private void validateScanTeam() throws CxScanPrerequisitesValidatorException, CxRestGeneralClientException {
-        final List<TeamDTO> teams;
-        teams = cxRestGeneralClient.getTeams();
+        final List<TeamDTO> teams = cxRestGeneralClient.getTeams();
         for (TeamDTO team : teams) {
-            if (team.getFullName().equalsIgnoreCase(teamInput.getFullName())) {
+            if (team.getFullName().replace("/", "\\").equalsIgnoreCase(teamInput.getFullName())) {
                 teamInput.setId(team.getId());
                 projectInput.setTeamId(team.getId());
                 log.info("Team: \"" + teamInput.getFullName().replaceFirst("\\\\", "") + "\" was validated in server");
