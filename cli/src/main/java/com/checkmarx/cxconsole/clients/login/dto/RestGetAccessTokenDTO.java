@@ -1,10 +1,12 @@
 package com.checkmarx.cxconsole.clients.login.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by nirli on 17/10/2017.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RestGetAccessTokenDTO {
 
     @JsonProperty("id_token")

@@ -28,30 +28,31 @@ import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEED
 /**
  * Created by nirli on 20/02/2018.
  */
-public class RestClientUtils {
+public interface RestClientUtils {
 
-    private static final String SEPARATOR = ",";
+    String SEPARATOR = ",";
 
-    private RestClientUtils() {
-        throw new IllegalStateException("Utility class");
-    }
-
-    public static JSONObject parseJsonObjectFromResponse(HttpResponse response) throws IOException {
+    static JSONObject parseJsonObjectFromResponse(HttpResponse response) throws IOException {
         String responseInString = createStringFromResponse(response).toString();
         return new JSONObject(responseInString);
     }
 
-    public static <ResponseObj> ResponseObj parseJsonFromResponse(HttpResponse response, Class<ResponseObj> dtoClass) throws IOException {
+    static <ResponseObj> ResponseObj parseJsonFromResponse(HttpResponse response, Class<ResponseObj> dtoClass) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(createStringFromResponse(response).toString(), dtoClass);
     }
 
-    public static <ResponseObj> List<ResponseObj> parseJsonListFromResponse(HttpResponse response, CollectionType dtoClass) throws IOException {
+    static <ResponseObj> ResponseObj parseFromURL(String url, Class<ResponseObj> dtoClass) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(fromUrlToJson(url), dtoClass);
+    }
+
+    static <ResponseObj> List<ResponseObj> parseJsonListFromResponse(HttpResponse response, CollectionType dtoClass) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(createStringFromResponse(response).toString(), dtoClass);
     }
 
-    private static StringBuilder createStringFromResponse(HttpResponse response) throws IOException {
+    static StringBuilder createStringFromResponse(HttpResponse response) throws IOException {
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
         StringBuilder result = new StringBuilder();
@@ -63,7 +64,7 @@ public class RestClientUtils {
         return result;
     }
 
-    public static ScanSettingDTO parseScanSettingResponse(HttpResponse response) throws IOException {
+    static ScanSettingDTO parseScanSettingResponse(HttpResponse response) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
         module.addDeserializer(ScanSettingDTO.class, new ScanSettingDTODeserializer());
@@ -72,8 +73,7 @@ public class RestClientUtils {
         return mapper.readValue(createStringFromResponse(response).toString(), ScanSettingDTO.class);
     }
 
-
-    public static void validateClientResponse(HttpResponse response, int status, String message) throws CxValidateResponseException {
+    static void validateClientResponse(HttpResponse response, int status, String message) throws CxValidateResponseException {
         try {
             if (response.getStatusLine().getStatusCode() != status) {
                 String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
@@ -87,7 +87,7 @@ public class RestClientUtils {
         }
     }
 
-    public static void validateTokenResponse(HttpResponse response, int status, String message) throws CxValidateResponseException {
+    static void validateTokenResponse(HttpResponse response, int status, String message) throws CxValidateResponseException {
         try {
             if (response.getStatusLine().getStatusCode() != status) {
                 String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
@@ -106,18 +106,18 @@ public class RestClientUtils {
     }
 
     //Common method to be called by SAST or OSA commands.
-    public static int getArmViolationExitCode(CxRestArmClient armClient, CxProviders provider, int projectId, Logger log) throws CxRestARMClientException {
+    static int getArmViolationExitCode(CxRestArmClient armClient, CxProviders provider, int projectId, Logger log) throws CxRestARMClientException {
         List<String> violatedPolicies = new ArrayList<>();
         int exitCode = SCAN_SUCCEEDED_EXIT_CODE;
         String status = armClient.getPolicyStatus(projectId);
         List<Policy> policiesViolations = armClient.getProjectViolations(projectId, provider.name());
-        for (Policy policy: policiesViolations) {
-                violatedPolicies.add(policy.getPolicyName());
+        for (Policy policy : policiesViolations) {
+            violatedPolicies.add(policy.getPolicyName());
         }
-        if(violatedPolicies.size() > 0){
+        if (violatedPolicies.size() > 0) {
             exitCode = POLICY_VIOLATION_ERROR_EXIT_CODE;
             StringBuilder builder = new StringBuilder();
-            for(String policy : violatedPolicies){
+            for (String policy : violatedPolicies) {
                 builder.append(policy);
                 builder.append(SEPARATOR);
             }
@@ -127,9 +127,15 @@ public class RestClientUtils {
             log.info("Policy status: Violated");
             log.info("Policy violations: " + violatedPolicies.size() + " - " + commaSeparatedPolicies);
 
-        } else{
+        } else {
             log.info("Policy Status: Compliant");
         }
         return exitCode;
+    }
+
+    static String fromUrlToJson(String url) {
+        url = url.replaceAll("=", "\":\"");
+        url = url.replaceAll("&", "\",\"");
+        return "{\"" + url + "\"}";
     }
 }

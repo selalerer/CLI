@@ -14,8 +14,6 @@ import org.apache.log4j.Logger;
 
 import java.util.List;
 
-import static com.checkmarx.cxconsole.exitcodes.Constants.ErrorMassages.NO_PROJECT_PRIOR_TO_OSA_SCAN_ERROR_MSG;
-
 /**
  * Created by nirli on 26/02/2018.
  */
@@ -133,7 +131,7 @@ public class ScanPrerequisitesValidator {
     private void validateScanTeam() throws CxScanPrerequisitesValidatorException, CxRestGeneralClientException {
         final List<TeamDTO> teams = cxRestGeneralClient.getTeams();
         for (TeamDTO team : teams) {
-            if (team.getFullName().equalsIgnoreCase(teamInput.getFullName())) {
+            if (team.getFullName().replace("/", "\\").equalsIgnoreCase(teamInput.getFullName())) {
                 teamInput.setId(team.getId());
                 projectInput.setTeamId(team.getId());
                 log.info("Team: \"" + teamInput.getFullName().replaceFirst("\\\\", "") + "\" was validated in server");

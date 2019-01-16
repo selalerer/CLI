@@ -13,12 +13,12 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.cookie.Cookie;
@@ -42,10 +42,10 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +92,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                     .create()
                     .setDefaultHeaders(headers)
                     .setSSLContext(sslContext)
-//                    .setRedirectStrategy(new LaxRedirectStrategy())
                     .build();
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
@@ -116,8 +115,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
     }
 
-    public CxRestLoginClientImpl(String hostname) {
-        this.hostName = hostname;
+    public CxRestLoginClientImpl(String hostName) {
+        this.hostName = !hostName.contains("http") ? "http://" + hostName : hostName;
         this.username = null;
         this.password = null;
         this.token = null;
@@ -185,8 +184,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setRedirectsEnabled(false)
                 .setAuthenticationEnabled(true)
+                .setCookieSpec(CookieSpecs.STANDARD)
                 .build();
-
         try {
             //Request1
             request = RequestBuilder.post()
@@ -219,16 +218,24 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                     .build();
             loginResponse = client.execute(request);
 
-            // RestClientUtils.validateClientResponse(loginResponse, 200, "Fail to authenticate");
-            RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(loginResponse, RestGetAccessTokenDTO.class);
-            CxRestLoginClientImpl.headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
-        } catch (IOException e) {
+            final String accessToken = extractAuthTokenFromResponse(loginResponse);
+            CxRestLoginClientImpl.headers.add(new BasicHeader("Authorization", "Bearer " + accessToken));
+        } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with windows authentication: " + e.getMessage());
             throw new CxRestLoginClientException("Fail to login with windows authentication: " + e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(loginResponse);
         }
         isLoggedIn = true;
+    }
+
+    private String extractAuthTokenFromResponse(HttpResponse loginResponse) throws IOException, CxValidateResponseException {
+        String redirectURL = loginResponse.getHeaders("Location")[0].getValue();
+        if (!redirectURL.contains("access_token")) {
+            throw new CxValidateResponseException("Failed retrieving access token from server");
+        }
+        final RestGetAccessTokenDTO accessTokenDTO = RestClientUtils.parseFromURL(redirectURL, RestGetAccessTokenDTO.class);
+        return accessTokenDTO.getAccessToken();
     }
 
     private String retrieveCookies() {
@@ -303,28 +310,20 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     }
 
     private StringEntity generateEntity() throws CxRestLoginClientException {
-//        final String BASE_URL = "/CxRestAPI/auth/identity/";
+        String scopes = "sast_api openid sast-permissions access-control-permissions access_control_api management_and_orchestration_api".replace(" ", "%20");
 
-        //String redirectURL = hostName + BASE_URL + String.format("connect/authorize/callback?client_id=%s&redirect_uri=%s&response_type=%s&scope=%s", "cli_client", hostName + "/CxWebClient/authCallback.html?", "token", "sast_api%20openid%20offline_access%20management_and_orchestration_api");
-//        final String redirectURL = "/CxRestAPI/auth/identity/connect/authorize/callback?client_id=cli_client&redirect_uri=http%3A%2F%2F10.31.2.9%2Fcxwebclient%2FauthCallback.html%3F&response_type=id_token%20token&scope=scope=openid%20offline_access%20management_and_orchestration_api";
-//                "connect/authorize/callback" +
-//                "?client_id=cli_client" +
-//                "&redirect_uri=http%3A%2F%2F10.31.2.9%2Fcxwebclient%2FauthCallback.html%3F&response_type=id_token%20token" +
-//                "&scope=sast_api%20openid%20offline_access%20management_and_orchestration_api";
-//        urlParameters.add(new BasicNameValuePair("redirectUrl", String.format("%s/CxRestAPI/auth/", hostName)));
-//        urlParameters.add(new BasicNameValuePair("redirectUrl", String.format("%s/CxWebClient/authCallback.html?", hostName)));
-
-        String redirectUrl = "%2FCxRestAPI%2Fauth%2Fidentity%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dcli_client%26redirect_uri%3Dhttp%253A%252F%252F10.31.2.9%252Fcxwebclient%252FauthCallback.html%253F%26response_type%3Did_token%2520token%26scope%3Dsast_api%2520openid%2520sast-permissions%2520access-control-permissions%2520access_control_api%2520management_and_orchestration_api&providerid=2";
-
-        List<NameValuePair> urlParameters = new ArrayList<>();
-//        urlParameters.add(new BasicNameValuePair("redirectUrl", "/CxRestAPI/auth/identity/connect/authorize/callback?" +
-//                "client_id=cli_client" +
-//                "&redirect_uri=" + hostName + "/cxwebclient/authCallback.html?" +
-//                "&scope=sast_api%20openid%20offline_access%20management_and_orchestration_api" +
-//                "&esponse_type=id_token token"));
-//                "&providerid=2"));
+        String redirectUrl = MessageFormat.format("/CxRestAPI/auth/identity/connect/authorize/callback" +
+                        "?client_id={0}" +
+                        "&redirect_uri={1}%2Fcxwebclient%2FauthCallback.html%3F" +
+                        "&response_type={2}" +
+                        "&scope={3}" +
+                        "&state=d840adad2bc545feaec91c005cdcdd4b" +
+                        "&nonce=9313f0902ba64e50bc564f5137f35a52" +
+                        "&prompt=true"
+                , "cxsast_client", hostName, "id_token%20token", scopes);
 
         try {
+            List<NameValuePair> urlParameters = new ArrayList<>();
             urlParameters.add(new BasicNameValuePair("redirectUrl", redirectUrl));
             urlParameters.add(new BasicNameValuePair("providerid", "2"));
             return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
