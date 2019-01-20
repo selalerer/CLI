@@ -64,7 +64,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private static final String CX_COOKIE = "cxCookie";
     private static final String CSRF_TOKEN_HEADER = "CXCSRFToken";
     private static final String TLS_PROTOCOL = "TLSv1.2";
-    public static final String AUTH_URL = "/cxrestapi/auth/AuthenticationProviders";
+    private static final String AUTH_API_URL = "/cxrestapi/auth/";
     private static Logger log = Logger.getLogger(CxRestLoginClientImpl.class);
 
     private final String username;
@@ -321,7 +321,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         final String clientId = "cxsast_client";
         final String redirectUri = "%2Fcxwebclient%2FauthCallback.html%3F";
         final String responseType = "id_token%20token";
-        final String state = "d840adad2bc545feaec91c005cdcdd4b";
         final String nonce = "9313f0902ba64e50bc564f5137f35a52";
         final String isPrompt = "true";
         final String scopes = "sast_api openid sast-permissions access-control-permissions access_control_api management_and_orchestration_api".replace(" ", "%20");
@@ -332,10 +331,9 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                         "&redirect_uri={1}" + redirectUri +
                         "&response_type={2}" +
                         "&scope={3}" +
-                        "&state={4}" +
-                        "&nonce={5}" +
-                        "&prompt={6}"
-                , clientId, hostName, responseType, scopes, state, nonce, isPrompt);
+                        "&nonce={4}" +
+                        "&prompt={5}"
+                , clientId, hostName, responseType, scopes, nonce, isPrompt);
 
         try {
             List<NameValuePair> urlParameters = new ArrayList<>();
@@ -348,18 +346,16 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     }
 
     private String getProviderId(String providerName) throws IOException, CxRestLoginClientException {
-        final HttpUriRequest request = RequestBuilder.get(hostName + AUTH_URL)
+        final HttpUriRequest request = RequestBuilder.get(hostName + AUTH_API_URL + "AuthenticationProviders")
                 .build();
-
         final HttpResponse response = client.execute(request);
-        String jsonResponse = EntityUtils.toString(response.getEntity());
 
-        Gson gson = new Gson();
-        final Provider[] providers = gson.fromJson(jsonResponse, Provider[].class);
+        String entity = EntityUtils.toString(response.getEntity());
+        final Provider[] providers = new Gson().fromJson(entity, Provider[].class);
         final Provider provider = Arrays.stream(providers)
                 .filter(p -> p.getName().equalsIgnoreCase(providerName))
                 .findFirst()
-                .orElseThrow(() -> new CxRestLoginClientException("Provider was not found" + providerName));
+                .orElseThrow(() -> new CxRestLoginClientException(String.format("Provider [%s] was not found", providerName)));
 
         return String.valueOf(provider.getId());
     }
