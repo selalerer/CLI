@@ -1,13 +1,18 @@
 package com.checkmarx.cxconsole.clients.login;
 
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
+import com.checkmarx.cxconsole.clients.login.dto.Provider;
 import com.checkmarx.cxconsole.clients.login.dto.RestGetAccessTokenDTO;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clients.login.utils.LoginResourceURIBuilder;
 import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.google.common.base.Strings;
-import org.apache.http.*;
+import com.google.gson.Gson;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
@@ -36,6 +41,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -47,6 +53,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,6 +64,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private static final String CX_COOKIE = "cxCookie";
     private static final String CSRF_TOKEN_HEADER = "CXCSRFToken";
     private static final String TLS_PROTOCOL = "TLSv1.2";
+    public static final String AUTH_URL = "/cxrestapi/auth/AuthenticationProviders";
     private static Logger log = Logger.getLogger(CxRestLoginClientImpl.class);
 
     private final String username;
@@ -309,26 +317,50 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         return sslContext;
     }
 
-    private StringEntity generateEntity() throws CxRestLoginClientException {
-        String scopes = "sast_api openid sast-permissions access-control-permissions access_control_api management_and_orchestration_api".replace(" ", "%20");
+    private StringEntity generateEntity() throws CxRestLoginClientException, IOException {
+        final String clientId = "cxsast_client";
+        final String redirectUri = "%2Fcxwebclient%2FauthCallback.html%3F";
+        final String responseType = "id_token%20token";
+        final String state = "d840adad2bc545feaec91c005cdcdd4b";
+        final String nonce = "9313f0902ba64e50bc564f5137f35a52";
+        final String isPrompt = "true";
+        final String scopes = "sast_api openid sast-permissions access-control-permissions access_control_api management_and_orchestration_api".replace(" ", "%20");
+        final String providerId = getProviderId("Windows");
 
         String redirectUrl = MessageFormat.format("/CxRestAPI/auth/identity/connect/authorize/callback" +
                         "?client_id={0}" +
-                        "&redirect_uri={1}%2Fcxwebclient%2FauthCallback.html%3F" +
+                        "&redirect_uri={1}" + redirectUri +
                         "&response_type={2}" +
                         "&scope={3}" +
-                        "&state=d840adad2bc545feaec91c005cdcdd4b" +
-                        "&nonce=9313f0902ba64e50bc564f5137f35a52" +
-                        "&prompt=true"
-                , "cxsast_client", hostName, "id_token%20token", scopes);
+                        "&state={4}" +
+                        "&nonce={5}" +
+                        "&prompt={6}"
+                , clientId, hostName, responseType, scopes, state, nonce, isPrompt);
 
         try {
             List<NameValuePair> urlParameters = new ArrayList<>();
             urlParameters.add(new BasicNameValuePair("redirectUrl", redirectUrl));
-            urlParameters.add(new BasicNameValuePair("providerid", "2"));
+            urlParameters.add(new BasicNameValuePair("providerid", providerId));
             return new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             throw new CxRestLoginClientException(e.getMessage());
         }
+    }
+
+    private String getProviderId(String providerName) throws IOException, CxRestLoginClientException {
+        final HttpUriRequest request = RequestBuilder.get(hostName + AUTH_URL)
+                .build();
+
+        final HttpResponse response = client.execute(request);
+        String jsonResponse = EntityUtils.toString(response.getEntity());
+
+        Gson gson = new Gson();
+        final Provider[] providers = gson.fromJson(jsonResponse, Provider[].class);
+        final Provider provider = Arrays.stream(providers)
+                .filter(p -> p.getName().equalsIgnoreCase(providerName))
+                .findFirst()
+                .orElseThrow(() -> new CxRestLoginClientException("Provider was not found" + providerName));
+
+        return String.valueOf(provider.getId());
     }
 }
