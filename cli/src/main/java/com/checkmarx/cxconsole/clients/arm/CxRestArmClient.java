@@ -11,5 +11,5 @@ import java.util.List;
 public interface CxRestArmClient {
      void close();
      List<Policy> getProjectViolations(int projectId, String provider) throws CxRestARMClientException;
-     String getPolicyStatus(int projectId);
+//     String getPolicyStatus(int projectId);
 }

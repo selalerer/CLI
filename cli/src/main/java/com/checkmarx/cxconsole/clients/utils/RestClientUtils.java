@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.POLICY_VIOLATION_ERROR_EXIT_CODE;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEEDED_EXIT_CODE;
@@ -109,11 +110,9 @@ public interface RestClientUtils {
     static int getArmViolationExitCode(CxRestArmClient armClient, CxProviders provider, int projectId, Logger log) throws CxRestARMClientException {
         List<String> violatedPolicies = new ArrayList<>();
         int exitCode = SCAN_SUCCEEDED_EXIT_CODE;
-        String status = armClient.getPolicyStatus(projectId);
+//        String status = armClient.getPolicyStatus(projectId);
         List<Policy> policiesViolations = armClient.getProjectViolations(projectId, provider.name());
-        for (Policy policy : policiesViolations) {
-            violatedPolicies.add(policy.getPolicyName());
-        }
+        violatedPolicies.addAll(policiesViolations.stream().map(Policy::getPolicyName).collect(Collectors.toList()));
         if (violatedPolicies.size() > 0) {
             exitCode = POLICY_VIOLATION_ERROR_EXIT_CODE;
             StringBuilder builder = new StringBuilder();
@@ -126,7 +125,6 @@ public interface RestClientUtils {
             commaSeparatedPolicies = commaSeparatedPolicies.substring(0, commaSeparatedPolicies.length() - SEPARATOR.length());
             log.info("Policy status: Violated");
             log.info("Policy violations: " + violatedPolicies.size() + " - " + commaSeparatedPolicies);
-
         } else {
             log.info("Policy Status: Compliant");
         }
