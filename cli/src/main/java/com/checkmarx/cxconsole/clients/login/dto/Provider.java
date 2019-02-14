@@ -1,8 +1,6 @@
 package com.checkmarx.cxconsole.clients.login.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Builder;
-import lombok.Data;
 
 /**
  * Created by idanA on 1/17/2019.
