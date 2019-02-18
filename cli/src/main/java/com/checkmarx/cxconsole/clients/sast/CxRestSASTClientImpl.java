@@ -299,15 +299,14 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
         try {
             if (remoteSourceScanSettingDTO instanceof SVNAndTFSScanSettingDTO && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey() != null && ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey().length > 1) {
-                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                builder.addBinaryBody("privateKey", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey(), ContentType.APPLICATION_JSON, null);
-                builder.addTextBody("absoluteUrl", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getAbsoluteUrl(), ContentType.APPLICATION_JSON);
-                builder.addTextBody("port", String.valueOf(((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getPort()), ContentType.APPLICATION_JSON);
-                builder.addTextBody("paths", StringUtils.join(remoteSourceScanSettingDTO.getPaths(), ";"), ContentType.APPLICATION_JSON);
-                HttpEntity multipart = builder.build();
+                HttpEntity multipart = MultipartEntityBuilder.create()
+                        .addBinaryBody("privateKey", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getPrivateKey(), ContentType.APPLICATION_JSON, null)
+                        .addTextBody("absoluteUrl", ((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getAbsoluteUrl())
+                        .addTextBody("port", String.valueOf(((SVNAndTFSScanSettingDTO) remoteSourceScanSettingDTO).getUri().getPort()))
+                        .addTextBody("paths", StringUtils.join(remoteSourceScanSettingDTO.getPaths(), ";"))
+                        .build();
                 postRequest = RequestBuilder.post()
                         .setUri(String.valueOf(SastResourceURIBuilder.buildCreateRemoteSourceScanURL(new URL(hostName), projectId, remoteSourceType, true)))
-                        .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                         .setEntity(multipart)
                         .build();
             } else {
