@@ -8,6 +8,7 @@ import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.google.common.base.Strings;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.CookieStore;
@@ -30,6 +31,7 @@ import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
@@ -47,6 +49,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
     private static final String CX_COOKIE = "cxCookie";
     private static final String CSRF_TOKEN_HEADER = "CXCSRFToken";
+
     private static Logger log = Logger.getLogger(CxRestLoginClientImpl.class);
 
     private final String username;
@@ -67,6 +70,10 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private String cxCookie = null;
     private String csrfToken = null;
 
+    private static final boolean IS_PROXY = Boolean.parseBoolean(System.getProperty("proxySet"));
+    private static final String PROXY_HOST = System.getProperty("http.proxyHost");
+    private static final String PROXY_PORT = System.getProperty("http.proxyPort");
+
     public CxRestLoginClientImpl(String hostname, String token) {
         this.hostName = hostname;
         this.token = token;
@@ -74,11 +81,15 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.password = null;
 
         //create http client
-        client = HttpClientBuilder.create().build();
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+
         try {
             getAccessTokenFromRefreshToken(token);
             headers.add(CLI_ORIGIN_HEADER);
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            client = clientBuilder.create().setDefaultHeaders(headers).build();
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
@@ -95,9 +106,15 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.password = password;
         this.token = null;
 
-        //create http client
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+
         headers.add(CLI_ORIGIN_HEADER);
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+        client = clientBuilder.create()
+                .setDefaultHeaders(headers)
+                .build();
     }
 
     public CxRestLoginClientImpl(String hostname) {
@@ -114,7 +131,13 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                 .register(AuthSchemes.SPNEGO, new WindowsNegotiateSchemeFactory(null))
                 .build();
         final CredentialsProvider credsProvider = new WindowsCredentialsProvider(new SystemDefaultCredentialsProvider());
-        client = HttpClientBuilder.create()
+
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+
+        client = clientBuilder
                 .setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
                 .setDefaultCookieStore(cookieStore)
@@ -242,5 +265,13 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     @Override
     public boolean isTokenLogin() {
         return !Strings.isNullOrEmpty(token);
+    }
+
+    private void setProxy(HttpClientBuilder clientBuilder, String proxyHost, int proxyPort) {
+        log.debug(String.format("Setting proxy to %s:%s", proxyHost, proxyPort));
+        HttpHost proxyObject = new HttpHost(proxyHost, proxyPort);
+        clientBuilder
+                .setProxy(proxyObject)
+                .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
     }
 }
