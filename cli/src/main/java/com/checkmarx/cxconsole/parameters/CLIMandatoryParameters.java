@@ -61,7 +61,8 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         if (projectNameWithTeamPath != null) {
             projectNameWithTeamPath = projectNameWithTeamPath.replaceAll("/", "\\\\");
             projectName = extractProjectName(projectNameWithTeamPath);
-            team = extractTeamPath(projectNameWithTeamPath);
+            team = extractTeamPath(projectNameWithTeamPath, projectName);
+
             project = new ProjectDTO(projectName);
         }
     }
@@ -75,18 +76,10 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         }
     }
 
-    private TeamDTO extractTeamPath(String projectNameWithFullPath) {
-        String[] pathParts = projectNameWithFullPath.split("\\\\");
-        String team;
-        if ((pathParts.length <= 0)) {
-            return null;
-        } else {
-            team = projectNameWithFullPath.replace("\\" + projectName, "");
-            if (!team.startsWith("\\")) {
-                team = "\\" + team;
-            }
-            return new TeamDTO(team);
-        }
+    private TeamDTO extractTeamPath(String fullPath, String project) {
+        final int projectNameIndex = fullPath.lastIndexOf("\\" + project);
+        final String teamPath = fullPath.substring(0, projectNameIndex);
+        return !teamPath.startsWith("\\") ? new TeamDTO("\\" + teamPath) : new TeamDTO(teamPath);
     }
 
 
