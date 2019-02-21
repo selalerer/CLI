@@ -87,9 +87,9 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         }
 
         try {
-            getAccessTokenFromRefreshToken(token);
             headers.add(CLI_ORIGIN_HEADER);
             client = clientBuilder.create().setDefaultHeaders(headers).build();
+            getAccessTokenFromRefreshToken(token);
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
