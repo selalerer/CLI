@@ -29,10 +29,7 @@ import org.apache.http.impl.auth.DigestSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsCredentialsProvider;
 import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
+import org.apache.http.impl.client.*;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.log4j.Logger;
@@ -88,7 +85,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         try {
             headers.add(CLI_ORIGIN_HEADER);
-            client = clientBuilder.create().setDefaultHeaders(headers).build();
+            client = clientBuilder.setDefaultHeaders(headers).build();
             getAccessTokenFromRefreshToken(token);
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
@@ -112,7 +109,8 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         }
 
         headers.add(CLI_ORIGIN_HEADER);
-        client = clientBuilder.create()
+        client = clientBuilder
+                .useSystemProperties()
                 .setDefaultHeaders(headers)
                 .build();
     }
@@ -159,8 +157,13 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
             RestClientUtils.validateTokenResponse(loginResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
             RestGetAccessTokenDTO jsonResponse = RestClientUtils.parseJsonFromResponse(loginResponse, RestGetAccessTokenDTO.class);
+
             headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            final HttpClientBuilder clientBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
+            if (IS_PROXY) {
+                setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            }
+            client = clientBuilder.build();
             isLoggedIn = true;
         } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with credentials: " + e.getMessage());

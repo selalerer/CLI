@@ -67,7 +67,7 @@ public abstract class CLICommand {
                 log.error("Can't create new log file to path: " + params.getCliSharedParameters().getLogFilePath());
             }
         } else {
-            log.info("Default log file location: " + System.getProperty("user.dir") + File.separator + "logs\\cx_console.log");
+            log.info("Default log file location: " + System.getProperty("user.dir") + File.separator + "logs" + File.separator + "cx_console.log");
         }
 
         try {
