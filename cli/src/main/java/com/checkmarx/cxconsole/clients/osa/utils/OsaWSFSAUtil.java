@@ -5,8 +5,6 @@ import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
-import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.whitesource.fs.ComponentScan;
 import org.whitesource.fs.FSAConfigProperties;
