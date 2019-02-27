@@ -77,7 +77,6 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.username = null;
         this.password = null;
 
-        //create http client
         final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (IS_PROXY) {
             setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
@@ -85,7 +84,11 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         try {
             headers.add(CLI_ORIGIN_HEADER);
-            client = clientBuilder.setDefaultHeaders(headers).build();
+            client = clientBuilder
+                    .setDefaultHeaders(headers)
+                    .useSystemProperties()
+                    .build();
+
             getAccessTokenFromRefreshToken(token);
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
@@ -136,6 +139,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         }
 
         client = clientBuilder
+                .useSystemProperties()
                 .setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
                 .setDefaultCookieStore(cookieStore)
@@ -163,7 +167,9 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             if (IS_PROXY) {
                 setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
             }
-            client = clientBuilder.build();
+            client = clientBuilder
+                    .useSystemProperties()
+                    .build();
             isLoggedIn = true;
         } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with credentials: " + e.getMessage());
@@ -176,7 +182,14 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     @Override
     public void tokenLogin() throws CxRestLoginClientException {
         if (headers.size() == 2) {
-            client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+            final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+            if (IS_PROXY) {
+                setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            }
+            client = clientBuilder
+                    .setDefaultHeaders(headers)
+                    .useSystemProperties()
+                    .build();
             isLoggedIn = true;
         } else {
             throw new CxRestLoginClientException("Login failed");
@@ -215,7 +228,13 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         headers.add(new BasicHeader(CSRF_TOKEN_HEADER, csrfToken));
         headers.add(new BasicHeader("cookie", String.format("CXCSRFToken=%s; cxCookie=%s", csrfToken, cxCookie)));
 
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+        client = clientBuilder
+                .useSystemProperties()
+                .setDefaultHeaders(headers).build();
         isLoggedIn = true;
     }
 
