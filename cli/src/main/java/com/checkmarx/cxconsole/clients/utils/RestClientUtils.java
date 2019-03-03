@@ -11,7 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -32,6 +35,7 @@ import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.SCAN_SUCCEED
 public interface RestClientUtils {
 
     String SEPARATOR = ",";
+    Logger log = Logger.getLogger(RestClientUtils.class);
 
     static JSONObject parseJsonObjectFromResponse(HttpResponse response) throws IOException {
         String responseInString = createStringFromResponse(response).toString();
@@ -129,6 +133,14 @@ public interface RestClientUtils {
             log.info("Policy Status: Compliant");
         }
         return exitCode;
+    }
+
+    static void setClientProxy(HttpClientBuilder clientBuilder, String proxyHost, int proxyPort) {
+        log.debug(String.format("Setting proxy to %s:%s", proxyHost, proxyPort));
+        HttpHost proxyObject = new HttpHost(proxyHost, proxyPort);
+        clientBuilder
+                .setProxy(proxyObject)
+                .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
     }
 
     static String fromUrlToJson(String url) {

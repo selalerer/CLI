@@ -85,22 +85,43 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private String cxCookie = null;
     private String csrfToken = null;
 
+    private static final boolean IS_PROXY = Boolean.parseBoolean(System.getProperty("proxySet"));
+    private static final String PROXY_HOST;
+    private static final String PROXY_PORT;
+
+    static {
+        PROXY_PORT = System.getProperty("http.proxyPort") == null
+                ? System.getProperty("https.proxyPort")
+                : System.getProperty("http.proxyPort");
+
+        PROXY_HOST = System.getProperty("http.proxyHost") == null
+                ? System.getProperty("https.proxyHost")
+                : System.getProperty("http.proxyHost");
+    }
+
+
     public CxRestLoginClientImpl(String hostname, String token) {
         this.hostName = hostname;
         this.token = token;
         this.username = null;
         this.password = null;
 
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+
         SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
         client = HttpClientBuilder.create().build();
         try {
-            getAccessTokenFromRefreshToken(token);
             headers.add(CLI_ORIGIN_HEADER);
-            client = HttpClientBuilder
-                    .create()
+            client = clientBuilder
                     .setDefaultHeaders(headers)
+                    .useSystemProperties()
                     .setSSLContext(sslContext)
                     .build();
+
+            getAccessTokenFromRefreshToken(token);
         } catch (CxRestLoginClientException e) {
             if (e.getMessage().contains(SERVER_STACK_TRACE_ERROR_MESSAGE)) {
                 log.trace("Failed to login, due to: " + e.getMessage());
@@ -117,14 +138,22 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         this.password = password;
         this.token = null;
 
-        //create http client
-        headers.add(CLI_ORIGIN_HEADER);
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+
         SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
-        client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
+        headers.add(CLI_ORIGIN_HEADER);
+        client = clientBuilder
+                .useSystemProperties()
+                .setDefaultHeaders(headers)
+                .setSSLContext(sslContext)
+                .build();
     }
 
     public CxRestLoginClientImpl(String hostName) {
-        this.hostName = !hostName.contains("http") ? "http://" + hostName : hostName;
+        this.hostName = hostName;
         this.username = null;
         this.password = null;
         this.token = null;
@@ -138,7 +167,13 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
                 .register(AuthSchemes.SPNEGO, new WindowsNegotiateSchemeFactory(null))
                 .build();
         final CredentialsProvider credsProvider = new WindowsCredentialsProvider(new SystemDefaultCredentialsProvider());
-        client = HttpClientBuilder.create()
+        final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (IS_PROXY) {
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+        }
+
+        client = clientBuilder
+                .useSystemProperties()
                 .setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(authSchemeRegistry)
                 .setDefaultCookieStore(cookieStore)
@@ -164,6 +199,13 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
             SSLContext sslContext = generateSSLContext(TLS_PROTOCOL, log);
             client = HttpClientBuilder.create().setDefaultHeaders(headers).setSSLContext(sslContext).build();
+            final HttpClientBuilder clientBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
+            if (IS_PROXY) {
+                RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            }
+            client = clientBuilder
+                    .useSystemProperties()
+                    .build();
             isLoggedIn = true;
         } catch (IOException | CxValidateResponseException e) {
             log.error("Fail to login with credentials: " + e.getMessage());
