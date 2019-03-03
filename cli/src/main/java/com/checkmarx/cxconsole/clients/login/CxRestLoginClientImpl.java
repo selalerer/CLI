@@ -118,7 +118,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (IS_PROXY) {
-            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
         }
 
         headers.add(CLI_ORIGIN_HEADER);
