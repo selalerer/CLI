@@ -8,7 +8,6 @@ import com.checkmarx.cxconsole.clients.token.utils.TokenHttpEntityBuilder;
 import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import com.google.common.base.Strings;
 import org.apache.http.Header;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.CookieStore;
@@ -68,8 +67,18 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
     private String csrfToken = null;
 
     private static final boolean IS_PROXY = Boolean.parseBoolean(System.getProperty("proxySet"));
-    private static final String PROXY_HOST = System.getProperty("http.proxyHost");
-    private static final String PROXY_PORT = System.getProperty("http.proxyPort");
+    private static final String PROXY_HOST;
+    private static final String PROXY_PORT;
+
+    static {
+        PROXY_PORT = System.getProperty("http.proxyPort") == null
+                ? System.getProperty("https.proxyPort")
+                : System.getProperty("http.proxyPort");
+
+        PROXY_HOST = System.getProperty("http.proxyHost") == null
+                ? System.getProperty("https.proxyHost")
+                : System.getProperty("http.proxyHost");
+    }
 
     public CxRestLoginClientImpl(String hostname, String token) {
         this.hostName = hostname;
@@ -79,7 +88,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (IS_PROXY) {
-            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
         }
 
         try {
@@ -108,7 +117,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (IS_PROXY) {
-            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
         }
 
         headers.add(CLI_ORIGIN_HEADER);
@@ -135,7 +144,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (IS_PROXY) {
-            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
         }
 
         client = clientBuilder
@@ -165,7 +174,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
             headers.add(new BasicHeader("Authorization", "Bearer " + jsonResponse.getAccessToken()));
             final HttpClientBuilder clientBuilder = HttpClientBuilder.create().setDefaultHeaders(headers);
             if (IS_PROXY) {
-                setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+                RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
             }
             client = clientBuilder
                     .useSystemProperties()
@@ -184,7 +193,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         if (headers.size() == 2) {
             final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
             if (IS_PROXY) {
-                setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+                RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
             }
             client = clientBuilder
                     .setDefaultHeaders(headers)
@@ -230,7 +239,7 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
 
         final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (IS_PROXY) {
-            setProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
         }
         client = clientBuilder
                 .useSystemProperties()
@@ -289,11 +298,4 @@ public class CxRestLoginClientImpl implements CxRestLoginClient {
         return !Strings.isNullOrEmpty(token);
     }
 
-    private void setProxy(HttpClientBuilder clientBuilder, String proxyHost, int proxyPort) {
-        log.debug(String.format("Setting proxy to %s:%s", proxyHost, proxyPort));
-        HttpHost proxyObject = new HttpHost(proxyHost, proxyPort);
-        clientBuilder
-                .setProxy(proxyObject)
-                .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
-    }
 }
