@@ -1,6 +1,7 @@
 package com.checkmarx.cxconsole.commands.utils;
 
 import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
+import com.checkmarx.cxconsole.clients.utils.RestClientUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -13,34 +14,53 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class CommandUtils {
 
     private CommandUtils() {
-        throw new IllegalStateException("Utility class");
     }
 
     private static final String CX_SWAGGER = "/cxrestapi/help/swagger";
 
+    private static final boolean IS_PROXY = Boolean.parseBoolean(System.getProperty("proxySet"));
+    private static final String PROXY_HOST;
+    private static final String PROXY_PORT;
+
+    static {
+        PROXY_PORT = System.getProperty("http.proxyPort") == null
+                ? System.getProperty("https.proxyPort")
+                : System.getProperty("http.proxyPort");
+
+        PROXY_HOST = System.getProperty("http.proxyHost") == null
+                ? System.getProperty("https.proxyHost")
+                : System.getProperty("http.proxyHost");
+    }
+
     public static String resolveServerProtocol(String originalHost) throws CxRestClientException {
-        if (!originalHost.startsWith("http") && !originalHost.startsWith("https")) {
-            String httpsUrl = "https://" + originalHost + CX_SWAGGER;
-            if (isCxWebServiceAvailable(httpsUrl)) {
-                return "https://" + originalHost;
+        String host;
+        if ((originalHost.startsWith("http://") || originalHost.startsWith("https://"))) {
+            if (isCxWebServiceAvailable(originalHost + CX_SWAGGER)) {
+                return originalHost;
             }
-
-            String httpUrl = "http://" + originalHost + CX_SWAGGER;
-            if (isCxWebServiceAvailable(httpUrl)) {
-                return "http://" + originalHost;
-            }
-
-            throw new CxRestClientException("Cx web service is not available in server: " + originalHost);
-        } else {
-            return originalHost;
         }
+        host = "http://" + originalHost;
+        if (isCxWebServiceAvailable(host + CX_SWAGGER)) {
+            return host;
+        }
+
+        host = "https://" + originalHost;
+        if (isCxWebServiceAvailable(host + CX_SWAGGER)) {
+            return host;
+        }
+
+        throw new CxRestClientException("Cx web service is not available at: " + originalHost);
     }
 
     private static boolean isCxWebServiceAvailable(String url) {
         int responseCode;
         HttpClient client = null;
         try {
-            client = HttpClientBuilder.create().build();
+            final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+            if (IS_PROXY) {
+                RestClientUtils.setClientProxy(clientBuilder, PROXY_HOST, Integer.parseInt(PROXY_PORT));
+            }
+            client = clientBuilder.build();
             HttpGet getMethod = new HttpGet(url);
             HttpResponse response = client.execute(getMethod);
             responseCode = response.getStatusLine().getStatusCode();
@@ -50,7 +70,7 @@ public class CommandUtils {
             HttpClientUtils.closeQuietly(client);
         }
 
-        return (responseCode == 200);
+        return responseCode == 200;
     }
 
 }
