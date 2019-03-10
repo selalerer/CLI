@@ -124,6 +124,9 @@ public class CxConsoleLauncher {
         if (configIndx != -1 && args.length > (configIndx + 1) && args[configIndx + 1] != null && !args[configIndx + 1].startsWith("-")) {
             confPath = args[configIndx + 1];
         }
+        if (confPath != null) {
+            confPath = confPath.replace("..\\", "").replace("../", "");
+        }
         ConfigMgr.initCfgMgr(confPath);
     }
 

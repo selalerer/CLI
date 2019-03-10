@@ -18,6 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
 
 /**
  * Created by nirli on 05/11/2017.
@@ -40,7 +41,12 @@ public class JobUtils {
             //in case of ScanProject command
             String prjName = PathHandler.normalizePathString(parameters.getCliMandatoryParameters().getProject().getName());
             folderPath = System.getProperty("user.dir") + File.separator + prjName;
-            File folder = new File(folderPath);
+            File folder;
+            try {
+                folder = new File(folderPath).getCanonicalFile();
+            } catch (IOException e) {
+                throw new CLIJobUtilException("Error getting work directory", e);
+            }
             if (!folder.exists()) {
                 boolean result = folder.mkdir();
                 if (!result) {
