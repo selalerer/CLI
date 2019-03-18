@@ -98,7 +98,7 @@ public abstract class CLICommand {
 
     private void printCommandsDebug() {
         log.debug("----------------------------Configured Commands:-----------------------------");
-        log.debug("Cx CLI plugin version 8.90.1");
+        log.debug("Cx CLI plugin version 8.90.0");
         log.debug("Command type: " + getCommandName());
         for (Option opt : params.getParsedCommandLineArguments().getOptions()) {
             String option = opt.getOpt();
