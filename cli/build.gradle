@@ -73,14 +73,18 @@ dependencies {
             'org.slf4j:slf4j-log4j12:1.7.25',
             'org.apache.logging.log4j:log4j-core:2.10.0',
             'com.fasterxml.jackson.core:jackson-databind:2.9.8',
+            'org.bouncycastle:bcprov-jdk15on:1.60',
+            'com.google.guava:guava:24.1.1-jre',
             'org.codehaus.plexus:plexus-archiver:3.6.0'
-            compile('org.whitesource:wss-unified-agent-main:18.12.2') {
-                exclude group: 'org.slf4j', module: 'slf4j-api'
-                exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-                exclude group: 'ch.qos.logback', module: 'logback-classic'
-                exclude group: 'com.fasterxml.jackson.dataformat', module: 'jackson-databind'
-                exclude group: 'org.codehaus.plexus', module: 'plexus-archiver'
-            }
+    compile('org.whitesource:wss-unified-agent-main:18.12.2') {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+        exclude group: 'com.fasterxml.jackson.dataformat', module: 'jackson-databind'
+        exclude group: 'org.codehaus.plexus', module: 'plexus-archiver'
+        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'org.bouncycastle:bcprov-jdk15on'
+    }
 }
 
 distributions {
