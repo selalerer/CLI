@@ -3,6 +3,7 @@ package com.checkmarx.cxconsole.clients.osa;
 
 import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatus;
 import com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum;
+import com.checkmarx.cxconsole.clients.osa.dto.ScanState;
 import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -22,13 +23,13 @@ public class OSAConsoleScanWaitHandler implements ScanWaitHandler<OSAScanStatus>
 
     public void onTimeout(OSAScanStatus scanStatus) throws CxRestOSAClientException {
 
-        String status = scanStatus.getStatus() == null ? OSAScanStatusEnum.NONE.uiValue() : scanStatus.getStatus().uiValue();
+        String status = scanStatus.getStatus() == null ? OSAScanStatusEnum.NONE.uiValue() : scanStatus.getStatus().getValue();
         throw new CxRestOSAClientException("OSA scan has reached the time limit (" + scanTimeoutInMin + " minutes). status: [" + status + "]");
 
     }
 
     public void onFail(OSAScanStatus scanStatus) throws CxRestOSAClientException {
-        throw new CxRestOSAClientException("OSA scan cannot be completed. status [" + scanStatus.getStatus().uiValue() + "]. message: [" + StringUtils.defaultString(scanStatus.getMessage()) + "]");
+        throw new CxRestOSAClientException("OSA scan cannot be completed. status [" + scanStatus.getStatus().getValue() + "]. message: [" + StringUtils.defaultString(scanStatus.getMessage()) + "]");
 
     }
 
@@ -43,7 +44,7 @@ public class OSAConsoleScanWaitHandler implements ScanWaitHandler<OSAScanStatus>
 
         log.info("Waiting for OSA Scan Results. " +
                 "Time Elapsed: " + hoursStr + ":" + minutesStr + ":" + secondsStr + ". " +
-                "Status: " + scanStatus.getStatus().uiValue());
+                "Status: " + scanStatus.getStatus().getValue());
 
     }
 
@@ -53,7 +54,7 @@ public class OSAConsoleScanWaitHandler implements ScanWaitHandler<OSAScanStatus>
 
     public void onQueued(OSAScanStatus scanStatus) {
         log.debug("OSA Scan Queued.");
-        scanStatus.setStatus(QUEUED);
+        scanStatus.setStatus(new ScanState(QUEUED.getNum(), QUEUED.uiValue()));
         scanStatus.setLink(null);
         scanStatus.setMessage("Osa scan queued");
     }

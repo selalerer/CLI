@@ -7,7 +7,7 @@ package com.checkmarx.cxconsole.clients.osa.dto;
 public enum OSAScanStatusEnum {
 
     NONE(0, "None"),
-    IN_PROGRESS(1, "In progress"),
+    IN_PROGRESS(1, "In Progress"),
     FINISHED(2, "Finished"),
     FAILED(3, "Failed"),
     QUEUED(4, "Queued");

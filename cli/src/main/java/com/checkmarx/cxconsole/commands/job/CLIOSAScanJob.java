@@ -27,6 +27,8 @@ import com.checkmarx.cxconsole.thresholds.dto.ThresholdDto;
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 import static com.checkmarx.cxconsole.clients.osa.dto.OSAScanStatusEnum.QUEUED;
 import static com.checkmarx.cxconsole.commands.job.utils.PrintResultsUtils.printOSAResultsToConsole;
 import static com.checkmarx.cxconsole.exitcodes.Constants.ExitCodes.POLICY_VIOLATION_ERROR_EXIT_CODE;
@@ -107,7 +109,7 @@ public class CLIOSAScanJob extends CLIScanJob {
                 throw new CLIJobException("Error retrieving OSA scan status: " + e.getMessage());
             }
 
-            if (isAsyncScan && returnStatus.getStatus() == QUEUED) {
+            if (isAsyncScan && (returnStatus.getStatus().getId() == QUEUED.getNum())) {
                 return SCAN_SUCCEEDED_EXIT_CODE;
             }
             if (!isAsyncScan) {

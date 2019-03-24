@@ -10,15 +10,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public class OSAScanStatus {
 
-    private OSAScanStatusEnum status;
+    private ScanState status;
     private String message;
     private String link;
 
-    public OSAScanStatusEnum getStatus() {
+    public ScanState getStatus() {
         return status;
     }
 
-    public void setStatus(OSAScanStatusEnum status) {
+    public OSAScanStatusEnum getStatusAsEnum() {
+        for (OSAScanStatusEnum state : OSAScanStatusEnum.values()) {
+            if (state.uiValue().equals(this.status.getValue())) {
+                return state;
+            }
+        }
+        return OSAScanStatusEnum.NONE;
+    }
+
+    public void setStatus(ScanState status) {
         this.status = status;
     }
 

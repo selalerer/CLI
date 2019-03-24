@@ -240,7 +240,7 @@ public class CxRestOSAClientImpl implements CxRestOSAClient {
 
             retry = waitForScanToFinishRetry;
 
-            status = scanStatus.getStatus();
+            status = scanStatus.getStatusAsEnum();
             if (OSAScanStatusEnum.FAILED.equals(status)) {
                 waitHandler.onFail(scanStatus);
                 throw new CxRestOSAClientException("OSA scan cannot be completed. status: [" + status.uiValue() + "]. message: [" + StringUtils.defaultString(scanStatus.getMessage()) + "]");
