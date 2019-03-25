@@ -75,9 +75,9 @@ public class CxConsoleLauncher {
 
         initConfigurationManager(args);
 
-        // Temporary solution
-//        SSLUtilities.trustAllHostnames();
-//        SSLUtilities.trustAllHttpsCertificates();
+//         Temporary solution
+        SSLUtilities.trustAllHostnames();
+        SSLUtilities.trustAllHttpsCertificates();
 
         String commandName = args[0];
         argumentsLessCommandName = java.util.Arrays.copyOfRange(args, 1, args.length);
