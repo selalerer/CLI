@@ -40,7 +40,9 @@ public class OsaWSFSAUtil {
 
     private static FSAConfigProperties generateOsaScanProperties(String[] osaLocationPath, CLIOSAParameters cliosaParameters) {
         FSAConfigProperties ret = new FSAConfigProperties();
-        if ((osaLocationPath[0] == null) && !Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
+        if ((osaLocationPath[0] == null) && (
+                !Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName()) ||
+                        !Strings.isNullOrEmpty(cliosaParameters.getExcludeDockerPattern()))) {
             ret.put("d", "");
         } else {
             String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
