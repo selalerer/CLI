@@ -5,12 +5,15 @@ import com.checkmarx.cxconsole.parameters.CLIOSAParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.whitesource.fs.ComponentScan;
 import org.whitesource.fs.FSAConfigProperties;
 
+import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.Properties;
+import java.io.File;
 
 import static com.checkmarx.cxconsole.clients.osa.utils.OsaWSFSAUtil.StringType.*;
 
@@ -154,12 +157,24 @@ public class OsaWSFSAUtil {
             ComponentScan componentScan = new ComponentScan(scannerProperties);
             log.info("Starting FSA component scan");
             osaDependenciesJson = componentScan.scan();
+            log.info("FSA Dependencies Found");
             log.trace("List of files sent to WhiteSource: " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaDependenciesJson));
         } catch (JsonProcessingException e) {
             log.error("Can't write properties and list of files sent to WS " + e.getMessage());
         }
 
+        writeFSAResults(cliosaParametersr.getOsaResultsLogPath(), osaDependenciesJson, log);
         return new CreateOSAScanRequest(projectId, osaDependenciesJson);
+    }
+
+    private static void writeFSAResults(String logPath, String results, Logger log) {
+        try {
+            File file = new File(logPath, "OSADependencies.json");
+            FileUtils.writeStringToFile(file, results, Charset.defaultCharset());
+            log.info("OSA dependencies saved to file: [" + file.getAbsolutePath() + "]");
+        } catch (Exception e) {
+            log.info("Failed to write OSA dependencies to file: " + e.getMessage());
+        }
     }
 
 }

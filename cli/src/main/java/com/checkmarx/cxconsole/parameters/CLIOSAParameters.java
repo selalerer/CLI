@@ -8,6 +8,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
+import java.io.File;
+
 import static com.checkmarx.cxconsole.utils.ConfigMgr.*;
 
 /**
@@ -48,7 +50,7 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private boolean checkPolicyViolations = false;
     private String osaDockerImageName;
     private String excludeDockerPattern;
-
+    private String osaResultsLogPath;
 
     private static final Option PARAM_OSA_LOCATION_PATH = Option.builder("osalocationpath").hasArgs().argName("folders list").desc("Comma separated list of folder path patterns(Local or shared path ) to OSA sources.")
             .valueSeparator(',').build();
@@ -77,6 +79,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_SCAN_DOCKER = Option.builder("dockerscan").hasArg(true).argName("Docker image name").desc("Supports scanning of docker images as part of the OSA scan. Optional.").build();
     private static final Option PARAM_DOCKER_EXCLUDE = Option.builder("dockerexcludescan").hasArg(true).argName("Docker exclude pattern").desc("Set the GLOB pattern property for excluding docker files to scan. Optional.").build();
 
+    private static final Option PARAM_OAS_RESULTS_LOG = Option.builder("osaresultslog").hasArg(true).argName("Path to osa results log").desc("Set the path for osa results log. Optional.").build();
+
     CLIOSAParameters() throws CLIParameterParsingException {
         initCommandLineOptions();
     }
@@ -104,7 +108,12 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
         osaDockerImageName = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_SCAN_DOCKER.getOpt());
         excludeDockerPattern = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_DOCKER_EXCLUDE.getOpt());
+        osaResultsLogPath = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OAS_RESULTS_LOG.getOpt());
 
+        if(osaResultsLogPath == null){
+            String path = System.getProperty("user.dir");
+            osaResultsLogPath = path + File.separator + "logs";
+        }
 
         if (osaScanDepth == null) {
             osaScanDepth = ConfigMgr.getCfgMgr().getProperty(KEY_OSA_SCAN_DEPTH);
@@ -280,5 +289,10 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
 
         return osaParamsOptionGroup;
     }
+
+    public String getOsaResultsLogPath() {
+        return osaResultsLogPath;
+    }
+
 
 }
