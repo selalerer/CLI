@@ -274,6 +274,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_RUN_POLICY_VIOLATIONS);
         commandLineOptions.addOption(PARAM_OSA_SCAN_DOCKER);
         commandLineOptions.addOption(PARAM_DOCKER_EXCLUDE);
+
+        commandLineOptions.addOption(PARAM_OAS_RESULTS_LOG);
     }
 
     @Override
