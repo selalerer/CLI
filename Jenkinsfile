@@ -70,7 +70,7 @@ pipeline {
         stage('Build') {
             steps {
 				dir("cli") {
-					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=master --stacktrace clean build && exit %%ERRORLEVEL%%"
+					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=${env.BRANCH_NAME} --stacktrace clean build && exit %%ERRORLEVEL%%"
 				}
             }
         }
@@ -79,6 +79,14 @@ pipeline {
 				archiveArtifacts "cli\\build\\distributions\\*.zip"
 			}
 		}
+
+        stage('Stash Artifact') { 
+            steps {
+                dir('CxARM-Server') {   
+                    stash includes: 'cli/build/distributions/*.zip', name: 'CLIComponent'
+                }
+            }
+        }
 
         stage('Trigger Plugin-Deploy-Test-CLI-GIT') {
 			steps {
