@@ -46,9 +46,9 @@ public class CxConsoleLauncher {
 
         exitCode = runCli(args);
         if (exitCode == SCAN_SUCCEEDED_EXIT_CODE) {
-            log.info("Job completed successfully - exit code " + exitCode);
+            log.info("Job completed successfully -- exit code " + exitCode);
         } else {
-            log.error("Failure - " + errorMsgResolver(exitCode) + " - error code " + exitCode);
+            log.error("Failure -- " + errorMsgResolver(exitCode) + " - error code " + exitCode);
         }
 
         System.exit(exitCode);
