@@ -79,5 +79,11 @@ pipeline {
 				archiveArtifacts "cli\\build\\distributions\\*.zip"
 			}
 		}
+
+        stage('Trigger Plugin-Deploy-Test-CLI-GIT') {
+			steps {
+				build job: 'Plugin-Deploy-Test-CLI-GIT', wait: false
+			}
+		}
     }
 }
