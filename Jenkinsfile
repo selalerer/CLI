@@ -70,7 +70,7 @@ pipeline {
         stage('Build') {
             steps {
 				dir("cli") {
-					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=master --stacktrace clean build && exit %%ERRORLEVEL%%"
+					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=${env.BRANCH_NAME} --stacktrace clean build && exit %%ERRORLEVEL%%"
 				}
             }
         }
