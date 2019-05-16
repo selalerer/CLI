@@ -83,7 +83,7 @@ pipeline {
         stage('Stash Artifact') { 
             steps {
                 dir('CxARM-Server') {   
-                    stash includes: 'cli/build/distributions/*.zip', name: 'CLIComponent'
+                    stash includes: "cli\\build\\distributions\\*.zip', name: 'CLIComponent'
                 }
             }
         }
