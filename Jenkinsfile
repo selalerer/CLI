@@ -77,16 +77,17 @@ pipeline {
 		stage('Archive Artifacts') {
 			steps {
 				archiveArtifacts "cli\\build\\distributions\\*.zip"
+                stash includes: "cli/build/distributions/*.zip", name: 'CLIComponent'
 			}
 		}
 
-        stage('Stash Artifact') { 
-            steps {
-                dir('CxARM-Server') {   
-                    stash includes: "cli/build/distributions/*.zip", name: 'CLIComponent'
-                }
-            }
-        }
+        //stage('Stash Artifact') { 
+        //    steps {
+        //        dir('CxARM-Server') {   
+        //            stash includes: "cli/build/distributions/*.zip", name: 'CLIComponent'
+        //        }
+        //    }
+        //}
 
         stage('Trigger Plugin-Deploy-Test-CLI-GIT') {
 			steps {
