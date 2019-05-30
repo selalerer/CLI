@@ -1,7 +1,7 @@
 pipeline {
-	parameters {
-		booleanParam(name: 'IsReleaseBuild', description: 'Check the box if you want to create a release build')
-		string(name: 'BranchName', defaultValue: 'master', description: 'Branch used by the job')
+	parameters {        
+		booleanParam(name: 'IsReleaseBuild', description: 'Check the box if you want to create a release build') 
+		string(name: 'BranchName', defaultValue: 'master', description: 'Branch used by the job')  
 	}
     agent {
         node { label 'Plugins' }
@@ -13,11 +13,11 @@ pipeline {
                 echo bat(returnStdout: true, script: 'set')
             }
         }
-
+		
 		//stage ('Clean Workspace') {
         //    steps {
         //        cleanWs()
-        //    }
+        //    }        
         //}
 
         stage('Remove Snapshot From Build') {
@@ -33,7 +33,7 @@ pipeline {
 
                 dir("cli") {
                     powershell '''		If(Test-Path gradle.properties)
-					{
+					{  
 						$FileContent = Get-Content -Path gradle.properties
 						Foreach($LineContent in $FileContent)
 						{
@@ -47,9 +47,9 @@ pipeline {
 							}
 						}
 					}'''
-
+					
 					powershell '''		If(Test-Path build.gradle)
-					{
+					{  
 						$FileContent = Get-Content -Path build.gradle
 						Foreach($LineContent in $FileContent)
 						{
@@ -70,7 +70,7 @@ pipeline {
         stage('Build') {
             steps {
 				dir("cli") {
-					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=master --stacktrace clean build && exit %%ERRORLEVEL%%"
+					bat "gradlew.bat -DIsReleaseBuild=${params.IsReleaseBuild} -DBranchName=${env.BRANCH_NAME} --stacktrace clean build && exit %%ERRORLEVEL%%"
 				}
             }
         }
@@ -79,6 +79,13 @@ pipeline {
 				archiveArtifacts "cli\\build\\distributions\\*.zip"
 			}
 		}
+
+        stage('Stash Artifact') { 
+            steps { 
+                stash includes: "cli/build/distributions/*.zip", name: 'CLIComponent'
+            }
+        
+        }
 
         stage('Trigger Plugin-Deploy-Test-CLI-GIT') {
 			steps {
