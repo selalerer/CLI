@@ -76,8 +76,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
     private static final Option PARAM_OSA_EXECUTE_NPM_AND_BOWER = Option.builder("executenpmandbower").hasArg(false).argName("Pre scan installation of package managers dependencies").desc("Triggered in order to perform install dependencies command for package managers before initiate OSA analysis. Optional.(Currently kept for backward compatibility and will be removed in the future. You should use packagedependencyinstall instead)").build();
     private static final Option PARAM_OSA_EXECUTE_PACKAGE_INSTALL = Option.builder("executepackagedependency").hasArg(false).argName("Pre scan installation of package managers dependencies").desc("Triggered in order to perform install dependencies command for package managers before initiate OSA analysis. Optional.").build();
     private static final Option PARAM_RUN_POLICY_VIOLATIONS = Option.builder("checkpolicy").hasArg(false).argName("Check Policy Violations").desc("Mark the build as failed or unstable if the project's policy is violated. Optional.").build();
-    private static final Option PARAM_OSA_SCAN_DOCKER = Option.builder("dockerscan").hasArg(true).argName("Docker image name").desc("Supports scanning of docker images as part of the OSA scan. Optional.").build();
-    private static final Option PARAM_DOCKER_EXCLUDE = Option.builder("dockerexcludescan").hasArg(true).argName("Docker exclude pattern").desc("Set the GLOB pattern property for excluding docker files to scan. Optional.").build();
+//    private static final Option PARAM_OSA_SCAN_DOCKER = Option.builder("dockerscan").hasArg(true).argName("Docker image name").desc("Supports scanning of docker images as part of the OSA scan. Optional.").build();
+//    private static final Option PARAM_DOCKER_EXCLUDE = Option.builder("dockerexcludescan").hasArg(true).argName("Docker exclude pattern").desc("Set the GLOB pattern property for excluding docker files to scan. Optional.").build();
 
     private static final Option PARAM_OAS_RESULTS_LOG = Option.builder("osaresultslog").hasArg(true).argName("Path to osa results log").desc("Set the path for osa results log. Optional.").build();
 
@@ -106,8 +106,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         executeNpmAndBower = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER.getOpt());
         executePackageDependency = parsedCommandLineArguments.hasOption(PARAM_OSA_EXECUTE_PACKAGE_INSTALL.getOpt());
         checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
-        osaDockerImageName = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_SCAN_DOCKER.getOpt());
-        excludeDockerPattern = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_DOCKER_EXCLUDE.getOpt());
+//        osaDockerImageName = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OSA_SCAN_DOCKER.getOpt());
+//        excludeDockerPattern = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_DOCKER_EXCLUDE.getOpt());
         osaResultsLogPath = ParametersUtils.getOptionalValue(parsedCommandLineArguments, PARAM_OAS_RESULTS_LOG.getOpt());
 
         if(osaResultsLogPath == null){
@@ -272,8 +272,8 @@ public class CLIOSAParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_NPM_AND_BOWER);
         commandLineOptions.addOption(PARAM_OSA_EXECUTE_PACKAGE_INSTALL);
         commandLineOptions.addOption(PARAM_RUN_POLICY_VIOLATIONS);
-        commandLineOptions.addOption(PARAM_OSA_SCAN_DOCKER);
-        commandLineOptions.addOption(PARAM_DOCKER_EXCLUDE);
+//        commandLineOptions.addOption(PARAM_OSA_SCAN_DOCKER);
+//        commandLineOptions.addOption(PARAM_DOCKER_EXCLUDE);
 
         commandLineOptions.addOption(PARAM_OAS_RESULTS_LOG);
     }

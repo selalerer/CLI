@@ -140,11 +140,11 @@ public class CommandParametersValidator {
 
     public static void validateOSALocationType(CLIScanParametersSingleton parameters) throws CLICommandParameterValidatorException {
         if (parameters.getCliOsaParameters().getOsaLocationPath() == null &&
-                (parameters.getCliSharedParameters().getLocationType() != LocationType.FOLDER &&
-                        parameters.getCliSharedParameters().getLocationType() != LocationType.SHARED)) {
-            if (Strings.isNullOrEmpty(parameters.getCliOsaParameters().getOsaDockerImageName()) && Strings.isNullOrEmpty(parameters.getCliOsaParameters().getExcludeDockerPattern())) {
-                throw new CLICommandParameterValidatorException("For OSA Scan (OsaScan), provide  OsaLocationPath  or locationType (values: folder/shared)");
-            }
+                (parameters.getCliSharedParameters().getLocationType() != LocationType.FOLDER && parameters.getCliSharedParameters().getLocationType() != LocationType.SHARED)) {
+//            if (Strings.isNullOrEmpty(parameters.getCliOsaParameters().getOsaDockerImageName()) && Strings.isNullOrEmpty(parameters.getCliOsaParameters().getExcludeDockerPattern())) {
+//                throw new CLICommandParameterValidatorException("For OSA Scan (OsaScan), provide  OsaLocationPath  or locationType (values: folder/shared)");
+//            }
+            throw new CLICommandParameterValidatorException("For OSA Scan (OsaScan), provide  OsaLocationPath  or locationType (values: folder/shared)");
         }
     }
 

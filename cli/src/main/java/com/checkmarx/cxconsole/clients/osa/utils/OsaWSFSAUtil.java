@@ -43,14 +43,13 @@ public class OsaWSFSAUtil {
 
     private static FSAConfigProperties generateOsaScanProperties(String[] osaLocationPath, CLIOSAParameters cliosaParameters) {
         FSAConfigProperties ret = new FSAConfigProperties();
-        if ((osaLocationPath[0] == null) && (
-                !Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName()) ||
-                        !Strings.isNullOrEmpty(cliosaParameters.getExcludeDockerPattern()))) {
-            ret.put("d", "");
-        } else {
-            String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
-            ret.put("d", osaDirectoriesToAnalyze);
-        }
+//        if ((osaLocationPath[0] == null) && (
+//                !Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName()) ||
+//                        !Strings.isNullOrEmpty(cliosaParameters.getExcludeDockerPattern()))) {
+//            ret.put("d", "");
+//        } else {
+        String osaDirectoriesToAnalyze = stringArrayToString(osaLocationPath, BASE_DIRECTORIES);
+        ret.put("d", osaDirectoriesToAnalyze);
 
         String osaFolderExcludeString = "";
         if (cliosaParameters.isHasOsaExcludedFoldersParam() || cliosaParameters.getOsaExcludedFolders() != null) {
@@ -94,13 +93,13 @@ public class OsaWSFSAUtil {
             setResolveDependencies(ret, "false");
         }
         ret.put("acceptExtensionsList", ACCEPT_EXTENSIONS_LISTS);
-        ret.put("followSymbolicLinks", "false");
-        if (!Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
-            ret.put("docker.scanImages", "true");
-            ret.put("docker.includes", cliosaParameters.getOsaDockerImageName());
-            ret.put("docker.excludes", cliosaParameters.getExcludeDockerPattern());
-            log.info("OSA Docker image scan: " + cliosaParameters.getOsaDockerImageName());
-        }
+//        ret.put("followSymbolicLinks", "false");
+//        if (!Strings.isNullOrEmpty(cliosaParameters.getOsaDockerImageName())) {
+//            ret.put("docker.scanImages", "true");
+//            ret.put("docker.includes", cliosaParameters.getOsaDockerImageName());
+//            ret.put("docker.excludes", cliosaParameters.getExcludeDockerPattern());
+//            log.info("OSA Docker image scan: " + cliosaParameters.getOsaDockerImageName());
+//        }
 
         return ret;
     }
