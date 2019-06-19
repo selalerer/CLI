@@ -13,3 +13,8 @@ cli/.gradle/
 cli/build/
 *.iml
 
+
+# Project exclude paths
+/.gradle/
+/cli/out/
+/cli/out/production/classes/

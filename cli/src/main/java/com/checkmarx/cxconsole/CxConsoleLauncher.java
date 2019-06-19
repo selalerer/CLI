@@ -75,10 +75,6 @@ public class CxConsoleLauncher {
 
         initConfigurationManager(args);
 
-//         Temporary solution
-        SSLUtilities.trustAllHostnames();
-        SSLUtilities.trustAllHttpsCertificates();
-
         String commandName = args[0];
         argumentsLessCommandName = java.util.Arrays.copyOfRange(args, 1, args.length);
         makeArgumentsLowCase(argumentsLessCommandName);
@@ -97,6 +93,11 @@ public class CxConsoleLauncher {
         } catch (ExceptionInInitializerError | CLICommandFactoryException e) {
             log.fatal(e);
             return errorCodeResolver(e.getMessage());
+        }
+
+        if(cliScanParametersSingleton.getCliSharedParameters().isTrustAllCertificates()) {
+            SSLUtilities.trustAllHostnames();
+            SSLUtilities.trustAllHttpsCertificates();
         }
 
         int exitCode;

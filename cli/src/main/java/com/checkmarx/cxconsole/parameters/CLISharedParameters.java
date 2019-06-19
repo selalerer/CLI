@@ -24,11 +24,13 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
     private String scanComment;
     private boolean isSsoLoginUsed = false;
     private boolean isVisibleOthers = true;
+    private boolean trustAllCertificates = true;
 
     private LocationType locationType;
     private String locationPath;
     private String spFolderName;
 
+    private static final Option PARAM_TRUSTED_CERT = Option.builder("trustedcertificates").desc("Only accept trusted certificates").build();
     private static final Option PARAM_VERBOSE = Option.builder("v").desc("Turns on verbose mode. All messages and events will be sent to the console/log file.  Optional.")
             .longOpt("verbose").hasArg(false).build();
     private static final Option PARAM_LOG_FILE_PATH = Option.builder("log").hasArg().argName("file").desc("Log file path. Optional.").build();
@@ -53,6 +55,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
         scanComment = parsedCommandLineArguments.getOptionValue(PARAM_SCAN_COMMENT.getOpt());
         isSsoLoginUsed = parsedCommandLineArguments.hasOption(PARAM_USE_SSO.getOpt());
         isVisibleOthers = !parsedCommandLineArguments.hasOption(PARAM_PRIVATE.getOpt());
+        trustAllCertificates = !parsedCommandLineArguments.hasOption(PARAM_TRUSTED_CERT.getOpt());
 
         if (parsedCommandLineArguments.hasOption(PARAM_LOCATION_TYPE.getOpt())) {
             locationType = LocationType.byName(parsedCommandLineArguments.getOptionValue(PARAM_LOCATION_TYPE.getOpt()));
@@ -135,6 +138,7 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
         commandLineOptions.addOption(PARAM_PRIVATE);
         commandLineOptions.addOption(PARAM_SCAN_COMMENT);
         commandLineOptions.addOption(PARAM_USE_SSO);
+        commandLineOptions.addOption(PARAM_TRUSTED_CERT);
     }
 
     OptionGroup getSharedParamsOptionGroup() {
@@ -149,6 +153,10 @@ public class CLISharedParameters extends AbstractCLIScanParameters {
     @Override
     public String getMandatoryParams() {
         return null;
+    }
+
+    public boolean isTrustAllCertificates() {
+        return trustAllCertificates;
     }
 
 }
