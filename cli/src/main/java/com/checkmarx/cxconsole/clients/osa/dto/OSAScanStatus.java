@@ -20,7 +20,8 @@ public class OSAScanStatus {
 
     public OSAScanStatusEnum getStatusAsEnum() {
         for (OSAScanStatusEnum state : OSAScanStatusEnum.values()) {
-            if (state.uiValue().equals(this.status.getValue())) {
+            if (state.getNum() == (this.status.getId())) {
+                status.setValue(state.uiValue()); //TODO: for backward compatibility, can be removed in 9.3
                 return state;
             }
         }

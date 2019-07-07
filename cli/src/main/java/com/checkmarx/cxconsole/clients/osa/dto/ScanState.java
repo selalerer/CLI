@@ -4,19 +4,23 @@ package com.checkmarx.cxconsole.clients.osa.dto;
  * Created by idanA on 3/24/2019.
  */
 public class ScanState {
-    private int id;
+    private Integer id;
     private String value;
     private String failureReason;
 
     public ScanState() {
     }
 
-    public ScanState(int id, String value) {
+    public ScanState(Integer id) {
+        this.id = id;
+    }
+
+    public ScanState(Integer id, String value) {
         this.id = id;
         this.value = value;
     }
 
-    public ScanState(int id, String value, String failureReason) {
+    public ScanState(Integer id, String value, String failureReason) {
         this.id = id;
         this.value = value;
         this.failureReason = failureReason;
