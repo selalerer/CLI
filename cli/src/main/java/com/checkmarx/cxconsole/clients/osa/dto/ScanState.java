@@ -16,6 +16,12 @@ public class ScanState {
         this.value = value;
     }
 
+    public ScanState(int id, String value, String failureReason) {
+        this.id = id;
+        this.value = value;
+        this.failureReason = failureReason;
+    }
+
     public int getId() {
         return id;
     }

@@ -30,6 +30,12 @@ public class SastResourceURIBuilder {
     private static final String EXCLUSION_SETTING_RESOURCE = "excludeSettings";
     private static final String REPORTS_RESOURCE = "/reports/sastScan";
     private static final String SCAN_RESULTS_RESOURCE = "/resultsStatistics";
+    private static final String SAST_VERSION = "/system/version";
+
+    //TODO: deprecated API should be removed by 9.30
+    private static final String REVOCATION_RESOURCE = "revocation";
+    private static final String TOKEN_LOGIN_RESOURCE = "token";
+    private static final String IDENTITY_CONNECT_RESOURCE = "auth/identity/connect";
 
     public static URL buildGetSastPresetsURL(URL serverUrl) {
         try {
@@ -147,4 +153,29 @@ public class SastResourceURIBuilder {
             return serverUrl;
         }
     }
+
+    public static URL buildGetSastVersion(URL serverUrl){
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + SAST_VERSION);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildGenerateTokenURL(URL serverUrl) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + "/" + IDENTITY_CONNECT_RESOURCE + "/" + TOKEN_LOGIN_RESOURCE);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildRevokeURL(URL serverUrl) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + "/" + IDENTITY_CONNECT_RESOURCE + "/" + REVOCATION_RESOURCE);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
 }

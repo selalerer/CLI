@@ -18,4 +18,7 @@ public interface CxRestGeneralClient {
     int createNewProject(ProjectDTO projectToCreate) throws CxRestGeneralClientException;
 
     boolean isLoggedIn();
+
+    String getCxVersion();
+
 }

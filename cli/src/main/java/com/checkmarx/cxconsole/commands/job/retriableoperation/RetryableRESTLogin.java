@@ -24,7 +24,6 @@ public class RetryableRESTLogin extends RetryableOperation {
     @Override
     protected void operation() throws CLIJobException {
         log.info("Logging into Checkmarx server.");
-
         // Login
         try {
             if (cxRestLoginClient.isCredentialsLogin()) {

@@ -1,10 +1,12 @@
 package com.checkmarx.cxconsole.clients.sast;
 
 import com.checkmarx.cxconsole.clients.arm.dto.CxArmConfig;
+import com.checkmarx.cxconsole.clients.exception.CxRestClientException;
 import com.checkmarx.cxconsole.clients.exception.CxValidateResponseException;
 import com.checkmarx.cxconsole.clients.login.CxRestLoginClient;
+import com.checkmarx.cxconsole.clients.login.dto.RestGenerateTokenDTO;
+import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import com.checkmarx.cxconsole.clients.osa.exceptions.CxRestOSAClientException;
-import com.checkmarx.cxconsole.clients.osa.utils.OsaResourcesURIBuilder;
 import com.checkmarx.cxconsole.clients.sast.constants.RemoteSourceType;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportStatusValue;
 import com.checkmarx.cxconsole.clients.sast.constants.ReportType;
@@ -27,6 +29,7 @@ import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -35,8 +38,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonFromResponse;
-import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.parseJsonListFromResponse;
+import static com.checkmarx.cxconsole.clients.utils.RestClientUtils.*;
 
 /**
  * Created by nirli on 21/02/2018.
@@ -45,13 +47,16 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
     private static Logger log = Logger.getLogger(CxRestSASTClientImpl.class);
 
-    private HttpClient apacheClient;
+    private HttpClient client;
     private String hostName;
     private static final Header CLI_CONTENT_TYPE_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
     private static final Header CLI_ACCEPT_HEADER_AND_VERSION_HEADER = new BasicHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType() + ";v=1.0");
 
+    private static final String PARSING_ERROR = "Failed due to parsing error: ";
+    private static final String FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR = " User authentication failed";
+
     public CxRestSASTClientImpl(CxRestLoginClient restClient) {
-        this.apacheClient = restClient.getClient();
+        this.client = restClient.getClient();
         this.hostName = restClient.getHostName();
     }
 
@@ -65,7 +70,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSastPresetsURL(new URL(hostName))))
                     .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get presets");
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, PresetDTO.class));
@@ -86,7 +91,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetEngineConfigurationURL(new URL(hostName))))
                     .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get engine configuration");
             return parseJsonListFromResponse(response, TypeFactory.defaultInstance().constructCollectionType(List.class, EngineConfigurationDTO.class));
@@ -107,7 +112,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanSettingURL(new URL(hostName), id)))
                     .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan setting");
             return RestClientUtils.parseScanSettingResponse(response);
@@ -129,7 +134,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .setEntity(SastHttpEntityBuilder.createScanSettingEntity(scanSetting))
                     .build();
-            response = apacheClient.execute(postRequest);
+            response = client.execute(postRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to create scan settings");
         } catch (IOException | CxValidateResponseException e) {
@@ -151,7 +156,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setEntity(SastHttpEntityBuilder.createScanSettingEntity(scanSetting))
                     .build();
 
-            response = apacheClient.execute(putRequest);
+            response = client.execute(putRequest);
             RestClientUtils.validateClientResponse(response, 200, "Failed to update scan settings");
         } catch (IOException | CxValidateResponseException e) {
             throw new CxRestSASTClientException("Failed to update scan settings: " + e.getMessage());
@@ -171,7 +176,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .setEntity(SastHttpEntityBuilder.createNewSastScanEntity(projectId, forceScan, incrementalScan, visibleOthers))
                     .build();
-            response = apacheClient.execute(postRequest);
+            response = client.execute(postRequest);
 
             RestClientUtils.validateClientResponse(response, 201, "Failed to create new SAST scan");
             JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
@@ -195,7 +200,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setEntity(SastHttpEntityBuilder.createScanExclusionSettingEntity(StringUtils.join(excludeFoldersPattern, ","),
                             StringUtils.join(excludeFilesPattern, ",")))
                     .build();
-            response = apacheClient.execute(putRequest);
+            response = client.execute(putRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to update scan exclusions settings");
         } catch (IOException | CxValidateResponseException e) {
@@ -216,7 +221,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .setEntity(SastHttpEntityBuilder.patchSastCommentEntity(comment))
                     .build();
-            response = apacheClient.execute(patchRequest);
+            response = client.execute(patchRequest);
 
             RestClientUtils.validateClientResponse(response, 204, "Failed to add comment to SAST scan (id " + scanId + ")");
         } catch (IOException | CxValidateResponseException e) {
@@ -240,7 +245,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setEntity(multipart)
                     .build();
             log.info("Uploading zipped source files to server, please wait.");
-            response = apacheClient.execute(postRequest);
+            response = client.execute(postRequest);
 
             RestClientUtils.validateClientResponse(response, 204, "Failed to upload zip file for SAST scan");
             log.info("Zipped source files were uploaded successfully");
@@ -261,7 +266,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanQueueResponseURL(new URL(hostName), scanId)))
                     .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan queue response");
             return RestClientUtils.parseJsonFromResponse(response, ScanQueueDTO.class);
@@ -282,7 +287,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetSASTScanResultsURL(new URL(hostName), scanId)))
                     .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get SAST scan results");
             return RestClientUtils.parseJsonFromResponse(response, ResultsStatisticsDTO.class);
@@ -316,7 +321,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                         .setEntity(SastHttpEntityBuilder.createRemoteSourceEntity(remoteSourceScanSettingDTO))
                         .build();
             }
-            response = apacheClient.execute(postRequest);
+            response = client.execute(postRequest);
 
             RestClientUtils.validateClientResponse(response, 204, "Failed to create " + remoteSourceType.getUrlValue() + " remote source scan setting");
         } catch (IOException | CxValidateResponseException e) {
@@ -349,7 +354,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                         .setEntity(builder.build())
                         .build();
             }
-            response = apacheClient.execute(postRequest);
+            response = client.execute(postRequest);
 
             RestClientUtils.validateClientResponse(response, 204, "Failed to create " + RemoteSourceType.GIT.getUrlValue() + " remote source scan setting");
         } catch (IOException | CxValidateResponseException e) {
@@ -370,7 +375,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .setEntity(SastHttpEntityBuilder.createReportEntity(scanId, reportType))
                     .build();
-            response = apacheClient.execute(postRequest);
+            response = client.execute(postRequest);
 
             RestClientUtils.validateClientResponse(response, 202, "Failed to create " + reportType.getValue() + " report");
             JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
@@ -392,7 +397,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetReportStatusURL(new URL(hostName), reportId)))
                     .setHeader(CLI_ACCEPT_HEADER_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get report status");
             JSONObject jsonResponse = RestClientUtils.parseJsonObjectFromResponse(response);
@@ -414,7 +419,7 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
                     .setUri(String.valueOf(SastResourceURIBuilder.buildGetReportFileURL(new URL(hostName), reportId)))
                     .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
                     .build();
-            response = apacheClient.execute(getRequest);
+            response = client.execute(getRequest);
 
             RestClientUtils.validateClientResponse(response, 200, "Failed to get report file");
             FilesUtils.createReportFile(response, reportFile);
@@ -427,6 +432,71 @@ public class CxRestSASTClientImpl<T extends RemoteSourceScanSettingDTO> implemen
 
     @Override
     public CxArmConfig getCxArmConfiguration() throws CxRestOSAClientException {
-        return getPolicyConfig(apacheClient, hostName);
+        return getPolicyConfig(client, hostName);
+    }
+
+    @Override
+    public String generateToken(URL serverUrl, String userName, String password) throws CxRestClientException {
+        HttpResponse generateTokenResponse = null;
+        HttpUriRequest postRequest;
+
+        try {
+            postRequest = RequestBuilder.post()
+                    .setUri(String.valueOf(SastResourceURIBuilder.buildGenerateTokenURL(serverUrl)))
+                    .setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+                    .setEntity(SastHttpEntityBuilder.createGenerateTokenParamsEntity(userName, password, getSastVersion().equals("Pre 9.0")))
+                    .build();
+            generateTokenResponse = client.execute(postRequest);
+
+            validateTokenResponse(generateTokenResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
+            RestGenerateTokenDTO jsonResponse = parseJsonFromResponse(generateTokenResponse, RestGenerateTokenDTO.class);
+            return jsonResponse.getRefreshToken();
+        } catch (IOException e) {
+            throw new CxRestLoginClientException(PARSING_ERROR + e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(generateTokenResponse);
+        }
+    }
+
+    @Override
+    public void revokeToken(URL serverUrl, String token) throws CxRestClientException {
+        HttpResponse generateTokenResponse = null;
+        HttpUriRequest postRequest;
+
+        try {
+            postRequest = RequestBuilder.post()
+                    .setUri(String.valueOf(SastResourceURIBuilder.buildRevokeURL(serverUrl)))
+                    .setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+                    .setEntity(SastHttpEntityBuilder.createRevokeTokenParamsEntity(token))
+                    .build();
+            generateTokenResponse = client.execute(postRequest);
+
+            validateTokenResponse(generateTokenResponse, 200, FAIL_TO_VALIDATE_TOKEN_RESPONSE_ERROR);
+        } catch (IOException e) {
+            throw new CxRestLoginClientException(PARSING_ERROR + e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(generateTokenResponse);
+        }
+    }
+
+    @Override
+    public String getSastVersion() throws CxRestSASTClientException {
+        HttpResponse response = null;
+        HttpUriRequest request;
+        String version;
+        try {
+            request = RequestBuilder
+                    .get()
+                    .setUri(SastResourceURIBuilder.buildGetSastVersion(new URL(hostName)).toString())
+                    .setHeader(CLI_CONTENT_TYPE_AND_VERSION_HEADER)
+                    .build();
+            response = client.execute(request);
+            RestClientUtils.validateClientResponse(response, 200, "API not found");
+            version = RestClientUtils.parseJsonObjectFromResponse(response).getString("version");
+        } catch (IOException | CxValidateResponseException e) {
+            version = "Pre 9.0";
+        }
+
+        return version;
     }
 }

@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.clients.login;
 
+import com.checkmarx.cxconsole.clients.general.CxRestClient;
 import com.checkmarx.cxconsole.clients.login.exceptions.CxRestLoginClientException;
 import org.apache.http.client.HttpClient;
 

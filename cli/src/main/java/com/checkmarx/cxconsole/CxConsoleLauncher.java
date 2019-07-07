@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole;
 
+import com.checkmarx.cxconsole.clients.login.CxRestLoginClientImpl;
 import com.checkmarx.cxconsole.clients.login.utils.SSLUtilities;
 import com.checkmarx.cxconsole.commands.CLICommand;
 import com.checkmarx.cxconsole.commands.CommandFactory;

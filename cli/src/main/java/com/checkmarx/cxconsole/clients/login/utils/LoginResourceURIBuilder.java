@@ -12,6 +12,7 @@ public class LoginResourceURIBuilder {
 
     private static final String CREDENTIALS_LOGIN_RESOURCE = "auth/login";
     private static final String WINDOWS_AUTHENTICATION_LOGIN_RESOURCE = "auth/identity/externalLogin";
+    private static final String WINDOWS_AUTHENTICATION_LOGIN_RESOURCE_LEGACY = "auth/ssologin";
     private static final String TOKEN_LOGIN_RESOURCE = "token";
     private static final String IDENTITY_CONNECT_RESOURCE = "auth/identity/connect";
 
@@ -38,6 +39,14 @@ public class LoginResourceURIBuilder {
     public static URL buildWindowsAuthenticationLoginURL(URL serverUrl) {
         try {
             return new URL(serverUrl, APPLICATION_NAME + "/" + WINDOWS_AUTHENTICATION_LOGIN_RESOURCE);
+        } catch (MalformedURLException e) {
+            return serverUrl;
+        }
+    }
+
+    public static URL buildLegactWindowsAuthenticationLoginURL(URL serverUrl) {
+        try {
+            return new URL(serverUrl, APPLICATION_NAME + "/" + WINDOWS_AUTHENTICATION_LOGIN_RESOURCE_LEGACY);
         } catch (MalformedURLException e) {
             return serverUrl;
         }
