@@ -1,5 +1,6 @@
 package com.checkmarx.cxconsole.parameters;
 
+import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import com.checkmarx.cxconsole.parameters.utils.ParametersUtils;
 import org.apache.commons.cli.CommandLine;
@@ -20,10 +21,12 @@ public class CLIScanParametersSingleton {
             instance = new CLIScanParametersSingleton();
         } catch (CLIParameterParsingException e) {
             throw new ExceptionInInitializerError(e.getMessage());
+        } catch (CLICommandParameterValidatorException e) {
+            throw new ExceptionInInitializerError(e.getMessage());
         }
     }
 
-    private CLIScanParametersSingleton() throws CLIParameterParsingException {
+    private CLIScanParametersSingleton() throws CLIParameterParsingException, CLICommandParameterValidatorException {
         String[] args = getArgumentsLessCommandName();
         cliMandatoryParameters = new CLIMandatoryParameters();
         cliSharedParameters = new CLISharedParameters();

@@ -2,6 +2,7 @@ package com.checkmarx.cxconsole.parameters;
 
 import com.checkmarx.cxconsole.clients.general.dto.ProjectDTO;
 import com.checkmarx.cxconsole.clients.general.dto.TeamDTO;
+import com.checkmarx.cxconsole.commands.exceptions.CLICommandParameterValidatorException;
 import com.checkmarx.cxconsole.parameters.exceptions.CLIParameterParsingException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -46,7 +47,7 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         initCommandLineOptions();
     }
 
-    void initMandatoryParams(CommandLine parsedCommandLineArguments) {
+    void initMandatoryParams(CommandLine parsedCommandLineArguments) throws CLICommandParameterValidatorException {
         host = parsedCommandLineArguments.getOptionValue(PARAM_HOST.getOpt());
         originalHost = parsedCommandLineArguments.getOptionValue(PARAM_HOST.getOpt());
         username = parsedCommandLineArguments.getOptionValue(PARAM_USER.getOpt());
@@ -76,8 +77,11 @@ public class CLIMandatoryParameters extends AbstractCLIScanParameters {
         }
     }
 
-    private TeamDTO extractTeamPath(String fullPath, String project) {
+    private TeamDTO extractTeamPath(String fullPath, String project) throws CLICommandParameterValidatorException {
         final int projectNameIndex = fullPath.lastIndexOf("\\" + project);
+        if (-1 == projectNameIndex) {
+            throw new CLICommandParameterValidatorException("Please provide team and project in the format TEAM_NAME\\PROJECT_NAME. Provided: " + fullPath);
+        }
         final String teamPath = fullPath.substring(0, projectNameIndex);
         return !teamPath.startsWith("\\") ? new TeamDTO("\\" + teamPath) : new TeamDTO(teamPath);
     }
