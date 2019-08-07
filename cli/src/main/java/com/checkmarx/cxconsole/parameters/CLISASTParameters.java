@@ -115,7 +115,7 @@ public class CLISASTParameters extends AbstractCLIScanParameters {
 
         checkPolicyViolations = parsedCommandLineArguments.hasOption(PARAM_RUN_POLICY_VIOLATIONS.getOpt());
         isIncrementalScan = parsedCommandLineArguments.hasOption(PARAM_INCREMENTAL.getOpt());
-        forceScan = !parsedCommandLineArguments.hasOption(PARAM_FORCE_SCAN.getOpt());
+        forceScan = parsedCommandLineArguments.hasOption(PARAM_FORCE_SCAN.getOpt());
         isOsaEnabled = parsedCommandLineArguments.hasOption(PARAM_ENABLE_OSA.getOpt());
         this.locationType = locationType;
 
